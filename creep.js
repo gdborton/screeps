@@ -45,11 +45,11 @@ Creep.prototype.work = function() {
   }
 };
 
-var spawns = {};
 Creep.prototype.getSpawn = function() {
-  if (!spawns[this.room.name]) {
-    spawns[this.room.name] = Object.keys(this.room.spawns)[0];
+  for (var spawnName in Game.spawns) {
+    var spawn = Game.spawns[spawnName];
+    if (spawn.room === this.room) {
+      return spawn;
+    }
   }
-
-  return spawns[this.room.name];
 };
