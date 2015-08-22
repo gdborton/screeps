@@ -34,7 +34,7 @@ var roles = {
     if (target) {
       this.moveTo(target);
       this.heal(target);
-      this.RangedHeal(target);
+      this.rangedHeal(target);
     }
   }
 }
