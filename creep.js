@@ -8,8 +8,8 @@ var roles = {
       this.moveTo(source);
       this.harvest(source);
     } else {
-      this.moveTo(Game.spawns.Spawn1);
-      this.transferEnergy(Game.spawns.Spawn1)
+      this.moveTo(this.getSpawn());
+      this.transferEnergy(this.getSpawn());
     }
   },
 
@@ -43,4 +43,13 @@ Creep.prototype.work = function() {
   if (this.memory.role) {
     roles[this.memory.role].call(this);
   }
+};
+
+var spawns = {};
+Creep.prototype.getSpawn = function() {
+  if (!spawns[this.room.name]) {
+    spawns[this.room.name] = Object.keys(this.room.spawns)[0];
+  }
+
+  return spawns[this.room.name];
 };
