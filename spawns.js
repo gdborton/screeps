@@ -34,7 +34,7 @@ Spawn.prototype.work = function() {
 };
 
 Spawn.prototype.buildDefender = function() {
-  this.createCreep([MOVE, ATTACK, ATTACK, ATTACK], undefined, {role: 'defender'});
+  this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
 };
 
 Spawn.prototype.buildHealer = function() {
