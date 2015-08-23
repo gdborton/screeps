@@ -17,15 +17,22 @@ Spawn.prototype.buildHarvester = function() {
   }
 };
 
+Spawn.prototype.buildCourier = function() {
+  this.createCreep([MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], undefined, {role: 'courier'});
+};
+
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'harvester'}}}).length;
   var defenderCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'defender'}}}).length;
   var healerCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'healer'}}}).length;
+  var courierCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'courier'}}}).length;
 
   if (harvesterCount < 2) {
     this.buildHarvester();
   } else if (harvesterCount / defenderCount > 3) {
     this.buildDefender();
+  } else if (courierCount < 1) {
+    this.buildCourier();
   } else if (healerCount < 2) {
     this.buildHealer();
   } else {

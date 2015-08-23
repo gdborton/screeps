@@ -1,10 +1,9 @@
+require('room');
+
 var roles = {
   harvester: function() {
     if (this.carry.energy < this.carryCapacity) {
-      var source = this.room.find(FIND_SOURCES).filter(function(source) {
-        return this.memory.source === source.id;
-      }.bind(this))[0];
-
+      var source = this.targetSource();
       this.moveTo(source);
       this.harvest(source);
     } else {
@@ -24,6 +23,26 @@ var roles = {
     }
   },
 
+  courier: function() {
+    if (this.carry.energy / this.carryCapacity < .6) {
+      if (!this.memory.target) {
+        var harvester = this.room.getHarvesters().filter(function(harvester) {
+          return harvester.carry.energy / harvester.carryCapacity > .6;
+        })[0];
+
+        if (harvester) {
+          this.takeEnergyFrom(harvester);
+        } else {
+          this.moveTo(this.getSpawn());
+          this.transferEnergy(this.getSpawn());
+        }
+      }
+    } else {
+      this.moveTo(this.getSpawn());
+      this.transferEnergy(this.getSpawn());
+    }
+  },
+
   healer: function() {
     var target = this.pos.findClosest(FIND_MY_CREEPS, {
       filter: function(object) {
@@ -37,12 +56,18 @@ var roles = {
       this.rangedHeal(target);
     }
   }
-}
+};
 
 Creep.prototype.work = function() {
   if (this.memory.role) {
     roles[this.memory.role].call(this);
   }
+};
+
+Creep.prototype.targetSource = function() {
+  return this.room.find(FIND_SOURCES).filter(function(source) {
+    return this.memory.source === source.id;
+  }.bind(this))[0];
 };
 
 Creep.prototype.getSpawn = function() {
@@ -52,4 +77,9 @@ Creep.prototype.getSpawn = function() {
       return spawn;
     }
   }
+};
+
+Creep.prototype.takeEnergyFrom = function(target) {
+  this.moveTo(target);
+  target.transferEnergy(this);
 };
