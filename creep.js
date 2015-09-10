@@ -24,10 +24,10 @@ var roles = {
   },
 
   courier: function() {
-    if (this.carry.energy / this.carryCapacity < .6) {
+    if (this.carry.energy / this.carryCapacity < 0.6) {
       if (!this.memory.target) {
         var harvester = this.room.getHarvesters().filter(function(harvester) {
-          return harvester.carry.energy / harvester.carryCapacity > .6;
+          return harvester.carry.energy / harvester.carryCapacity > 0.6;
         })[0];
 
         if (harvester) {
