@@ -31,3 +31,11 @@ Room.prototype.courierTargets = function() {
     return courier.memory.target;
   });
 };
+
+Room.prototype.getCreepsThatNeedOffloading = function() {
+  var targets = this.courierTargets();
+  return this.getHarvesters().filter(function(harvester) {
+    var targeted = targets.indexOf(harvester.name) !== -1;
+    return harvester.needsOffloaded() && !targeted;
+  });
+};
