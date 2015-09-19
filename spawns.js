@@ -26,6 +26,7 @@ Spawn.prototype.buildCourier = function() {
 Spawn.prototype.work = function() {
   if (this.energy === this.energyCapacity) {
     var harvesterCount = this.room.harvesterCount();
+    var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
 
@@ -33,10 +34,16 @@ Spawn.prototype.work = function() {
       this.buildHarvester();
     } else if (settings.courierToWorkerRatio > courierCount / workerCount) {
       this.buildCourier();
-    } else {
+    } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
+    } else if (builderCount < 2) {
+      this.buildBuilder();
     }
   }
+};
+
+Spawn.prototype.buildBuilder = function() {
+  this.createCreep([MOVE, WORK, CARRY], undefined, {role: 'builder'});
 };
 
 Spawn.prototype.buildDefender = function() {

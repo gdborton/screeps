@@ -55,6 +55,15 @@ var roles = {
       this.heal(target);
       this.rangedHeal(target);
     }
+  },
+  builder: function() {
+    if (this.energy === this.energyCapacity) {
+      this.moveTo(this.room.controller);
+      this.upgradeController(this.room.controller);
+    } else {
+      this.moveTo(this.getSpawn());
+      this.takeEnergyFrom(this.getSpawn());
+    }
   }
 };
 
