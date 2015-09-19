@@ -25,17 +25,28 @@ var roles = {
 
   courier: function() {
     if (this.carry.energy / this.carryCapacity < 0.6) {
-      if (!this.memory.target) {
-        var harvester = this.room.getHarvesters().filter(function(harvester) {
-          return harvester.carry.energy / harvester.carryCapacity > 0.6;
-        })[0];
+      var targets = this.room.courierTargets();
 
-        if (harvester) {
-          this.takeEnergyFrom(harvester);
-        } else {
-          this.moveTo(this.getSpawn());
-          this.transferEnergy(this.getSpawn());
+      if (!this.memory.target) {
+        var harvesters = this.room.getHarvesters().filter(function(harvester) {
+          var needsOffloaded = harvester.carry.energy / harvester.carryCapacity > 0.6;
+          var targeted = targets.indexOf(harvester.name) !== -1;
+          return needsOffloaded && !targeted;
+        });
+
+        if (harvesters.length) {
+          this.memory.target = harvesters[0].name;
         }
+      }
+
+      if (this.memory.target) {
+        var result = this.takeEnergyFrom(Game.creeps[this.memory.target]);
+        if (result === 0) {
+          this.memory.target = '';
+        }
+      } else {
+        this.moveTo(this.getSpawn());
+        this.transferEnergy(this.getSpawn());
       }
     } else {
       this.moveTo(this.getSpawn());
@@ -91,5 +102,5 @@ Creep.prototype.getSpawn = function() {
 
 Creep.prototype.takeEnergyFrom = function(target) {
   this.moveTo(target);
-  target.transferEnergy(this);
+  return target.transferEnergy(this);
 };

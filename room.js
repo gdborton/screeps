@@ -23,3 +23,11 @@ Room.prototype.needsHarvesters = function() {
     return source.needsHarvesters();
   }).length > 0;
 };
+
+Room.prototype.courierTargets = function() {
+  return this.find(FIND_MY_CREEPS).filter(function(creep) {
+    return creep.memory.roll === 'courier' && !!creep.memory.target;
+  }).map(function(courier) {
+    return courier.memory.target;
+  });
+};
