@@ -57,7 +57,7 @@ var roles = {
     }
   },
   builder: function() {
-    if (this.energy === this.energyCapacity) {
+    if (this.energy === this.carryCapacity) {
       this.moveTo(this.room.controller);
       this.upgradeController(this.room.controller);
     } else {
