@@ -3,7 +3,7 @@ Room.prototype.getHarvesters = function() {
 };
 
 Room.prototype.harvesterCount = function() {
-  return this.room.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}}).length;
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}}).length;
 };
 
 Room.prototype.workerCount = function() {
@@ -11,5 +11,5 @@ Room.prototype.workerCount = function() {
 };
 
 Room.prototype.courierCount = function() {
-  return this.room.find(FIND_MY_CREEPS, {filter: {memory: {role: 'courier'}}}).length;
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'courier'}}}).length;
 };
