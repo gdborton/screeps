@@ -58,12 +58,12 @@ var roles = {
   },
 
   builder: function() {
-    if (this.carry.energy === this.carryCapacity) {
-      this.moveTo(this.room.controller);
-      this.upgradeController(this.room.controller);
-    } else {
+    if (this.carry.energy === 0) {
       this.moveTo(this.getSpawn());
       this.takeEnergyFrom(this.getSpawn());
+    } else {
+      this.moveTo(this.room.controller);
+      this.upgradeController(this.room.controller);
     }
   }
 };
