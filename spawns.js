@@ -1,5 +1,5 @@
 require('source');
-require('settings');
+var settings = require('settings');
 
 Spawn.prototype.buildHarvester = function() {
   var closestSource = this.pos.findClosest(FIND_SOURCES);
