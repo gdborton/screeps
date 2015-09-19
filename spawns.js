@@ -31,7 +31,7 @@ Spawn.prototype.work = function() {
 
     if (harvesterCount < 1) {
       this.buildHarvester();
-    } else if (settings.courierToWorkerRatio > courierCount / workerCount) {
+    } else if (settings.courierToWorkerRatio >= courierCount / workerCount) {
       this.buildCourier();
     } else {
       this.buildHarvester();
