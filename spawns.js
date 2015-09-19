@@ -1,9 +1,10 @@
 require('source');
+require('settings');
 
 Spawn.prototype.buildHarvester = function() {
   var closestSource = this.pos.findClosest(FIND_SOURCES);
   var sourceId;
-  if (closestSource.needsHarvesters()) {
+  if (closestSource && closestSource.needsHarvesters()) {
     sourceId = closestSource.id;
   } else {
     this.room.find(FIND_SOURCES).forEach(function(source) {
@@ -24,14 +25,13 @@ Spawn.prototype.buildCourier = function() {
 
 Spawn.prototype.work = function() {
   if (this.energy === this.energyCapacity) {
-    var harvesterCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'harvester'}}}).length;
-    var defenderCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'defender'}}}).length;
-    var healerCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'healer'}}}).length;
-    var courierCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'courier'}}}).length;
+    var harvesterCount = this.room.harvesterCount();
+    var workerCount = this.room.workerCount();
+    var courierCount = this.room.courierCount();
 
-    if (harvesterCount < 2) {
+    if (harvesterCount < 1) {
       this.buildHarvester();
-    } else if (courierCount < 1) {
+    } else if (settings.courierToWorkerRatio < courierCount / workerCount) {
       this.buildCourier();
     } else {
       this.buildHarvester();
