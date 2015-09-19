@@ -1,4 +1,5 @@
 require('source');
+
 Spawn.prototype.buildHarvester = function() {
   var closestSource = this.pos.findClosest(FIND_SOURCES);
   var sourceId;
@@ -29,12 +30,8 @@ Spawn.prototype.work = function() {
 
   if (harvesterCount < 2) {
     this.buildHarvester();
-  } else if (harvesterCount / defenderCount > 3) {
-    this.buildDefender();
   } else if (courierCount < 1) {
     this.buildCourier();
-  } else if (healerCount < 2) {
-    this.buildHealer();
   } else {
     this.buildHarvester();
   }

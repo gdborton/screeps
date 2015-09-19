@@ -8,7 +8,7 @@ Source.prototype.freeEdges = function() {
       Object.keys(surroundings[x]).forEach(function(y) {
         openSpots = openSpots + surroundings[x][y].filter(function(object) {
           return object.type === 'terrain' && (object.terrain === 'swamp' || object.terrain === 'plain');
-        }).length
+        }).length;
       });
     });
 
@@ -23,8 +23,10 @@ Source.prototype.needsHarvesters = function() {
   var harvesters = this.room.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester', source: this.id }}});
   var workParts = 0;
   harvesters.forEach(function(harvester) {
-    workParts = workParts + harvester.body.filter(function(bodyPart) {return bodyPart.type === 'work'}).length
+    workParts = workParts + harvester.body.filter(function(bodyPart) {
+      return bodyPart.type === 'work';
+    }).length;
   });
 
   return workParts < 5 && harvesters.length < this.freeEdges();
-}
+};
