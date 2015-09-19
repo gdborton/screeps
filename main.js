@@ -4,9 +4,7 @@ require('spawns');
 
 for (var spawnName in Game.spawns) {
   var spawn = Game.spawns[spawnName];
-  if (spawn.energy === spawn.energyCapacity) {
-    spawn.work();
-  }
+  spawn.work();
 }
 
 for (var name in Game.creeps) {

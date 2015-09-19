@@ -23,17 +23,19 @@ Spawn.prototype.buildCourier = function() {
 };
 
 Spawn.prototype.work = function() {
-  var harvesterCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'harvester'}}}).length;
-  var defenderCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'defender'}}}).length;
-  var healerCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'healer'}}}).length;
-  var courierCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'courier'}}}).length;
+  if (this.energy === this.energyCapacity) {
+    var harvesterCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'harvester'}}}).length;
+    var defenderCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'defender'}}}).length;
+    var healerCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'healer'}}}).length;
+    var courierCount = this.room.find(FIND_MY_CREEPS, {filter: { memory: {role: 'courier'}}}).length;
 
-  if (harvesterCount < 2) {
-    this.buildHarvester();
-  } else if (courierCount < 1) {
-    this.buildCourier();
-  } else {
-    this.buildHarvester();
+    if (harvesterCount < 2) {
+      this.buildHarvester();
+    } else if (courierCount < 1) {
+      this.buildCourier();
+    } else {
+      this.buildHarvester();
+    }
   }
 };
 
