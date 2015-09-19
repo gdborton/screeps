@@ -35,7 +35,7 @@ var roles = {
         });
 
         if (harvesters.length) {
-          this.memory.target = harvesters[0].name;
+          this.memory.target = this.pos.findClosestByPath(harvesters).name;
         }
       }
 
