@@ -56,8 +56,9 @@ var roles = {
       this.rangedHeal(target);
     }
   },
+
   builder: function() {
-    if (this.energy === this.carryCapacity) {
+    if (this.carry.energy === this.carryCapacity) {
       this.moveTo(this.room.controller);
       this.upgradeController(this.room.controller);
     } else {
