@@ -13,7 +13,7 @@ var roles = {
   },
 
   defender: function() {
-    var enemy = this.pos.findClosest(FIND_HOSTILE_CREEPS);
+    var enemy = this.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
     if (enemy) {
       var range = this.pos.getRangeTo(enemy);
       if (range < 12) {
@@ -44,7 +44,7 @@ var roles = {
   },
 
   healer: function() {
-    var target = this.pos.findClosest(FIND_MY_CREEPS, {
+    var target = this.pos.findClosestByPath(FIND_MY_CREEPS, {
       filter: function(object) {
         return object.hits < object.hitsMax;
       }

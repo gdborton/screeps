@@ -2,7 +2,7 @@ require('source');
 var settings = require('settings');
 
 Spawn.prototype.buildHarvester = function() {
-  var closestSource = this.pos.findClosest(FIND_SOURCES);
+  var closestSource = this.pos.findClosestByPath(FIND_SOURCES);
   var sourceId;
   if (closestSource && closestSource.needsHarvesters()) {
     sourceId = closestSource.id;
