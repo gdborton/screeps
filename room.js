@@ -5,7 +5,15 @@ Room.prototype.getHarvesters = function() {
 };
 
 Room.prototype.harvesterCount = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}}).length;
+  return this.getHarvesters().length;
+};
+
+Room.prototype.getMailmen = function() {
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'mailman'}}});
+};
+
+Room.prototype.mailmanCount = function() {
+  return this.getMailmen().length;
 };
 
 Room.prototype.workerCount = function() {

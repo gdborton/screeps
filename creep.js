@@ -86,6 +86,30 @@ var roles = {
       this.moveTo(this.room.controller);
       this.upgradeController(this.room.controller);
     }
+  },
+
+  mailman: function() {
+    if (this.carry.energy === 0) {
+      this.memory.task = 'stock';
+    } else if (this.carry.energy === this.carryCapacity) {
+      this.memory.task = 'deliver';
+    }
+
+    if (this.memory.task === 'deliver') {
+      var target = this.pos.findClosestByPath(this.room.find(FIND_MY_CREEPS).filter(function(creep) {
+        return creep.needsEnergyDelivered();
+      }));
+      if (target) {
+        this.moveTo(target);
+        this.transferEnergy(target);
+      }
+    } else {
+      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergySourceStructures());
+      if (closestEnergySource) {
+        this.moveTo(closestEnergySource);
+        this.takeEnergyFrom(closestEnergySource);
+      }
+    }
   }
 };
 
@@ -117,4 +141,12 @@ Creep.prototype.takeEnergyFrom = function(target) {
 
 Creep.prototype.needsOffloaded = function() {
   return this.carry.energy / this.carryCapacity > 0.6;
+};
+
+Creep.prototype.needsEnergyDelivered = function() {
+  if (this.memory.role === 'harvester' || this.memory.role === 'courier' || this.memory.role === 'mailman') {
+    return false;
+  } else {
+    return this.carry.energy / this.carryCapacity < 0.6;
+  }
 };

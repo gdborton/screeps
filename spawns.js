@@ -36,8 +36,10 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (builderCount < 5){
+    } else if (builderCount < 5) {
       this.buildBuilder();
+    } else if (mailmanCount < 2) {
+      this.buildMailman();
     }
   } else {
     this.extend();
@@ -60,6 +62,10 @@ Spawn.prototype.availableEnergy = function() {
 
 Spawn.prototype.buildBuilder = function() {
   this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'builder'});
+};
+
+Spawn.prototype.buildMailman = function() {
+  this.createCreep([MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], undefined, {role: 'mailman'});
 };
 
 Spawn.prototype.buildDefender = function() {
