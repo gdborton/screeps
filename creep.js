@@ -24,16 +24,19 @@ var roles = {
   },
 
   courier: function() {
-    if (this.carry.energy === 0) {
-      this.memory.task = 'pickup';
-    }else if (this.carry.energy === this.carryCapacity) {
-      this.memory.task = 'deliver';
-    }
-
-    var spawn = this.getSpawn();
     var dumpTarget = this.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
       return structure.structureType !== STRUCTURE_SPAWN && structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
+
+    if (this.carry.energy === 0) {
+      this.memory.task = 'pickup';
+    } else if (this.carry.energy === this.carryCapacity) {
+      this.memory.task = 'deliver';
+    }else if (!dumpTarget) {
+      this.memory.task = 'pickup';
+    }
+
+    var spawn = this.getSpawn();
     if (!dumpTarget) {
       dumpTarget = spawn;
     }
