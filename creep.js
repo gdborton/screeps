@@ -24,6 +24,8 @@ var roles = {
   },
 
   courier: function() {
+    var spawn = this.getSpawn();
+
     if (this.carry.energy / this.carryCapacity < 0.6) {
       var targets = this.room.courierTargets();
 
@@ -39,12 +41,12 @@ var roles = {
           this.memory.target = '';
         }
       } else {
-        this.moveTo(this.getSpawn());
-        this.transferEnergy(this.getSpawn());
+        this.moveTo(spawn.pos.x + 1, spawn.pos.y + 1);
+        this.transferEnergy(spawn);
       }
     } else {
-      this.moveTo(this.getSpawn());
-      this.transferEnergy(this.getSpawn());
+      this.moveTo(spawn);
+      this.transferEnergy(spawn);
     }
   },
 
