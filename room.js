@@ -30,6 +30,12 @@ Room.prototype.needsHarvesters = function() {
   }).length > 0;
 };
 
+Room.prototype.getEnergySourceStructures = function() {
+  return this.find(FIND_MY_STRUCTURES).filter(function(structure) {
+    return structure.energy;
+  });
+};
+
 Room.prototype.getSpawn = function() {
   var spawns = this.find(FIND_MY_SPAWNS);
   if (spawns.length) {
