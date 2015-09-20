@@ -18,6 +18,10 @@ Room.prototype.builderCount = function() {
   return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'builder'}}}).length;
 };
 
+Room.prototype.getConstructionSites = function() {
+  return this.find(FIND_CONSTRUCTION_SITES);
+};
+
 Room.prototype.needsHarvesters = function() {
   return this.find(FIND_SOURCES).filter(function(source) {
     return source.needsHarvesters();
