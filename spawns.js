@@ -24,7 +24,7 @@ Spawn.prototype.buildCourier = function() {
 };
 
 Spawn.prototype.work = function() {
-  if (this.energy === this.maxEnergy()) {
+  if (this.availableEnergy() === this.maxEnergy()) {
     var harvesterCount = this.room.harvesterCount();
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
@@ -36,7 +36,7 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else {
+    } else if (builderCount < 5){
       this.buildBuilder();
     }
   } else {
@@ -46,7 +46,16 @@ Spawn.prototype.work = function() {
 
 Spawn.prototype.maxEnergy = function() {
   var extensions = this.room.getExtensions();
-  return this.energyCapacity + (extensions.length * extensions.length ? extensions[0].energyCapacity : 0);
+  return this.energyCapacity + (extensions.length * (extensions.length ? extensions[0].energyCapacity : 0));
+};
+
+Spawn.prototype.availableEnergy = function() {
+  var extensions = this.room.getExtensions();
+  var availableEnergy = this.energy;
+  extensions.forEach(function(extension) {
+    availableEnergy += extension.energy;
+  });
+  return availableEnergy;
 };
 
 Spawn.prototype.buildBuilder = function() {
