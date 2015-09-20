@@ -29,6 +29,7 @@ Spawn.prototype.work = function() {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
+    var mailmanCount = this.room.mailmanCount();
 
     if (harvesterCount < 1) {
       this.buildHarvester();
