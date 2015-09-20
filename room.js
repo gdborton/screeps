@@ -17,7 +17,7 @@ Room.prototype.mailmanCount = function() {
 };
 
 Room.prototype.workerCount = function() {
-  return this.harvesterCount();
+  return this.harvesterCount() + this.builderCount() + this.mailmanCount();
 };
 
 Room.prototype.courierCount = function() {
