@@ -46,7 +46,7 @@ Spawn.prototype.work = function() {
 
 Spawn.prototype.maxEnergy = function() {
   var extensions = this.room.getExtensions();
-  return this.energyCapacity + (extensions.length * extensions.length ? extensions[0].carryCapacity : 0);
+  return this.energyCapacity + (extensions.length * extensions.length ? extensions[0].energyCapacity : 0);
 };
 
 Spawn.prototype.buildBuilder = function() {
