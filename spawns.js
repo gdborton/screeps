@@ -15,7 +15,7 @@ Spawn.prototype.buildHarvester = function() {
   }
 
   if (sourceId) {
-    this.createCreep([MOVE, WORK, CARRY], undefined, {role: 'harvester', source: sourceId});
+    this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'harvester', source: sourceId});
   }
 };
 
@@ -38,12 +38,14 @@ Spawn.prototype.work = function() {
       this.buildHarvester();
     } else if (builderCount < 2) {
       this.buildBuilder();
+    }else {
+      this.extend();
     }
   }
 };
 
 Spawn.prototype.buildBuilder = function() {
-  this.createCreep([MOVE, WORK, CARRY], undefined, {role: 'builder'});
+  this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'builder'});
 };
 
 Spawn.prototype.buildDefender = function() {
@@ -52,4 +54,13 @@ Spawn.prototype.buildDefender = function() {
 
 Spawn.prototype.buildHealer = function() {
   this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
+};
+
+Spawn.prototype.extend = function() {
+  this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+  this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
+    return structure.structureType === STRUCTURE_EXTENSION;
+  }).forEach(function(structure) {
+    structure.work();
+  });
 };

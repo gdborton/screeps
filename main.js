@@ -1,6 +1,7 @@
 require('creep');
 require('source');
 require('spawns');
+require('structure');
 
 for (var spawnName in Game.spawns) {
   var spawn = Game.spawns[spawnName];
