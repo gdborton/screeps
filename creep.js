@@ -26,7 +26,7 @@ var roles = {
   courier: function() {
     var spawn = this.getSpawn();
     var dumpTarget = spawn.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-      return structure.structureType !== STRUCTURE_SPAWN;
+      return structure.structureType !== STRUCTURE_SPAWN && structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
     if (!dumpTarget) {
       dumpTarget = spawn;
