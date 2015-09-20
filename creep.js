@@ -25,6 +25,12 @@ var roles = {
 
   courier: function() {
     var spawn = this.getSpawn();
+    var dumpTarget = spawn.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
+      return structure.structureType !== STRUCTURE_SPAWN;
+    }));
+    if (!dumpTarget) {
+      dumpTarget = spawn;
+    }
 
     if (this.carry.energy / this.carryCapacity < 0.6) {
       var targets = this.room.courierTargets();
@@ -41,12 +47,12 @@ var roles = {
           this.memory.target = '';
         }
       } else {
-        this.moveTo(spawn.pos.x + 1, spawn.pos.y + 1);
-        this.transferEnergy(spawn);
+        this.moveTo(dumpTarget);
+        this.transferEnergy(dumpTarget);
       }
     } else {
-      this.moveTo(spawn);
-      this.transferEnergy(spawn);
+      this.moveTo(dumpTarget);
+      this.transferEnergy(dumpTarget);
     }
   },
 
