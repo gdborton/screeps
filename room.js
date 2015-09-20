@@ -28,6 +28,26 @@ Room.prototype.needsHarvesters = function() {
   }).length > 0;
 };
 
+Room.prototype.getSpawn = function() {
+  var spawns = this.find(FIND_MY_SPAWNS);
+  if (spawns.length) {
+    return spawns[0];
+  }
+
+  return spawns;
+};
+
+Room.prototype.canBuildExtension = function() {
+  var maxExtensions = settings.buildingCount[this.controller.level].extensions || 0;
+  return this.getExtensions().length < maxExtensions;
+};
+
+Room.prototype.getExtensions = function() {
+  return this.find(FIND_MY_STRUCTURES).filter(function(structure) {
+    return structure.structureType === STRUCTURE_EXTENSION;
+  });
+};
+
 Room.prototype.courierTargets = function() {
   return this.find(FIND_MY_CREEPS).filter(function(creep) {
     return creep.memory.roll === 'courier' && !!creep.memory.target;
