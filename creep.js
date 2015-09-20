@@ -24,15 +24,21 @@ var roles = {
   },
 
   courier: function() {
+    if (this.carry.energy === 0) {
+      this.memory.task = 'pickup';
+    }else if (this.carry.energy === this.carryCapacity) {
+      this.memory.task = 'deliver';
+    }
+
     var spawn = this.getSpawn();
-    var dumpTarget = spawn.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
+    var dumpTarget = this.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
       return structure.structureType !== STRUCTURE_SPAWN && structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
     if (!dumpTarget) {
       dumpTarget = spawn;
     }
 
-    if (this.carry.energy / this.carryCapacity < 0.6) {
+    if (this.memory.task === 'pickup') {
       var targets = this.room.courierTargets();
 
       if (!this.memory.target) {
