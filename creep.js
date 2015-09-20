@@ -73,7 +73,7 @@ var roles = {
   builder: function() {
     var constructionSites = this.room.getConstructionSites();
     if (this.carry.energy === 0) {
-      var closestEnergySource = this.room.getEnergySourceStructures();
+      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergySourceStructures());
       this.moveTo(closestEnergySource);
       this.takeEnergyFrom(closestEnergySource);
     } else if (constructionSites.length) {
