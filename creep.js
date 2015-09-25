@@ -145,7 +145,7 @@ Creep.prototype.getSpawn = function() {
 Creep.prototype.takeEnergyFrom = function(target) {
   this.moveTo(target);
   if (target instanceof Energy) {
-    this.pickup(target);
+    return this.pickup(target);
   } else {
     return target.transferEnergy(this);
   }
