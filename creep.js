@@ -7,6 +7,9 @@ var roles = {
       this.moveTo(source);
       this.harvest(source);
     } else if (this.room.courierCount() === 0) {
+      this.moveTo(this.getSpawn());
+      this.transferEnergy(this.getSpawn());
+    } else {
       this.dropEnergy();
     }
   },
