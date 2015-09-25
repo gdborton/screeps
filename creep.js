@@ -41,7 +41,7 @@ var roles = {
     if (!dumpTarget) {
       dumpTarget = spawn;
       if (spawn.energy === spawn.energyCapacity) {
-        dumpTarget = this.room.getSpawnEnergyDropFlag();
+        dumpTarget = this.room.getControllerEnergyDropFlag();
       }
     }
 
@@ -120,7 +120,7 @@ var roles = {
         this.transferEnergy(target);
       }
     } else {
-      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergySourceStructures());
+      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.moveTo(closestEnergySource);
         this.takeEnergyFrom(closestEnergySource);

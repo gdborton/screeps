@@ -18,11 +18,21 @@ Room.prototype.mailmanCount = function() {
 
 Room.prototype.setupFlags = function() {
   this.createSpawnEnergyDropFlag();
+  this.createControllerEnergyDropFlag();
 };
 
 Room.prototype.createSpawnEnergyDropFlag = function() {
   var spawn = this.getSpawn();
   this.createFlag(spawn.pos.x, spawn.pos.y - 1, 'SPAWN_ENERGY_DROP', COLOR_YELLOW);
+};
+
+Room.prototype.createControllerEnergyDropFlag = function() {
+  var controller = this.controller;
+  this.createFlag(controller.pos.x, controller.pos.y + 2, 'CONTROLLER_ENERGY_DROP', COLOR_YELLOW);
+};
+
+Room.prototype.getControllerEnergyDropFlag = function() {
+  return this.find(FIND_FLAGS, {filter: {name: 'CONTROLLER_ENERGY_DROP'}})[0];
 };
 
 Room.prototype.getSpawnEnergyDropFlag = function() {
@@ -55,6 +65,15 @@ Room.prototype.getEnergySourceStructures = function() {
   return this.find(FIND_MY_STRUCTURES).filter(function(structure) {
     return structure.energy;
   });
+};
+
+Room.prototype.getEnergyStockSources = function() {
+  var dumpFlag = this.getControllerEnergyDropFlag();
+  var results = this.find(FIND_DROPPED_ENERGY).filter(function(energy) {
+    return energy.pos.getRangeTo(dumpFlag) === 0;
+  });
+  results = results.concat(this.getEnergySourceStructures());
+  return results;
 };
 
 Room.prototype.getSpawn = function() {
@@ -99,7 +118,7 @@ Room.prototype.getDroppedEnergy = function() {
 
 Room.prototype.getEnergyThatNeedsPickedUp = function() {
   var targets = this.courierTargets();
-  var dumpFlag = this.getSpawnEnergyDropFlag();
+  var dumpFlag = this.getControllerEnergyDropFlag();
 
   return this.getDroppedEnergy().filter(function(energy) {
     var targeted = targets.indexOf(energy.id) !== -1;
