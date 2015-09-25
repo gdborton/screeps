@@ -1,4 +1,5 @@
 require('room');
+var bodyCosts = require('body-costs');
 
 var roles = {
   harvester: function() {
@@ -133,6 +134,7 @@ Creep.prototype.work = function() {
   if (this.memory.role) {
     roles[this.memory.role].call(this);
   }
+  console.log(this.memory.role, this.cost());
 };
 
 Creep.prototype.targetSource = function() {
@@ -181,4 +183,13 @@ Creep.prototype.needsEnergyDelivered = function() {
   } else {
     return this.carry.energy / this.carryCapacity < 0.6;
   }
+};
+
+Creep.prototype.cost = function() {
+  var cost = 0;
+  this.body.forEach(function(part) {
+    cost += bodyCosts[part.type];
+  });
+
+  return cost;
 };
