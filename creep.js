@@ -47,16 +47,21 @@ var roles = {
       var targets = this.room.courierTargets();
 
       if (!this.memory.target) {
-        var harvesters = this.room.getCreepsThatNeedOffloading();
+        var harvesters = this.room.getEnergySourcesThatNeedsStocked();
         var closest = this.pos.findClosestByPath(harvesters);
         this.memory.target = closest ? closest.id : '';
       }
 
       if (this.memory.target) {
-        var result = this.takeEnergyFrom(Game.getObjectById[this.memory.target]);
-        if (result === 0) {
+        var target = Game.getObjectById(this.memory.target);
+        var result;
+        if (target) {
+          result = this.takeEnergyFrom(target);
+        }
+        if (!target || result === 0) {
           this.memory.target = '';
         }
+
       } else {
         this.moveTo(dumpTarget);
         this.transferEnergy(dumpTarget);

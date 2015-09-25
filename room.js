@@ -85,6 +85,8 @@ Room.prototype.getDroppedEnergy = function() {
 };
 
 Room.prototype.getEnergyThatNeedsPickedUp = function() {
+  var targets = this.courierTargets();
+
   return this.getDroppedEnergy().filter(function(energy) {
     var targeted = targets.indexOf(energy.id) !== -1;
     return !targeted;
