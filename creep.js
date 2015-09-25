@@ -162,7 +162,7 @@ Creep.prototype.takeEnergyFrom = function(target) {
 Creep.prototype.deliverEnergyTo = function(target) {
   this.moveTo(target);
   if (target instanceof Flag) {
-    if (this.getRangeTo(target) === 0) {
+    if (this.pos.getRangeTo(target) === 0) {
       this.dropEnergy();
     }
   } else {
