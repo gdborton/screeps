@@ -1,6 +1,7 @@
 require('source');
 require('room');
 var settings = require('settings');
+var bodyCosts = require('body-costs');
 
 Spawn.prototype.buildHarvester = function() {
   var closestSource = this.pos.findClosestByPath(FIND_SOURCES);
@@ -16,12 +17,53 @@ Spawn.prototype.buildHarvester = function() {
   }
 
   if (sourceId) {
-    this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'harvester', source: sourceId});
+    var body = [MOVE, WORK, WORK, CARRY];
+    var cost = bodyCosts.calculateCosts(body);
+    while (cost <= this.maxEnergy()) {
+      if (body.length < 7 && cost <= this.maxEnergy() - 100) {
+        body.push(WORK);
+      } else {
+        body.push(CARRY);
+      }
+      cost = bodyCosts.calculateCosts(body);
+    }
+    if (cost > this.maxEnergy()) {
+      body.pop();
+    }
+    this.createCreep(body, undefined, {role: 'harvester', source: sourceId});
   }
 };
 
+Spawn.prototype.buildMailman = function() {
+  var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+  while (cost < this.maxEnergy()) {
+    body.push(MOVE);
+    body.push(CARRY);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  if (cost > this.maxEnergy()) {
+    body.pop();
+  }
+
+  this.createCreep(body, undefined, {role: 'mailman'});
+};
+
 Spawn.prototype.buildCourier = function() {
-  this.createCreep([MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], undefined, {role: 'courier'});
+  var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+  while (cost < this.maxEnergy()) {
+    body.push(MOVE);
+    body.push(CARRY);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  if (cost > this.maxEnergy()) {
+    body.pop();
+  }
+
+  this.createCreep(body, undefined, {role: 'courier'});
 };
 
 Spawn.prototype.work = function() {
@@ -30,6 +72,7 @@ Spawn.prototype.work = function() {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
+    var mailmanCount = this.room.mailmanCount();
 
     if (harvesterCount < 1) {
       this.buildHarvester();
@@ -37,8 +80,10 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (builderCount < 5){
+    } else if (builderCount < 5) {
       this.buildBuilder();
+    } else if (mailmanCount < 2) {
+      this.buildMailman();
     } else {
       this.retireOldCreep();
     }
@@ -75,7 +120,19 @@ Spawn.prototype.availableEnergy = function() {
 };
 
 Spawn.prototype.buildBuilder = function() {
-  this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'builder'});
+  var body = [MOVE, WORK, WORK, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+
+  while (cost < this.maxEnergy()) {
+    body.push(CARRY);
+    body.push(WORK);
+    body.push(WORK);
+    cost = bodyCosts.calculateCosts(body);
+  }
+  while (cost > this.maxEnergy()) {
+    body.pop();
+  }
+  this.createCreep(body, undefined, {role: 'builder'});
 };
 
 Spawn.prototype.buildDefender = function() {
