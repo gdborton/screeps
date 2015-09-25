@@ -42,6 +42,8 @@ Spawn.prototype.work = function() {
   } else {
     this.extend();
   }
+
+  this.room.setupFlags();
 };
 
 Spawn.prototype.maxEnergy = function() {

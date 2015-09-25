@@ -16,6 +16,15 @@ Room.prototype.mailmanCount = function() {
   return this.getMailmen().length;
 };
 
+Room.prototype.setupFlags = function() {
+  this.createSpawnEnergyDropFlag();
+};
+
+Room.prototype.createSpawnEnergyDropFlag = function() {
+  var spawn = this.getSpawn();
+  this.createFlag(spawn.x, spawn.y - 1, 'SPAWN_ENERGY_DROP', COLOR_YELLOW);
+};
+
 Room.prototype.workerCount = function() {
   return this.harvesterCount() + this.builderCount() + this.mailmanCount();
 };
