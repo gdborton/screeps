@@ -7,8 +7,7 @@ var roles = {
       this.moveTo(source);
       this.harvest(source);
     } else if (this.room.courierCount() === 0) {
-      this.moveTo(this.getSpawn());
-      this.transferEnergy(this.getSpawn());
+      this.deliverEnergyTo(this.getSpawn());
     } else {
       this.dropEnergy();
     }
@@ -41,6 +40,9 @@ var roles = {
     var spawn = this.getSpawn();
     if (!dumpTarget) {
       dumpTarget = spawn;
+      if (spawn.energy === spawn.energyCapacity) {
+        dumpTarget = this.room.getSpawnEnergyDropFlag();
+      }
     }
 
     if (this.memory.task === 'pickup') {
@@ -63,12 +65,10 @@ var roles = {
         }
 
       } else {
-        this.moveTo(dumpTarget);
-        this.transferEnergy(dumpTarget);
+        this.deliverEnergyTo(dumpTarget);
       }
     } else {
-      this.moveTo(dumpTarget);
-      this.transferEnergy(dumpTarget);
+      this.deliverEnergyTo(dumpTarget);
     }
   },
 
@@ -157,8 +157,19 @@ Creep.prototype.takeEnergyFrom = function(target) {
   } else {
     return target.transferEnergy(this);
   }
-
 };
+
+Creep.prototype.deliverEnergyTo = function(target) {
+  this.moveTo(target);
+  if (target instanceof Flag) {
+    if (this.getRangeTo(target) === 0) {
+      this.dropEnergy();
+    }
+  } else {
+    this.transferEnergy(target);
+  }
+};
+
 
 Creep.prototype.needsOffloaded = function() {
   return this.carry.energy / this.carryCapacity > 0.6;

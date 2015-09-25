@@ -25,6 +25,10 @@ Room.prototype.createSpawnEnergyDropFlag = function() {
   this.createFlag(spawn.pos.x, spawn.pos.y - 1, 'SPAWN_ENERGY_DROP', COLOR_YELLOW);
 };
 
+Room.prototype.getSpawnEnergyDropFlag = function() {
+  return this.find(FIND_FLAGS, {filter: {name: 'SPAWN_ENERGY_DROP'}})[0];
+};
+
 Room.prototype.workerCount = function() {
   return this.harvesterCount() + this.builderCount() + this.mailmanCount();
 };
