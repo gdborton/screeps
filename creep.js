@@ -186,10 +186,5 @@ Creep.prototype.needsEnergyDelivered = function() {
 };
 
 Creep.prototype.cost = function() {
-  var cost = 0;
-  this.body.forEach(function(part) {
-    cost += bodyCosts[part.type];
-  });
-
-  return cost;
+  return bodyCosts.calculateCosts(this.body);
 };

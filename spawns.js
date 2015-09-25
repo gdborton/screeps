@@ -1,4 +1,5 @@
 require('source');
+require('room');
 var settings = require('settings');
 
 Spawn.prototype.buildHarvester = function() {
@@ -38,12 +39,25 @@ Spawn.prototype.work = function() {
       this.buildHarvester();
     } else if (builderCount < 5){
       this.buildBuilder();
+    } else {
+      this.retireOldCreep();
     }
   } else {
     this.extend();
   }
 
   this.room.setupFlags();
+};
+
+Spawn.prototype.retireOldCreep = function() {
+  var self = this;
+  var outdatedCreeps = this.room.find(FIND_MY_CREEPS).filter(function(creep) {
+    return creep.cost() <= self.maxEnergy() - 100;
+  });
+
+  if (outdatedCreeps.length) {
+    outdatedCreeps[0].suicide();
+  }
 };
 
 Spawn.prototype.maxEnergy = function() {
