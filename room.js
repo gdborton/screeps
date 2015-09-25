@@ -9,7 +9,7 @@ Room.prototype.harvesterCount = function() {
 };
 
 Room.prototype.getMailmen = function() {
-  return this.find(FIND_MY_CREEPS), {filter: {memory: {role: 'mailman'}}};
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'mailman'}}});
 };
 
 Room.prototype.mailmanCount = function() {
