@@ -29,7 +29,6 @@ Spawn.prototype.work = function() {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
-    var mailmanCount = this.room.mailmanCount();
 
     if (harvesterCount < 1) {
       this.buildHarvester();
@@ -37,10 +36,8 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (builderCount < 5) {
+    } else if (builderCount < 5){
       this.buildBuilder();
-    } else if (mailmanCount < 2) {
-      this.buildMailman();
     }
   } else {
     this.extend();
@@ -65,10 +62,6 @@ Spawn.prototype.buildBuilder = function() {
   this.createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'builder'});
 };
 
-Spawn.prototype.buildMailman = function() {
-  this.createCreep([MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], undefined, {role: 'mailman'});
-};
-
 Spawn.prototype.buildDefender = function() {
   this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
 };
@@ -78,7 +71,10 @@ Spawn.prototype.buildHealer = function() {
 };
 
 Spawn.prototype.extend = function() {
-  this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+  if (this.room.canBuildExtension()) {
+    this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+  }
+
   this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
     return structure.structureType === STRUCTURE_EXTENSION;
   }).forEach(function(structure) {
