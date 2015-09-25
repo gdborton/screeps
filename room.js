@@ -99,10 +99,11 @@ Room.prototype.getDroppedEnergy = function() {
 
 Room.prototype.getEnergyThatNeedsPickedUp = function() {
   var targets = this.courierTargets();
+  var dumpFlag = this.getSpawnEnergyDropFlag();
 
   return this.getDroppedEnergy().filter(function(energy) {
     var targeted = targets.indexOf(energy.id) !== -1;
-    return !targeted;
+    return !targeted && energy.pos.getRangeTo(dumpFlag) !== 0;
   }).sort(function(energyA, energyB) {
     return energyA.enery - energyB.energy;
   });
