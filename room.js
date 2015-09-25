@@ -22,7 +22,7 @@ Room.prototype.setupFlags = function() {
 
 Room.prototype.createSpawnEnergyDropFlag = function() {
   var spawn = this.getSpawn();
-  this.createFlag(spawn.x, spawn.y - 1, 'SPAWN_ENERGY_DROP', COLOR_YELLOW);
+  this.createFlag(spawn.pos.x, spawn.pos.y - 1, 'SPAWN_ENERGY_DROP', COLOR_YELLOW);
 };
 
 Room.prototype.workerCount = function() {
