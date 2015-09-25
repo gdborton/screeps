@@ -5,19 +5,11 @@ Room.prototype.getHarvesters = function() {
 };
 
 Room.prototype.harvesterCount = function() {
-  return this.getHarvesters().length;
-};
-
-Room.prototype.getMailmen = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'mailman'}}});
-};
-
-Room.prototype.mailmanCount = function() {
-  return this.getMailmen().length;
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}}).length;
 };
 
 Room.prototype.workerCount = function() {
-  return this.harvesterCount() + this.builderCount() + this.mailmanCount();
+  return this.harvesterCount();
 };
 
 Room.prototype.courierCount = function() {
@@ -75,7 +67,32 @@ Room.prototype.courierTargets = function() {
 Room.prototype.getCreepsThatNeedOffloading = function() {
   var targets = this.courierTargets();
   return this.getHarvesters().filter(function(harvester) {
-    var targeted = targets.indexOf(harvester.name) !== -1;
+    var targeted = targets.indexOf(harvester.id) !== -1;
     return harvester.needsOffloaded() && !targeted;
   });
+};
+
+Room.prototype.getDroppedEnergy = function() {
+  return this.find(FIND_DROPPED_ENERGY);
+};
+
+Room.prototype.getEnergyThatNeedsPickedUp = function() {
+  return this.getDroppedEnergy().filter(function(energy) {
+    var targeted = targets.indexOf(energy.id) !== -1;
+    return !targeted;
+  }).sort(function(energyA, energyB) {
+    return energyA.enery - energyB.energy;
+  });
+};
+
+Room.prototype.getEnergySourcesThatNeedsStocked = function() {
+  var targets = this.courierTargets();
+
+  var potentialTargets = this.getEnergyThatNeedsPickedUp();
+
+  if (!potentialTargets.length) {
+    return this.getCreepsThatNeedOffloading();
+  }
+
+  return potentialTargets;
 };
