@@ -98,7 +98,7 @@ Room.prototype.getExtensions = function() {
 
 Room.prototype.courierTargets = function() {
   return this.find(FIND_MY_CREEPS).filter(function(creep) {
-    return creep.memory.roll === 'courier' && !!creep.memory.target;
+    return creep.memory.role === 'courier' && !!creep.memory.target;
   }).map(function(courier) {
     return courier.memory.target;
   });
