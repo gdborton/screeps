@@ -84,8 +84,10 @@ Spawn.prototype.work = function() {
       this.buildBuilder();
     } else if (mailmanCount < 2) {
       this.buildMailman();
-    } else {
+    } else if (this.room.hasOutdatedCreeps()) {
       this.retireOldCreep();
+    } else {
+      this.extend();
     }
   } else {
     this.extend();
@@ -96,9 +98,7 @@ Spawn.prototype.work = function() {
 
 Spawn.prototype.retireOldCreep = function() {
   var self = this;
-  var outdatedCreeps = this.room.find(FIND_MY_CREEPS).filter(function(creep) {
-    return creep.cost() <= self.maxEnergy() - 100;
-  });
+  var outdatedCreeps = this.room.getOutdatedCreeps();
 
   if (outdatedCreeps.length) {
     outdatedCreeps[0].suicide();

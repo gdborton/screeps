@@ -16,6 +16,17 @@ Room.prototype.mailmanCount = function() {
   return this.getMailmen().length;
 };
 
+Room.prototype.hasOutdatedCreeps = function() {
+  return this.getOutdatedCreeps().length > 0;
+};
+
+Room.prototype.getOutdatedCreeps = function() {
+  var self = this;
+  return this.find(FIND_MY_CREEPS).filter(function(creep) {
+    return creep.cost() <= self.getSpawn().maxEnergy() - 100;
+  });
+};
+
 Room.prototype.setupFlags = function() {
   this.createSpawnEnergyDropFlag();
   this.createControllerEnergyDropFlag();
