@@ -30,11 +30,9 @@ var roles = {
       return structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
 
-    if (this.carry.energy === 0) {
-      this.memory.task = 'pickup';
-    } else if (this.carry.energy === this.carryCapacity) {
+    if (this.carry.energy === this.carryCapacity) {
       this.memory.task = 'deliver';
-    } else if (!dumpTarget) {
+    } else if (!dumpTarget || this.carry.energy === 0) {
       this.memory.task = 'pickup';
     }
 
