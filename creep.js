@@ -27,23 +27,19 @@ var roles = {
 
   courier: function() {
     var dumpTarget = this.pos.findClosestByRange(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-      return structure.structureType !== STRUCTURE_SPAWN && structure.energyCapacity && structure.energy < structure.energyCapacity;
+      return structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
 
     if (this.carry.energy === 0) {
       this.memory.task = 'pickup';
     } else if (this.carry.energy === this.carryCapacity) {
       this.memory.task = 'deliver';
-    }else if (!dumpTarget) {
+    } else if (!dumpTarget) {
       this.memory.task = 'pickup';
     }
 
-    var spawn = this.getSpawn();
     if (!dumpTarget) {
-      dumpTarget = spawn;
-      if (spawn.energy === spawn.energyCapacity) {
-        dumpTarget = this.room.getControllerEnergyDropFlag();
-      }
+      dumpTarget = this.room.getControllerEnergyDropFlag();
     }
 
     if (this.memory.task === 'pickup') {
