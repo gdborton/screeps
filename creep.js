@@ -15,7 +15,7 @@ var roles = {
   },
 
   defender: function() {
-    var enemy = this.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+    var enemy = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
     if (enemy) {
       var range = this.pos.getRangeTo(enemy);
       if (range < 12) {
@@ -26,7 +26,7 @@ var roles = {
   },
 
   courier: function() {
-    var dumpTarget = this.pos.findClosestByPath(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
+    var dumpTarget = this.pos.findClosestByRange(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
       return structure.structureType !== STRUCTURE_SPAWN && structure.energyCapacity && structure.energy < structure.energyCapacity;
     }));
 
@@ -51,7 +51,7 @@ var roles = {
 
       if (!this.memory.target) {
         var harvesters = this.room.getEnergySourcesThatNeedsStocked();
-        var closest = this.pos.findClosestByPath(harvesters);
+        var closest = this.pos.findClosestByRange(harvesters);
         this.memory.target = closest ? closest.id : '';
       }
 
@@ -74,7 +74,7 @@ var roles = {
   },
 
   healer: function() {
-    var target = this.pos.findClosestByPath(FIND_MY_CREEPS, {
+    var target = this.pos.findClosestByRange(FIND_MY_CREEPS, {
       filter: function(object) {
         return object.hits < object.hitsMax;
       }
@@ -90,13 +90,13 @@ var roles = {
   builder: function() {
     var constructionSites = this.room.getConstructionSites();
     if (this.carry.energy === 0) {
-      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergySourceStructures());
+      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
       if (closestEnergySource) {
         this.moveTo(closestEnergySource);
         this.takeEnergyFrom(closestEnergySource);
       }
     } else if (constructionSites.length) {
-      var closestConstructionSite = this.pos.findClosestByPath(constructionSites);
+      var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
       this.moveTo(closestConstructionSite);
       this.build(closestConstructionSite);
     } else {
@@ -113,7 +113,7 @@ var roles = {
     }
 
     if (this.memory.task === 'deliver') {
-      var target = this.pos.findClosestByPath(this.room.find(FIND_MY_CREEPS).filter(function(creep) {
+      var target = this.pos.findClosestByRange(this.room.find(FIND_MY_CREEPS).filter(function(creep) {
         return creep.needsEnergyDelivered();
       }));
       if (target) {
@@ -121,7 +121,7 @@ var roles = {
         this.transferEnergy(target);
       }
     } else {
-      var closestEnergySource = this.pos.findClosestByPath(this.room.getEnergyStockSources());
+      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.moveTo(closestEnergySource);
         this.takeEnergyFrom(closestEnergySource);

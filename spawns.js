@@ -4,7 +4,7 @@ var settings = require('settings');
 var bodyCosts = require('body-costs');
 
 Spawn.prototype.buildHarvester = function() {
-  var closestSource = this.pos.findClosestByPath(FIND_SOURCES);
+  var closestSource = this.pos.findClosestByRange(FIND_SOURCES);
   var sourceId;
   if (closestSource && closestSource.needsHarvesters()) {
     sourceId = closestSource.id;
