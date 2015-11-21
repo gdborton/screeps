@@ -28,7 +28,6 @@ Room.prototype.getOutdatedCreeps = function() {
 };
 
 Room.prototype.setupFlags = function() {
-  this.createSpawnEnergyDropFlag();
   this.createControllerEnergyDropFlag();
 };
 
