@@ -129,7 +129,7 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (builderCount < 5) {
+    } else if (builderCount < 1) {
       this.buildBuilder();
     } else if (mailmanCount < 2) {
       this.buildMailman();
