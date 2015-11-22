@@ -24,7 +24,7 @@ Room.prototype.getWallers = function() {
   return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'waller'}}});
 };
 
-Room.wallerCount = function() {
+Room.prototype.wallerCount = function() {
   return this.getWallers().length;
 };
 
