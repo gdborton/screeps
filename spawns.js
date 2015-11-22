@@ -29,6 +29,7 @@ Spawn.prototype.buildHarvester = function() {
     }
     if (cost > this.maxEnergy()) {
       body.pop();
+      cost = bodyCosts.calculateCosts(body);
     }
     this.createCreep(body, undefined, {role: 'harvester', source: sourceId});
   }
@@ -45,6 +46,7 @@ Spawn.prototype.buildMailman = function() {
 
   if (cost > this.maxEnergy()) {
     body.pop();
+    cost = bodyCosts.calculateCosts(body);
   }
 
   this.createCreep(body, undefined, {role: 'mailman'});
@@ -61,6 +63,7 @@ Spawn.prototype.buildCourier = function() {
 
   if (cost > this.maxEnergy()) {
     body.pop();
+    cost = bodyCosts.calculateCosts(body);
   }
 
   this.createCreep(body, undefined, {role: 'courier'});
@@ -79,6 +82,7 @@ Spawn.prototype.buildBuilder = function() {
 
   while (cost > this.maxEnergy()) {
     body.pop();
+    cost = bodyCosts.calculateCosts(body);
   }
 
   this.createCreep(body, undefined, {role: 'builder'});
@@ -93,21 +97,22 @@ Spawn.prototype.buildHealer = function() {
 };
 
 Spawn.prototype.buildWaller = function() {
-  var body = [MOVE, WORK, WORK, CARRY];
+  var body = [MOVE, MOVE, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
 
   while (cost < this.maxEnergy()) {
+    body.push(MOVE);
     body.push(CARRY);
-    body.push(WORK);
     body.push(WORK);
     cost = bodyCosts.calculateCosts(body);
   }
 
   while (cost > this.maxEnergy()) {
     body.pop();
+    cost = bodyCosts.calculateCosts(body);
   }
   this.createCreep(body, undefined, {role: 'waller'});
-};0
+};
 
 Spawn.prototype.work = function() {
   if (this.availableEnergy() === this.maxEnergy()) {

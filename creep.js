@@ -82,23 +82,25 @@ var roles = {
   },
 
   builder: function() {
-    var constructionSites = this.room.getConstructionSites().filter(function(constructionSite) {
-      return constructionSite.type !== 'wall' && constructionSite.type !== 'rampart';
-    });
+    if (!this.room.needsHarvesters()) {
+      var constructionSites = this.room.getConstructionSites().filter(function(constructionSite) {
+        return constructionSite.structureType !== 'constructedWall' && constructionSite.structureType !== 'rampart';
+      });
 
-    if (this.carry.energy === 0) {
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
-      if (closestEnergySource) {
-        this.moveTo(closestEnergySource);
-        this.takeEnergyFrom(closestEnergySource);
+      if (this.carry.energy === 0) {
+        var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
+        if (closestEnergySource) {
+          this.moveTo(closestEnergySource);
+          this.takeEnergyFrom(closestEnergySource);
+        }
+      } else if (constructionSites.length) {
+        var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
+        this.moveTo(closestConstructionSite);
+        this.build(closestConstructionSite);
+      } else {
+        this.moveTo(this.room.controller);
+        this.upgradeController(this.room.controller);
       }
-    } else if (constructionSites.length) {
-      var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
-      this.moveTo(closestConstructionSite);
-      this.build(closestConstructionSite);
-    } else {
-      this.moveTo(this.room.controller);
-      this.upgradeController(this.room.controller);
     }
   },
 
@@ -127,38 +129,49 @@ var roles = {
   },
 
   waller: function() {
-    var exits = this.room.getExits();
-    var spawn = this.getSpawn();
-
-    if (!this.memory.target) {
-      exits.forEach(function (exit) {
-        if (!this.memory.target) {
-          var path = spawn.pos.findPathTo(exit);
-          path = path.filter(function (coord) {
-            return coord.x === 2 || coord.y === 2;
-          });
-
-          if (path.length) {
-            var coord = path[0];
-            this.memory.target = coord;
-            this.room.createConstructionSite(coord.x, coord.y, STRUCTURE_WALL);
-          }
+    if (!this.room.needsHarvesters()) {
+      if (this.carry.energy === 0) {
+        var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
+        if (closestEnergySource) {
+          this.moveTo(closestEnergySource);
+          this.takeEnergyFrom(closestEnergySource);
         }
-      });
-    }
-
-    var site = this.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
-      return obj.type === 'structure' || obj.type === 'constructionSite';
-    })[0];
-
-    this.moveTo(site);
-    if (site.type === 'structure') {
-      this.build(site);
-    } else if (site.type === 'constructionSite') {
-      if (site.structure.hits / site.structure.hitsMax < .1) {
-        this.repair(site);
       } else {
-        this.memory.target = null;
+        var exits = this.room.getExits();
+        var spawn = this.getSpawn();
+        var self = this;
+
+        if (!this.memory.target) {
+          exits.forEach(function (exit) {
+            if (!self.memory.target) {
+              var path = spawn.pos.findPathTo(exit);
+              path = path.filter(function (coord) {
+                return coord.x === 2 || coord.y === 2;
+              });
+
+              if (path.length) {
+                var coord = path[0];
+                self.memory.target = coord;
+                self.room.createConstructionSite(coord.x, coord.y, STRUCTURE_WALL);
+              }
+            }
+          });
+        }
+
+        var site = this.room.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
+          return obj.type === 'structure' || obj.type === 'constructionSite';
+        })[0];
+
+        this.moveTo(this.memory.target.x, this.memory.target.y);
+        if (site.type === 'structure') {
+          if (site.structure.hits / site.structure.hitsMax < .1) {
+            this.repair(site.structure);
+          } else {
+            this.memory.target = null;
+          }
+        } else if (site.type === 'constructionSite') {
+          this.build(site.constructionSite);
+        }
       }
     }
   }
