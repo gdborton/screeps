@@ -16,6 +16,18 @@ Room.prototype.mailmanCount = function() {
   return this.getMailmen().length;
 };
 
+Room.prototype.getExits = function() {
+  return this.find(FIND_EXIT);
+};
+
+Room.prototype.getWallers = function() {
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'waller'}}});
+};
+
+Room.wallerCount = function() {
+  return this.getWallers().length;
+};
+
 Room.prototype.hasOutdatedCreeps = function() {
   return this.getOutdatedCreeps().length > 0;
 };

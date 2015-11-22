@@ -82,7 +82,10 @@ var roles = {
   },
 
   builder: function() {
-    var constructionSites = this.room.getConstructionSites();
+    var constructionSites = this.room.getConstructionSites().filter(function(constructionSite) {
+      return constructionSite.type !== 'wall' && constructionSite.type !== 'rampart';
+    });
+
     if (this.carry.energy === 0) {
       var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
       if (closestEnergySource) {
@@ -121,6 +124,43 @@ var roles = {
         this.takeEnergyFrom(closestEnergySource);
       }
     }
+  },
+
+  waller: function() {
+    var exits = this.room.getExits();
+    var spawn = this.getSpawn();
+
+    if (!this.memory.target) {
+      exits.forEach(function (exit) {
+        if (!this.memory.target) {
+          var path = spawn.pos.findPathTo(exit);
+          path = path.filter(function (coord) {
+            return coord.x === 2 || coord.y === 2;
+          });
+
+          if (path.length) {
+            var coord = path[0];
+            this.memory.target = coord;
+            this.room.createConstructionSite(coord.x, coord.y, STRUCTURE_WALL);
+          }
+        }
+      });
+    }
+
+    var site = this.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
+      return obj.type === 'structure' || obj.type === 'constructionSite';
+    })[0];
+
+    this.moveTo(site);
+    if (site.type === 'structure') {
+      this.build(site);
+    } else if (site.type === 'constructionSite') {
+      if (site.structure.hits / site.structure.hitsMax < .1) {
+        this.repair(site);
+      } else {
+        this.memory.target = null;
+      }
+    }
   }
 };
 
@@ -128,7 +168,6 @@ Creep.prototype.work = function() {
   if (this.memory.role) {
     roles[this.memory.role].call(this);
   }
-  console.log(this.memory.role, this.cost());
 };
 
 Creep.prototype.targetSource = function() {

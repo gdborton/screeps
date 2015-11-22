@@ -66,6 +66,49 @@ Spawn.prototype.buildCourier = function() {
   this.createCreep(body, undefined, {role: 'courier'});
 };
 
+Spawn.prototype.buildBuilder = function() {
+  var body = [MOVE, WORK, WORK, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+
+  while (cost < this.maxEnergy()) {
+    body.push(CARRY);
+    body.push(WORK);
+    body.push(WORK);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  while (cost > this.maxEnergy()) {
+    body.pop();
+  }
+
+  this.createCreep(body, undefined, {role: 'builder'});
+};
+
+Spawn.prototype.buildDefender = function() {
+  this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
+};
+
+Spawn.prototype.buildHealer = function() {
+  this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
+};
+
+Spawn.prototype.buildWaller = function() {
+  var body = [MOVE, WORK, WORK, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+
+  while (cost < this.maxEnergy()) {
+    body.push(CARRY);
+    body.push(WORK);
+    body.push(WORK);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  while (cost > this.maxEnergy()) {
+    body.pop();
+  }
+  this.createCreep(body, undefined, {role: 'waller'});
+};0
+
 Spawn.prototype.work = function() {
   if (this.availableEnergy() === this.maxEnergy()) {
     var harvesterCount = this.room.harvesterCount();
@@ -73,6 +116,7 @@ Spawn.prototype.work = function() {
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
     var mailmanCount = this.room.mailmanCount();
+    var wallerCount = this.room.wallerCount();
 
     if (harvesterCount < 1) {
       this.buildHarvester();
@@ -86,6 +130,8 @@ Spawn.prototype.work = function() {
       this.buildMailman();
     } else if (this.room.hasOutdatedCreeps()) {
       this.retireOldCreep();
+    } else if (wallerCount < 1) {
+      this.buildWaller();
     } else {
       this.extend();
     }
@@ -117,30 +163,6 @@ Spawn.prototype.availableEnergy = function() {
     availableEnergy += extension.energy;
   });
   return availableEnergy;
-};
-
-Spawn.prototype.buildBuilder = function() {
-  var body = [MOVE, WORK, WORK, CARRY];
-  var cost = bodyCosts.calculateCosts(body);
-
-  while (cost < this.maxEnergy()) {
-    body.push(CARRY);
-    body.push(WORK);
-    body.push(WORK);
-    cost = bodyCosts.calculateCosts(body);
-  }
-  while (cost > this.maxEnergy()) {
-    body.pop();
-  }
-  this.createCreep(body, undefined, {role: 'builder'});
-};
-
-Spawn.prototype.buildDefender = function() {
-  this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
-};
-
-Spawn.prototype.buildHealer = function() {
-  this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
 };
 
 Spawn.prototype.extend = function() {
