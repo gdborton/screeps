@@ -133,8 +133,8 @@ Spawn.prototype.work = function() {
       this.buildBuilder();
     } else if (mailmanCount < 2) {
       this.buildMailman();
-    } else if (this.room.hasOutdatedCreeps()) {
-      this.retireOldCreep();
+    //} else if (this.room.hasOutdatedCreeps()) {
+      //this.retireOldCreep();
     } else if (wallerCount < 1) {
       this.buildWaller();
     } else {
