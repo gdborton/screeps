@@ -87,7 +87,7 @@ var roles = {
       });
 
       if (this.carry.energy === 0) {
-        var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
+        var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
         if (closestEnergySource) {
           this.takeEnergyFrom(closestEnergySource);
         }
