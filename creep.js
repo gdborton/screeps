@@ -198,6 +198,38 @@ Creep.prototype.getSpawn = function() {
   }
 };
 
+var originalMoveTo = Creep.prototype.moveTo;
+Creep.prototype.moveTo = function() {
+  var args = [].map.call(arguments, function(arg) { return arg; });
+  var potentialOptions;
+  if (typeof arguments[0] === 'number') {
+    potentialOptions = args[2];
+  }else {
+    potentialOptions = args[1];
+  }
+  if (!potentialOptions) {
+    potentialOptions = {};
+    args.push(potentialOptions);
+  }
+  if (this.memory.role !== 'builder' && this.room.controller && typeof potentialOptions === 'object') {
+    var coord = this.room.controller.pos;
+    var avoid = [];
+    for (var x = coord.x - 1; x <= coord.x + 1; x++) {
+      for (var y = coord.y - 1; y <= coord.y + 1; y++) {
+        avoid.push({x: x, y: y});
+      }
+    }
+
+    if (potentialOptions.avoid) {
+      potentialOptions.avoid = potentialOptions.avoid.concat(avoid);
+    } else {
+      potentialOptions.avoid = avoid;
+    }
+  }
+
+  return originalMoveTo.apply(this, args);
+};
+
 Creep.prototype.takeEnergyFrom = function(target) {
   this.moveTo(target);
   if (target instanceof Energy) {
@@ -217,7 +249,6 @@ Creep.prototype.deliverEnergyTo = function(target) {
     this.transferEnergy(target);
   }
 };
-
 
 Creep.prototype.needsOffloaded = function() {
   return this.carry.energy / this.carryCapacity > 0.6;
