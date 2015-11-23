@@ -5,8 +5,7 @@ var roles = {
   harvester: function() {
     if (this.carry.energy < this.carryCapacity) {
       var source = this.targetSource();
-      this.moveTo(source);
-      this.harvest(source);
+      this.moveToAndHarvest(source);
     } else if (this.room.courierCount() === 0) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
@@ -90,16 +89,13 @@ var roles = {
       if (this.carry.energy === 0) {
         var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
         if (closestEnergySource) {
-          this.moveTo(closestEnergySource);
           this.takeEnergyFrom(closestEnergySource);
         }
       } else if (constructionSites.length) {
         var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
-        this.moveTo(closestConstructionSite);
-        this.build(closestConstructionSite);
+        this.moveToAndBuild(closestConstructionSite);
       } else {
-        this.moveTo(this.room.controller);
-        this.upgradeController(this.room.controller);
+        this.moveToAndUpgrade(this.room.controller);
       }
     }
   },
@@ -116,13 +112,11 @@ var roles = {
         return creep.needsEnergyDelivered();
       }));
       if (target) {
-        this.moveTo(target);
-        this.transferEnergy(target);
+        this.deliverEnergyTo(target);
       }
     } else {
       var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
-        this.moveTo(closestEnergySource);
         this.takeEnergyFrom(closestEnergySource);
       }
     }
@@ -133,7 +127,6 @@ var roles = {
       if (this.carry.energy === 0) {
         var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
         if (closestEnergySource) {
-          this.moveTo(closestEnergySource);
           this.takeEnergyFrom(closestEnergySource);
         }
       } else {
@@ -162,15 +155,14 @@ var roles = {
           return obj.type === 'structure' || obj.type === 'constructionSite';
         })[0];
 
-        this.moveTo(this.memory.target.x, this.memory.target.y);
         if (site.type === 'structure') {
           if (site.structure.hits / site.structure.hitsMax < .1) {
-            this.repair(site.structure);
+            this.moveToAndRepair(site.structure);
           } else {
             this.memory.target = null;
           }
         } else if (site.type === 'constructionSite') {
-          this.build(site.constructionSite);
+          this.moveToAndBuild(site.createConstructionSite);
         }
       }
     }
@@ -230,23 +222,71 @@ Creep.prototype.moveTo = function() {
   return originalMoveTo.apply(this, args);
 };
 
+Creep.prototype.moveToAndHarvest = function(target) {
+  if (this.pos.getRangeTo(target) > 1) {
+    this.moveTo(target);
+  } else {
+    this.harvest(target);
+  }
+};
+
+Creep.prototype.moveToAndUpgrade = function(target) {
+  if (this.pos.getRangeTo(target) > 1) {
+    this.moveTo(this.room.controller);
+  } else {
+    this.upgradeController(this.room.controller);
+  }
+};
+
+Creep.prototype.moveToAndBuild = function(target) {
+  var range = this.pos.getRangeTo(target);
+  if (range > 1) {
+    this.moveTo(target);
+  }
+  if (range <= 3) {
+    this.build(target);
+  }
+};
+
+Creep.prototype.moveToAndRepair = function(target) {
+  var range = this.pos.getRangeTo(target);
+  if (this.pos.getRangeTo(target) > 1) {
+    this.moveTo(target);
+  }
+  if (range <= 3) {
+    this.repair(target);
+  }
+}
+
 Creep.prototype.takeEnergyFrom = function(target) {
-  this.moveTo(target);
+  var range = this.pos.getRangeTo(target);
   if (target instanceof Energy) {
+    if (range > 0) {
+      this.moveTo(target);
+    }
     return this.pickup(target);
   } else {
+    if (range > 1) {
+      this.moveTo(target);
+    }
     return target.transferEnergy(this);
   }
 };
 
 Creep.prototype.deliverEnergyTo = function(target) {
-  this.moveTo(target);
+  var range = this.pos.getRangeTo(target);
   if (target instanceof Flag) {
-    if (this.pos.getRangeTo(target) === 0) {
+    if (range === 0) {
       this.dropEnergy();
+    } else {
+      this.moveTo(target);
     }
   } else {
-    this.transferEnergy(target);
+    if (range <= 1) {
+      this.transferEnergy(target);
+    } else {
+      this.moveTo(target);
+    }
   }
 };
 

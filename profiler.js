@@ -16,7 +16,8 @@ if (!Memory.profiler) {
   Memory.profiler = {
     map: {},
     totalTime: 0,
-    bucketSize: 0
+    bucketSize: 0,
+    enabledTick: Game.time
   };
 }
 
@@ -36,19 +37,15 @@ var Profiler = {
       return val2.totalTime - val1.totalTime;
     });
 
-    var output = stats.map(function(data) {
+    var lines = stats.map(function(data) {
       return 'calls: ' + data.calls + ',\ttotalTime: ' + data.totalTime.toFixed(4) + ',\taverageTime: ' + data.averageTime.toFixed(4) + ' --- ' + data.name;
     });
 
-    console.log();
-    console.log('### PROFILER ###');
-    console.log();
-
-    output.forEach(function(line) {
-      console.log(line);
-    });
-
-    console.log('Average CPU/tick:', (Memory.profiler.totalTime / Game.time).toFixed(4), 'Total tick time:', Memory.profiler.totalTime.toFixed(4), 'Ticks:', Game.time, 'Bucket Size (20 limit):', Memory.profiler.bucketSize);
+    var output = ['', '### PROFILER ###', ''];
+    output = output.concat(lines);
+    var elapsedTicks = Game.time - Memory.profiler.enabledTick + 1;
+    output.push('Average CPU/tick: ' + (Memory.profiler.totalTime / elapsedTicks).toFixed(4) + ' Total tick time: ' + Memory.profiler.totalTime.toFixed(4) + ' Ticks: ' + elapsedTicks + ' Bucket Size (20 limit): ' + Memory.profiler.bucketSize);
+    console.log(output.join('\n'));
   },
   prototypes: [
     //{ name: 'Game', val: Game },
