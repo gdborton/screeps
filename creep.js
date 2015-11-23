@@ -162,7 +162,7 @@ var roles = {
             this.memory.target = null;
           }
         } else if (site.type === 'constructionSite') {
-          this.moveToAndBuild(site.createConstructionSite);
+          this.moveToAndBuild(site.constructionSite);
         }
       }
     }
