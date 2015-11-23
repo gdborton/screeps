@@ -1,24 +1,49 @@
 var usedOnStart = 0;
-
-if (Game.rooms.sim) {
-  Game.getUsedCpu = function() {
-    return Game.rooms.sim ? performance.now() - usedOnStart : Game.getUsedCpu();
-  };
-}
-
-usedOnStart = Game.getUsedCpu();
+var enabled = false;
 
 function additionReducer(val1, val2) {
   return val1 + val2;
 }
 
-if (!Memory.profiler) {
-  Memory.profiler = {
-    map: {},
-    totalTime: 0,
-    bucketSize: 0,
-    enabledTick: Game.time
-  };
+function setupMemory() {
+  if (!Memory.profiler) {
+    Memory.profiler = {
+      map: {},
+      totalTime: 0,
+      bucketSize: 0,
+      enabledTick: Game.time
+    };
+  }
+}
+
+function overloadCPUCalc() {
+  if (Game.rooms.sim) {
+    Game.getUsedCpu = function() {
+      return Game.rooms.sim ? performance.now() - usedOnStart : Game.getUsedCpu();
+    };
+  }
+}
+
+function hookUpPrototypes() {
+  Profiler.prototypes.forEach(function eachPrototype(proto) {
+    var foundProto = proto.val.prototype;
+    Object.keys(foundProto).forEach(function eachKeyOnPrototype(prototypeFunctionName) {
+      var key = proto.name + '.' + prototypeFunctionName;
+
+      try {
+        if (typeof foundProto[prototypeFunctionName] === 'function') {
+          var originalFunction = foundProto[prototypeFunctionName];
+          foundProto[prototypeFunctionName] = function() {
+            var start = Game.getUsedCpu();
+            var result = originalFunction.apply(this, arguments);
+            var end = Game.getUsedCpu();
+            Profiler.record(key, end - start);
+            return result;
+          };
+        }
+      } catch (ex) { }
+    });
+  });
 }
 
 var Profiler = {
@@ -31,8 +56,6 @@ var Profiler = {
         totalTime: functionCalls.time,
         averageTime: functionCalls.time / functionCalls.calls
       }
-    }).filter(function(data) {
-      return data.averageTime > 0.1;
     }).sort(function(val1, val2) {
       return val2.totalTime - val1.totalTime;
     });
@@ -42,7 +65,7 @@ var Profiler = {
     });
 
     var output = ['', '### PROFILER ###', ''];
-    output = output.concat(lines);
+    output = output.concat(lines.slice(0, 30));
     var elapsedTicks = Game.time - Memory.profiler.enabledTick + 1;
     output.push('Average CPU/tick: ' + (Memory.profiler.totalTime / elapsedTicks).toFixed(4) + ' Total tick time: ' + Memory.profiler.totalTime.toFixed(4) + ' Ticks: ' + elapsedTicks + ' Bucket Size (20 limit): ' + Memory.profiler.bucketSize);
     console.log(output.join('\n'));
@@ -77,29 +100,23 @@ var Profiler = {
     }else if (cpuUsed > 20) {
       Memory.profiler.bucketSize -= cpuUsed - 20;
     }
+  },
+
+  enable: function enable() {
+    enabled = true;
+    overloadCPUCalc();
+    setupMemory();
+    usedOnStart = Game.getUsedCpu();
+    hookUpPrototypes();
+  },
+
+  profile: function profile(callback) {
+    callback();
+    if (enabled) {
+      Profiler.endTick();
+      Profiler.printProfile();
+    }
   }
 };
-
-Profiler.prototypes.forEach(function eachPrototype(proto) {
-  var foundProto = proto.val.prototype;
-  Object.keys(foundProto).forEach(function eachKeyOnPrototype(prototypeFunctionName) {
-    var key = proto.name + '.' + prototypeFunctionName;
-
-    try {
-      if (typeof foundProto[prototypeFunctionName] === 'function') {
-        var originalFunction = foundProto[prototypeFunctionName];
-        foundProto[prototypeFunctionName] = function() {
-          var start = Game.getUsedCpu();
-          var result = originalFunction.apply(this, arguments);
-          var end = Game.getUsedCpu();
-          Profiler.record(key, end - start);
-          return result;
-        };
-      }
-    } catch (ex) { }
-  });
-});
-
-
 
 module.exports = Profiler;
