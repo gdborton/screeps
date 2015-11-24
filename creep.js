@@ -150,18 +150,20 @@ var roles = {
           });
         }
 
-        var site = this.room.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
-          return obj.type === 'structure' || obj.type === 'constructionSite';
-        })[0];
+        if (this.memory.target) {
+          var site = this.room.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
+            return obj.type === 'structure' || obj.type === 'constructionSite';
+          })[0];
 
-        if (site.type === 'structure') {
-          if (site.structure.hits / site.structure.hitsMax < .1) {
-            this.moveToAndRepair(site.structure);
-          } else {
-            this.memory.target = null;
+          if (site.type === 'structure') {
+            if (site.structure.hits / site.structure.hitsMax < .1) {
+              this.moveToAndRepair(site.structure);
+            } else {
+              this.memory.target = null;
+            }
+          } else if (site.type === 'constructionSite') {
+            this.moveToAndBuild(site.constructionSite);
           }
-        } else if (site.type === 'constructionSite') {
-          this.moveToAndBuild(site.constructionSite);
         }
       }
     }
