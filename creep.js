@@ -260,15 +260,17 @@ Creep.prototype.moveToAndRepair = function(target) {
 Creep.prototype.takeEnergyFrom = function(target) {
   var range = this.pos.getRangeTo(target);
   if (target instanceof Energy) {
-    if (range > 0) {
+    if (range > 1) {
       this.moveTo(target);
+    } else {
+      return this.pickup(target);
     }
-    return this.pickup(target);
   } else {
     if (range > 1) {
       this.moveTo(target);
+    } else {
+      return target.transferEnergy(this);
     }
-    return target.transferEnergy(this);
   }
 };
 
