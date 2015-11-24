@@ -74,7 +74,10 @@ Spawn.prototype.buildBuilder = function() {
   var cost = bodyCosts.calculateCosts(body);
 
   while (cost < this.availableEnergy()) {
-    body.push(CARRY);
+    if (this.room.controller.pos.freeEdges() > 2) {
+      body.push(CARRY);
+    }
+
     body.push(WORK);
     body.push(WORK);
     cost = bodyCosts.calculateCosts(body);
