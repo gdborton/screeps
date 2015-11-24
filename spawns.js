@@ -70,36 +70,6 @@ Spawn.prototype.buildCourier = function() {
 };
 
 Spawn.prototype.buildBuilder = function() {
-  var body = [MOVE, WORK, WORK, CARRY];
-  var cost = bodyCosts.calculateCosts(body);
-
-  while (cost < this.availableEnergy()) {
-    if (this.room.controller.pos.freeEdges() > 2) {
-      body.push(CARRY);
-    }
-
-    body.push(WORK);
-    body.push(WORK);
-    cost = bodyCosts.calculateCosts(body);
-  }
-
-  while (cost > this.availableEnergy()) {
-    body.pop();
-    cost = bodyCosts.calculateCosts(body);
-  }
-
-  this.createCreep(body, undefined, {role: 'builder'});
-};
-
-Spawn.prototype.buildDefender = function() {
-  this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
-};
-
-Spawn.prototype.buildHealer = function() {
-  this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
-};
-
-Spawn.prototype.buildWaller = function() {
   var body = [MOVE, MOVE, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
 
@@ -114,7 +84,32 @@ Spawn.prototype.buildWaller = function() {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
-  this.createCreep(body, undefined, {role: 'waller'});
+  this.createCreep(body, undefined, {role: 'builder'});
+};
+
+Spawn.prototype.buildDefender = function() {
+  this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
+};
+
+Spawn.prototype.buildHealer = function() {
+  this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
+};
+
+Spawn.prototype.buildUpgrader = function() {
+  var body = [MOVE, WORK, WORK, CARRY];
+  var cost = bodyCosts.calculateCosts(body);
+
+  while (cost < this.availableEnergy()) {
+    body.push(WORK);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  while (cost > this.availableEnergy()) {
+    body.pop();
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  this.createCreep(body, undefined, {role: 'upgrader'});
 };
 
 Spawn.prototype.work = function() {
@@ -128,20 +123,20 @@ Spawn.prototype.work = function() {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var mailmanCount = this.room.mailmanCount();
-    var wallerCount = this.room.wallerCount();
+    var upgraderCount = this.room.upgraderCount();
 
     if (settings.courierToWorkerRatio > courierCount / workerCount) {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (builderCount < this.room.controller.pos.freeEdges()) {
-      this.buildBuilder();
+    } else if (upgraderCount < this.room.controller.pos.freeEdges()) {
+      this.buildUpgrader();
     } else if (mailmanCount < 2) {
       this.buildMailman();
     //} else if (this.room.hasOutdatedCreeps()) {
       //this.retireOldCreep();
-    } else if (wallerCount < 1) {
-      this.buildWaller();
+    } else if (builderCount < 1) {
+      this.buildBuilder();
     } else {
       this.extend();
     }

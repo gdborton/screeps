@@ -2,7 +2,7 @@ var settings = require('settings');
 var validExitCoord = require('valid-exit-coord');
 
 Room.prototype.work = function() {
-  this.getStructures().forEach(function(structure) {
+  this.getMyStructures().forEach(function(structure) {
     structure.work();
   });
 
@@ -13,11 +13,15 @@ Room.prototype.work = function() {
 
 Room.prototype.getCreeps = function() {
   return this.find(FIND_MY_CREEPS);
-}
+};
 
 Room.prototype.getStructures = function() {
+  return this.find(FIND_STRUCTURES);
+};
+
+Room.prototype.getMyStructures = function() {
   return this.find(FIND_MY_STRUCTURES);
-}
+};
 
 Room.prototype.getHarvesters = function() {
   return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
@@ -52,14 +56,6 @@ Room.prototype.getUniqueExitPoints = function() {
   });
 
   return exitCoords;
-};
-
-Room.prototype.getWallers = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'waller'}}});
-};
-
-Room.prototype.wallerCount = function() {
-  return this.getWallers().length;
 };
 
 Room.prototype.hasOutdatedCreeps = function() {
@@ -104,7 +100,22 @@ Room.prototype.courierCount = function() {
 };
 
 Room.prototype.builderCount = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'builder'}}}).length;
+  return this.getBuilders().length;
+};
+
+Room.prototype.getBuilders = function () {
+  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'builder'}}});
+};
+
+Room.prototype.upgraderCount = function() {
+  return this.getUpgraders().length;
+};
+
+Room.prototype.getUpgraders = function () {
+  if (!this._upgraders) {
+    this._upgraders = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'upgrader'}}});
+  }
+  return this._upgraders;
 };
 
 Room.prototype.getConstructionSites = function() {
@@ -125,6 +136,7 @@ Room.prototype.getEnergySourceStructures = function() {
 
 Room.prototype.droppedControllerEnergy = function() {
   if (!this._droppedControllerEnergy) {
+    var dumpFlag = this.getControllerEnergyDropFlag();
     this._droppedControllerEnergy = this.find(FIND_DROPPED_ENERGY).filter(function(energy) {
       return energy.pos.getRangeTo(dumpFlag) === 0;
     })[0];
@@ -135,7 +147,6 @@ Room.prototype.droppedControllerEnergy = function() {
 
 Room.prototype.getEnergyStockSources = function() {
   if (!this._energyStockSources) {
-    var dumpFlag = this.getControllerEnergyDropFlag();
     var droppedControllerEnergy = this.droppedControllerEnergy();
     this._energyStockSources = this.getEnergySourceStructures();
     if (droppedControllerEnergy) {

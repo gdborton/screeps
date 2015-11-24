@@ -82,11 +82,10 @@ var roles = {
   },
 
   builder: function() {
-    var constructionSites = this.room.getConstructionSites().filter(function(constructionSite) {
-      return constructionSite.structureType !== 'constructedWall' && constructionSite.structureType !== 'rampart';
-    });
+    var constructionSites = this.room.getConstructionSites();
 
     if (this.carry.energy === 0) {
+      this.memory.target = null;
       var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.takeEnergyFrom(closestEnergySource);
@@ -94,7 +93,24 @@ var roles = {
     } else if (constructionSites.length) {
       var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
       this.moveToAndBuild(closestConstructionSite);
+    } else if (this.memory.target) {
+      var target = Game.getObjectById(this.memory.target);
+      this.moveToAndRepair(target);
     } else {
+      var damagedStructures = this.rooms.getStructures().sort(function(structureA, structureB) {
+        return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
+      });
+      if (damagedStructures.length) {
+        this.memory.target = damagedStructures[0].id;
+      }
+    }
+  },
+
+  upgrader: function() {
+    if (this.carry.energy === 0 && this.room.droppedControllerEnergy()) {
+      this.takeEnergyFrom(this.room.droppedControllerEnergy());
+    }
+    if (this.carry.energy > 0) {
       this.moveToAndUpgrade(this.room.controller);
     }
   },
@@ -117,50 +133,6 @@ var roles = {
       var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.takeEnergyFrom(closestEnergySource);
-      }
-    }
-  },
-
-  waller: function() {
-    if (this.carry.energy === 0) {
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergySourceStructures());
-      if (closestEnergySource) {
-        this.takeEnergyFrom(closestEnergySource);
-      }
-    } else {
-      var exits = this.room.getUniqueExitPoints();
-      var spawn = this.getSpawn();
-      var self = this;
-
-      if (!this.memory.target) {
-        exits.forEach(function (exit) {
-          if (!self.memory.target) {
-            var path = spawn.pos.findPathTo(exit);
-            path = path.filter(validExitCoord);
-
-            if (path.length) {
-              var coord = path[0];
-              self.memory.target = coord;
-              self.room.createConstructionSite(coord.x, coord.y, STRUCTURE_WALL);
-            }
-          }
-        });
-      }
-
-      if (this.memory.target) {
-        var site = this.room.lookAt(this.memory.target.x, this.memory.target.y).filter(function(obj) {
-          return obj.type === 'structure' || obj.type === 'constructionSite';
-        })[0];
-
-        if (site.type === 'structure') {
-          if (site.structure.hits / site.structure.hitsMax < .1) {
-            this.moveToAndRepair(site.structure);
-          } else {
-            this.memory.target = null;
-          }
-        } else if (site.type === 'constructionSite') {
-          this.moveToAndBuild(site.constructionSite);
-        }
       }
     }
   }
