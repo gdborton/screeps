@@ -2,6 +2,7 @@ require('creep');
 require('source');
 require('spawns');
 require('structures');
+require('room-position');
 var profiler = require('profiler');
 
 //profiler.enable();
