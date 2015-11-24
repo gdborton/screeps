@@ -19,15 +19,15 @@ Spawn.prototype.buildHarvester = function() {
   if (sourceId) {
     var body = [MOVE, WORK, WORK, CARRY];
     var cost = bodyCosts.calculateCosts(body);
-    while (cost <= this.maxEnergy()) {
-      if (body.length < 7 && cost <= this.maxEnergy() - 100) {
+    while (cost <= this.availableEnergy()) {
+      if (body.length < 7 && cost <= this.availableEnergy() - 100) {
         body.push(WORK);
       } else {
         body.push(CARRY);
       }
       cost = bodyCosts.calculateCosts(body);
     }
-    if (cost > this.maxEnergy()) {
+    if (cost > this.availableEnergy()) {
       body.pop();
       cost = bodyCosts.calculateCosts(body);
     }
@@ -38,13 +38,13 @@ Spawn.prototype.buildHarvester = function() {
 Spawn.prototype.buildMailman = function() {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.maxEnergy()) {
+  while (cost < this.availableEnergy()) {
     body.push(MOVE);
     body.push(CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  if (cost > this.maxEnergy()) {
+  if (cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -55,13 +55,13 @@ Spawn.prototype.buildMailman = function() {
 Spawn.prototype.buildCourier = function() {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.maxEnergy()) {
+  while (cost < this.availableEnergy()) {
     body.push(MOVE);
     body.push(CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  if (cost > this.maxEnergy()) {
+  if (cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -73,14 +73,14 @@ Spawn.prototype.buildBuilder = function() {
   var body = [MOVE, WORK, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
 
-  while (cost < this.maxEnergy()) {
+  while (cost < this.availableEnergy()) {
     body.push(CARRY);
     body.push(WORK);
     body.push(WORK);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > this.maxEnergy()) {
+  while (cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -100,14 +100,14 @@ Spawn.prototype.buildWaller = function() {
   var body = [MOVE, MOVE, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
 
-  while (cost < this.maxEnergy()) {
+  while (cost < this.availableEnergy()) {
     body.push(MOVE);
     body.push(CARRY);
     body.push(WORK);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > this.maxEnergy()) {
+  while (cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -115,17 +115,17 @@ Spawn.prototype.buildWaller = function() {
 };
 
 Spawn.prototype.work = function() {
-  if (this.availableEnergy() === this.maxEnergy()) {
-    var harvesterCount = this.room.harvesterCount();
+  var harvesterCount = this.room.harvesterCount();
+  if (this.availableEnergy() >= 300 && harvesterCount < 1) {
+    this.buildHarvester();
+  }else if (this.availableEnergy() === this.maxEnergy()) {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
     var courierCount = this.room.courierCount();
     var mailmanCount = this.room.mailmanCount();
     var wallerCount = this.room.wallerCount();
 
-    if (harvesterCount < 1) {
-      this.buildHarvester();
-    } else if (settings.courierToWorkerRatio > courierCount / workerCount) {
+    if (settings.courierToWorkerRatio > courierCount / workerCount) {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
