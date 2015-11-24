@@ -119,12 +119,14 @@ Spawn.prototype.buildWaller = function() {
 
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
+  var courierCount = this.room.courierCount();
   if (this.availableEnergy() >= 300 && harvesterCount < 1) {
     this.buildHarvester();
-  }else if (this.availableEnergy() === this.maxEnergy()) {
+  } else if (this.availableEnergy() >= 300 && courierCount < 1) {
+    this.buildCourier();
+  } else if (this.availableEnergy() === this.maxEnergy()) {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
-    var courierCount = this.room.courierCount();
     var mailmanCount = this.room.mailmanCount();
     var wallerCount = this.room.wallerCount();
 
