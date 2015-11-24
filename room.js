@@ -123,13 +123,27 @@ Room.prototype.getEnergySourceStructures = function() {
   });
 };
 
+Room.prototype.droppedControllerEnergy = function() {
+  if (!this._droppedControllerEnergy) {
+    this._droppedControllerEnergy = this.find(FIND_DROPPED_ENERGY).filter(function(energy) {
+      return energy.pos.getRangeTo(dumpFlag) === 0;
+    })[0];
+  }
+
+  return this._droppedControllerEnergy;
+};
+
 Room.prototype.getEnergyStockSources = function() {
-  var dumpFlag = this.getControllerEnergyDropFlag();
-  var results = this.find(FIND_DROPPED_ENERGY).filter(function(energy) {
-    return energy.pos.getRangeTo(dumpFlag) === 0;
-  });
-  results = results.concat(this.getEnergySourceStructures());
-  return results;
+  if (!this._energyStockSources) {
+    var dumpFlag = this.getControllerEnergyDropFlag();
+    var droppedControllerEnergy = this.droppedControllerEnergy();
+    this._energyStockSources = this.getEnergySourceStructures();
+    if (droppedControllerEnergy) {
+      this._energyStockSources.unshift(droppedControllerEnergy);
+    }
+  }
+
+  return this._energyStockSources;
 };
 
 Room.prototype.getSpawn = function() {
