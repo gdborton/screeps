@@ -1,6 +1,24 @@
 var settings = require('settings');
 var validExitCoord = require('valid-exit-coord');
 
+Room.prototype.work = function() {
+  this.getStructures().forEach(function(structure) {
+    structure.work();
+  });
+
+  this.getCreeps().forEach(function(creep) {
+    creep.work();
+  });
+};
+
+Room.prototype.getCreeps = function() {
+  return this.find(FIND_MY_CREEPS);
+}
+
+Room.prototype.getStructures = function() {
+  return this.find(FIND_MY_STRUCTURES);
+}
+
 Room.prototype.getHarvesters = function() {
   return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
 };

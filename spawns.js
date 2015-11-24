@@ -179,10 +179,4 @@ Spawn.prototype.extend = function() {
   if (this.room.canBuildExtension()) {
     this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
   }
-
-  this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-    return structure.structureType === STRUCTURE_EXTENSION;
-  }).forEach(function(structure) {
-    structure.work();
-  });
 };
