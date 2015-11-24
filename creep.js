@@ -97,7 +97,7 @@ var roles = {
       var target = Game.getObjectById(this.memory.target);
       this.moveToAndRepair(target);
     } else {
-      var damagedStructures = this.rooms.getStructures().sort(function(structureA, structureB) {
+      var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
         return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
       });
       if (damagedStructures.length) {
@@ -109,8 +109,7 @@ var roles = {
   upgrader: function() {
     if (this.carry.energy === 0 && this.room.droppedControllerEnergy()) {
       this.takeEnergyFrom(this.room.droppedControllerEnergy());
-    }
-    if (this.carry.energy > 0) {
+    } else {
       this.moveToAndUpgrade(this.room.controller);
     }
   },
@@ -172,7 +171,7 @@ Creep.prototype.moveTo = function() {
     potentialOptions = {};
     args.push(potentialOptions);
   }
-  if (this.memory.role !== 'builder' && this.room.controller && typeof potentialOptions === 'object') {
+  if (this.memory.role !== 'upgrader' && this.room.controller && typeof potentialOptions === 'object') {
     var coord = this.room.controller.pos;
     var avoid = [];
     for (var x = coord.x - 1; x <= coord.x + 1; x++) {
