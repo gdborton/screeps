@@ -1,4 +1,5 @@
 require('room');
+var validExitCoord = require('valid-exit-coord');
 var bodyCosts = require('body-costs');
 
 var roles = {
@@ -130,7 +131,7 @@ var roles = {
           this.takeEnergyFrom(closestEnergySource);
         }
       } else {
-        var exits = this.room.getExits();
+        var exits = this.room.getUniqueExitPoints();
         var spawn = this.getSpawn();
         var self = this;
 
@@ -138,9 +139,7 @@ var roles = {
           exits.forEach(function (exit) {
             if (!self.memory.target) {
               var path = spawn.pos.findPathTo(exit);
-              path = path.filter(function (coord) {
-                return coord.x === 2 || coord.y === 2;
-              });
+              path = path.filter(validExitCoord);
 
               if (path.length) {
                 var coord = path[0];

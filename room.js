@@ -1,4 +1,5 @@
 var settings = require('settings');
+var validExitCoord = require('valid-exit-coord');
 
 Room.prototype.getHarvesters = function() {
   return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
@@ -18,6 +19,21 @@ Room.prototype.mailmanCount = function() {
 
 Room.prototype.getExits = function() {
   return this.find(FIND_EXIT);
+};
+
+Room.prototype.getUniqueExitPoints = function() {
+  var exitCoords = this.getExits();
+  exitCoords = exitCoords.filter(function(coord, index) {
+    if (index === 0) {
+      return true;
+    }
+
+    var prevCoord = exitCoords[index - 1];
+
+    return !Math.abs(coord.x - prevCoord.x < 2) || !Math.abs(coord.y - prevCoord.y < 2);
+  });
+
+  return exitCoords;
 };
 
 Room.prototype.getWallers = function() {
