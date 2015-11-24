@@ -131,8 +131,8 @@ Spawn.prototype.work = function() {
       this.buildHarvester();
     } else if (upgraderCount < this.room.controller.pos.freeEdges()) {
       this.buildUpgrader();
-    } else if (mailmanCount < 2) {
-      this.buildMailman();
+    // } else if (mailmanCount < 2) {
+    //   this.buildMailman();
     //} else if (this.room.hasOutdatedCreeps()) {
       //this.retireOldCreep();
     } else if (builderCount < 1) {
