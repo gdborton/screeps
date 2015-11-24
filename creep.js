@@ -82,26 +82,32 @@ var roles = {
   },
 
   builder: function() {
-    var constructionSites = this.room.getConstructionSites();
-
-    if (this.carry.energy === 0) {
+    if (this.carry.energy === this.carryCapacity) {
+      this.memory.task = 'work';
+    } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
       this.memory.target = null;
+      this.memory.task = 'stockup';
       var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.takeEnergyFrom(closestEnergySource);
       }
-    } else if (constructionSites.length) {
-      var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
-      this.moveToAndBuild(closestConstructionSite);
-    } else if (this.memory.target) {
-      var target = Game.getObjectById(this.memory.target);
-      this.moveToAndRepair(target);
-    } else {
-      var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
-        return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
-      });
-      if (damagedStructures.length) {
-        this.memory.target = damagedStructures[0].id;
+    }
+
+    if (this.memory.task === 'work') {
+      var constructionSites = this.room.getConstructionSites();
+      if (constructionSites.length) {
+        var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
+        this.moveToAndBuild(closestConstructionSite);
+      } else if (this.memory.target) {
+        var target = Game.getObjectById(this.memory.target);
+        this.moveToAndRepair(target);
+      } else {
+        var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
+          return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
+        });
+        if (damagedStructures.length) {
+          this.memory.target = damagedStructures[0].id;
+        }
       }
     }
   },
