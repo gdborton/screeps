@@ -26,12 +26,12 @@ function overloadCPUCalc() {
 
 function hookUpPrototypes() {
   Profiler.prototypes.forEach(function eachPrototype(proto) {
-    var foundProto = proto.val.prototype;
+    var foundProto = proto.val.prototype ? proto.val.prototype : proto.val;
     Object.keys(foundProto).forEach(function eachKeyOnPrototype(prototypeFunctionName) {
       var key = proto.name + '.' + prototypeFunctionName;
 
       try {
-        if (typeof foundProto[prototypeFunctionName] === 'function') {
+        if (typeof foundProto[prototypeFunctionName] === 'function' && prototypeFunctionName !== 'getUsedCpu') {
           var originalFunction = foundProto[prototypeFunctionName];
           foundProto[prototypeFunctionName] = function() {
             var start = Game.getUsedCpu();
@@ -71,7 +71,7 @@ var Profiler = {
     console.log(output.join('\n'));
   },
   prototypes: [
-    //{ name: 'Game', val: Game },
+    { name: 'Game', val: Game },
     { name: 'Room', val: Room },
     { name: 'Structure', val: Structure },
     { name: 'Spawn', val: Spawn },
