@@ -12,7 +12,22 @@ Room.prototype.work = function() {
 };
 
 Room.prototype.needsUpgraders = function() {
-  return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy();
+  var upgraderWorkParts = this.getUpgraders();
+  upgraderWorkParts = upgraderWorkParts.map(function(upgrader) {
+    return upgrader.body.filter(function(bodyPart) {
+      return bodyPart.type === WORK;
+    }).length;
+  });
+  upgraderWorkParts = upgraderWorkParts.reduce(function(a, b) { return a + b; });
+  return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy() && upgraderWorkParts < this.maxEnergyProducedPerTick();
+};
+
+Room.prototype.maxEnergyProducedPerTick = function() {
+  return this.sourceCount() * 10;
+};
+
+Room.prototype.sourceCount = function() {
+  return this.getSources().length;
 };
 
 Room.prototype.getCreeps = function() {
@@ -126,8 +141,12 @@ Room.prototype.getConstructionSites = function() {
   return this.find(FIND_CONSTRUCTION_SITES);
 };
 
+Room.prototype.getSources = function() {
+  return this.find(FIND_SOURCES);
+};
+
 Room.prototype.needsHarvesters = function() {
-  return this.find(FIND_SOURCES).filter(function(source) {
+  return this.getSources().filter(function(source) {
     return source.needsHarvesters();
   }).length > 0;
 };
