@@ -33,6 +33,14 @@ module.exports = {
       walls: true,
       roads: true,
       storage: 1
+    },
+    6: {
+      spawns: 1,
+      extensions: 40,
+      ramparts: true,
+      walls: true,
+      roads: true,
+      storage: 1
     }
   }
 };
