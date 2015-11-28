@@ -27,7 +27,7 @@ Spawn.prototype.buildHarvester = function() {
       }
       cost = bodyCosts.calculateCosts(body);
     }
-    if (cost > this.availableEnergy()) {
+    while(cost > this.availableEnergy()) {
       body.pop();
       cost = bodyCosts.calculateCosts(body);
     }
@@ -44,7 +44,7 @@ Spawn.prototype.buildMailman = function() {
     cost = bodyCosts.calculateCosts(body);
   }
 
-  if (cost > this.availableEnergy()) {
+  while(cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -61,7 +61,7 @@ Spawn.prototype.buildCourier = function() {
     cost = bodyCosts.calculateCosts(body);
   }
 
-  if (cost > this.availableEnergy()) {
+  while (cost > this.availableEnergy()) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -131,8 +131,8 @@ Spawn.prototype.work = function() {
       this.buildHarvester();
     } else if (upgraderCount < this.room.controller.pos.freeEdges()) {
       this.buildUpgrader();
-    // } else if (mailmanCount < 2) {
-    //   this.buildMailman();
+    } else if (mailmanCount < 2 && this.maxEnergy() < 600) {
+      this.buildMailman();
     //} else if (this.room.hasOutdatedCreeps()) {
       //this.retireOldCreep();
     } else if (builderCount < 1) {
