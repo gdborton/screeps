@@ -5,9 +5,9 @@ require('structures');
 require('room-position');
 var profiler = require('profiler');
 
-//profiler.enable();
+profiler.enable();
 module.exports.loop = function() {
-  profiler.profile(function() {
+  profiler.wrap(function() {
     for (var roomName in Game.rooms) {
       Game.rooms[roomName].work();
     }
