@@ -11,6 +11,10 @@ Room.prototype.work = function() {
   });
 };
 
+Room.prototype.needsUpgraders = function() {
+  return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy();
+};
+
 Room.prototype.getCreeps = function() {
   return this.find(FIND_MY_CREEPS);
 };

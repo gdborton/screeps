@@ -129,7 +129,7 @@ Spawn.prototype.work = function() {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
-    } else if (upgraderCount < this.room.controller.pos.freeEdges()) {
+    } else if (this.room.needsUpgraders()) {
       this.buildUpgrader();
     } else if (mailmanCount < 2 && this.maxEnergy() < 600) {
       this.buildMailman();

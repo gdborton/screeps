@@ -87,9 +87,8 @@ var roles = {
     } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
       this.memory.target = null;
       this.memory.task = 'stockup';
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
-      if (closestEnergySource) {
-        this.takeEnergyFrom(closestEnergySource);
+      if (this.room.droppedControllerEnergy()) {
+        this.takeEnergyFrom(this.room.droppedControllerEnergy());
       }
     }
 
