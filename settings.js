@@ -25,6 +25,14 @@ module.exports = {
       walls: true,
       roads: true,
       storage: 1
+    },
+    5: {
+      spawns: 1,
+      extensions: 30,
+      ramparts: true,
+      walls: true,
+      roads: true,
+      storage: 1
     }
   }
 };
