@@ -135,7 +135,7 @@ Spawn.prototype.work = function() {
       this.buildMailman();
     //} else if (this.room.hasOutdatedCreeps()) {
       //this.retireOldCreep();
-    } else if (builderCount < 1) {
+    } else if (this.room.needsBuilders()) {
       this.buildBuilder();
     } else {
       this.extend();

@@ -12,14 +12,36 @@ Room.prototype.work = function() {
 };
 
 Room.prototype.needsUpgraders = function() {
-  var upgraderWorkParts = this.getUpgraders();
-  upgraderWorkParts = upgraderWorkParts.map(function(upgrader) {
-    return upgrader.body.filter(function(bodyPart) {
-      return bodyPart.type === WORK;
-    }).length;
+  return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy() && this.upgraderWorkParts() < this.maxEnergyProducedPerTick();
+};
+
+Room.prototype.needsBuilders = function() {
+  return this.builderCount() < 1  && this.constructionSites().length > 0 && this.damagedBuildings() > 0;
+};
+
+Room.prototype.damagedBuildings = function() {
+  return this.getStructures().filter(function(structure) {
+    return structure.hits / structure.hitsMax < .9;
   });
-  upgraderWorkParts = upgraderWorkParts.reduce(function(a, b) { return a + b; });
-  return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy() && upgraderWorkParts < this.maxEnergyProducedPerTick();
+};
+
+Room.prototype.upgraderWorkParts = function() {
+  if (!this._upgraderWorkParts) {
+    var upgraderWorkParts = this.getUpgraders();
+    upgraderWorkParts = upgraderWorkParts.map(function(upgrader) {
+      return upgrader.body.filter(function(bodyPart) {
+        return bodyPart.type === WORK;
+      }).length;
+    });
+
+    if (upgraderWorkParts.length) {
+      this._upgraderWorkParts = upgraderWorkParts.reduce(function(a, b) { return a + b; });
+    } else {
+      this._upgraderWorkParts = 0;
+    }
+  }
+
+  return this._upgraderWorkParts;
 };
 
 Room.prototype.maxEnergyProducedPerTick = function() {
