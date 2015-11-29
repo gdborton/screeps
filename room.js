@@ -61,11 +61,18 @@ Room.prototype.getStructures = function() {
 };
 
 Room.prototype.getMyStructures = function() {
-  return this.find(FIND_MY_STRUCTURES);
+  if (!this._myStructures) {
+    this._myStructures = this.find(FIND_MY_STRUCTURES);
+  }
+
+  return this._myStructures;
 };
 
 Room.prototype.getHarvesters = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
+  if (!this._harvesters) {
+    this._harvesters = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
+  }
+  return this._harvesters;
 };
 
 Room.prototype.harvesterCount = function() {
@@ -81,22 +88,28 @@ Room.prototype.mailmanCount = function() {
 };
 
 Room.prototype.getExits = function() {
-  return this.find(FIND_EXIT);
+  if (!this._exits) {
+    this._exits = this.find(FIND_EXIT);
+  }
+
+  return this._exits;
 };
 
 Room.prototype.getUniqueExitPoints = function() {
-  var exitCoords = this.getExits();
-  exitCoords = exitCoords.filter(function(coord, index) {
-    if (index === 0) {
-      return true;
-    }
+  if (!this._uniqueExitPoints) {
+    var exitCoords = this.getExits();
+    this._uniqueExitPoints = exitCoords.filter(function(coord, index) {
+      if (index === 0) {
+        return true;
+      }
 
-    var prevCoord = exitCoords[index - 1];
+      var prevCoord = exitCoords[index - 1];
 
-    return !Math.abs(coord.x - prevCoord.x < 2) || !Math.abs(coord.y - prevCoord.y < 2);
-  });
+      return !Math.abs(coord.x - prevCoord.x < 2) || !Math.abs(coord.y - prevCoord.y < 2);
+    });
+  }
 
-  return exitCoords;
+  return this._uniqueExitPoints();
 };
 
 Room.prototype.hasOutdatedCreeps = function() {
@@ -212,14 +225,21 @@ Room.prototype.getSpawn = function() {
 };
 
 Room.prototype.canBuildExtension = function() {
-  var maxExtensions = settings.buildingCount[this.controller.level].extensions || 0;
-  return this.getExtensions().length < maxExtensions;
+  if (this._canBuildExtensions === undefined) {
+    var maxExtensions = settings.buildingCount[this.controller.level].extensions || 0;
+    this._canBuildExtensions = this.getExtensions().length < maxExtensions;
+  }
+  return this._canBuildExtensions;
 };
 
 Room.prototype.getExtensions = function() {
-  return this.find(FIND_MY_STRUCTURES).filter(function(structure) {
-    return structure.structureType === STRUCTURE_EXTENSION;
-  });
+  if (!this._extensions) {
+    this._extensions = this.getMyStructures().filter(function(structure) {
+      return structure.structureType === STRUCTURE_EXTENSION;
+    });
+  }
+
+  return this._extensions;
 };
 
 Room.prototype.courierTargets = function() {
