@@ -16,7 +16,7 @@ Room.prototype.needsUpgraders = function() {
 };
 
 Room.prototype.needsBuilders = function() {
-  return this.builderCount() < 1  && this.constructionSites().length > 0 && this.damagedBuildings() > 0;
+  return this.builderCount() < 1  && this.getConstructionSites().length > 0 && this.damagedBuildings().length > 0;
 };
 
 Room.prototype.damagedBuildings = function() {
