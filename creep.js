@@ -99,11 +99,20 @@ var roles = {
         this.moveToAndBuild(closestConstructionSite);
       } else if (this.memory.target) {
         var target = Game.getObjectById(this.memory.target);
-        this.moveToAndRepair(target);
+        if (target.hits < target.hitsMax) {
+          this.moveToAndRepair(target);
+        } else {
+          this.memory.target = null;
+        }
       } else {
         var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
+          var distressedThreshold = 1400;
+          if ((structureA.hits < distressedThreshold && structureA.hitsMax > distressedThreshold) || (structureB.hits < distressedThreshold && structureB.hitsMax > distressedThreshold)) {
+            return structureA.hits - structureB.hits;
+          }
           return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
         });
+
         if (damagedStructures.length) {
           this.memory.target = damagedStructures[0].id;
         }
