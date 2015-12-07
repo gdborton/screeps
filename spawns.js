@@ -97,10 +97,12 @@ Spawn.prototype.buildHealer = function() {
 
 Spawn.prototype.buildUpgrader = function() {
   var body = [MOVE, WORK, WORK, CARRY];
+  var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
-
-  while (cost < this.availableEnergy()) {
+  var workPartsNeeded = this.rooms.upgraderWorkParts() - this.room.maxEnergyProducedPerTick();
+  while (cost < this.availableEnergy() && workParts < workPartsNeeded) {
     body.push(WORK);
+    workParts++;
     cost = bodyCosts.calculateCosts(body);
   }
 
