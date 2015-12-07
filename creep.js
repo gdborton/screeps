@@ -106,10 +106,6 @@ var roles = {
         }
       } else {
         var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
-          var distressedThreshold = 1400;
-          if ((structureA.hits < distressedThreshold && structureA.hitsMax > distressedThreshold) || (structureB.hits < distressedThreshold && structureB.hitsMax > distressedThreshold)) {
-            return structureA.hits - structureB.hits;
-          }
           return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
         });
 
@@ -125,6 +121,25 @@ var roles = {
       this.takeEnergyFrom(this.room.droppedControllerEnergy());
     } else {
       this.moveToAndUpgrade(this.room.controller);
+    }
+  },
+
+  roadworker: function() {
+    if (this.carry.energy === 0) {
+      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
+      if (closestEnergySource) {
+        this.takeEnergyFrom(closestEnergySource);
+      }
+    } else {
+      var roads = this.room.getRoads().filter(function(road) {
+        return road.hits < road.hitsMax;
+      });
+      if (roads.length) {
+        var road = this.pos.findClosestByRange(roads);
+        this.moveToAndRepair(road);
+      } else {
+        this.suicide();
+      }
     }
   },
 

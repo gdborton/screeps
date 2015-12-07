@@ -60,6 +60,22 @@ Room.prototype.getStructures = function() {
   return this.find(FIND_STRUCTURES);
 };
 
+Room.prototype.getRoads = function() {
+  return this.getStructures().filter(function(structure) {
+    return structure.structureType === STRUCTURE_ROAD;
+  });
+};
+
+Room.prototype.getDamagedRoads = function() {
+  return this.getStructures().filter(function(road) {
+    return road.structureType === STRUCTURE_ROAD && road.hits / road.hitsMax < .5;
+  });
+};
+
+Room.prototype.hasDamagedRoads = function() {
+  return this.getDamagedRoads().length > 0;
+};
+
 Room.prototype.getMyStructures = function() {
   if (!this._myStructures) {
     this._myStructures = this.find(FIND_MY_STRUCTURES);
@@ -73,6 +89,18 @@ Room.prototype.getHarvesters = function() {
     this._harvesters = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
   }
   return this._harvesters;
+};
+
+Room.prototype.getRoadWorkers = function() {
+  if (!this._roadWorkers) {
+    this._roadWorkers = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'roadworker'}}});
+  }
+
+  return this._roadWorkers;
+};
+
+Room.prototype.roadWorkerCount = function() {
+  return this.getRoadWorkers().length;
 };
 
 Room.prototype.harvesterCount = function() {

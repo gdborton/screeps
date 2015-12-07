@@ -69,6 +69,11 @@ Spawn.prototype.buildCourier = function() {
   this.createCreep(body, undefined, {role: 'courier'});
 };
 
+Spawn.prototype.buildRoadWorker = function() {
+  var body = [MOVE, MOVE, MOVE, WORK, CARRY];
+  this.createCreep(body, undefined, {role: 'roadworker'})
+};
+
 Spawn.prototype.buildBuilder = function() {
   var body = [MOVE, MOVE, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
@@ -99,7 +104,7 @@ Spawn.prototype.buildUpgrader = function() {
   var body = [MOVE, WORK, WORK, CARRY];
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
-  var workPartsNeeded = this.rooms.upgraderWorkParts() - this.room.maxEnergyProducedPerTick();
+  var workPartsNeeded = this.room.upgraderWorkParts() - this.room.maxEnergyProducedPerTick();
   while (cost < this.availableEnergy() && workParts < workPartsNeeded) {
     body.push(WORK);
     workParts++;
@@ -117,10 +122,13 @@ Spawn.prototype.buildUpgrader = function() {
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
   var courierCount = this.room.courierCount();
+
   if (this.availableEnergy() >= 300 && harvesterCount < 1) {
     this.buildHarvester();
   } else if (this.availableEnergy() >= 300 && courierCount < 1) {
     this.buildCourier();
+  } else if(this.availableEnergy() >= 300 && this.room.hasDamagedRoads() && this.room.roadWorkerCount() < 1) {
+    this.buildRoadWorker();
   } else if (this.availableEnergy() === this.maxEnergy()) {
     var builderCount = this.room.builderCount();
     var workerCount = this.room.workerCount();
