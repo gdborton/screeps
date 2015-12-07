@@ -104,7 +104,7 @@ Spawn.prototype.buildUpgrader = function() {
   var body = [MOVE, WORK, WORK, CARRY];
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
-  var workPartsNeeded = this.room.upgraderWorkParts() - this.room.maxEnergyProducedPerTick();
+  var workPartsNeeded = this.room.maxEnergyProducedPerTick() - this.room.upgraderWorkParts();
   while (cost < this.availableEnergy() && workParts < workPartsNeeded) {
     body.push(WORK);
     workParts++;
