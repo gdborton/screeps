@@ -70,7 +70,7 @@ Spawn.prototype.buildCourier = function() {
 };
 
 Spawn.prototype.buildRoadWorker = function() {
-  var body = [MOVE, MOVE, MOVE, WORK, CARRY];
+  var body = [MOVE, WORK, WORK, CARRY];
   this.createCreep(body, undefined, {role: 'roadworker'})
 };
 
