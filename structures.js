@@ -25,5 +25,20 @@ Structure.prototype.isControllerLink = function() {
 };
 
 Structure.prototype.isFull = function() {
-  return this.energy < this.energyCapacity;
+  if (this.energyCapacity) {
+    return this.energy < this.energyCapacity;
+  } else if (this.storeCapacity) {
+    return this.store < this.storeCapacity;
+  }
+  return true;
+};
+
+Structure.prototype.isEmpty = function() {
+  if (this.energyCapacity) {
+    return this.energy === 0;
+  } else if (this.storeCapacity) {
+    return this.store === 0;
+  }
+
+  return true;
 };

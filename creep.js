@@ -98,6 +98,8 @@ var roles = {
       this.memory.task = 'stockup';
       if (this.room.droppedControllerEnergy()) {
         this.takeEnergyFrom(this.room.droppedControllerEnergy());
+      } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
+        this.takeEnergyFrom(this.room.getControllerLink());
       }
     }
 
