@@ -9,7 +9,7 @@ structureTypes[STRUCTURE_EXTENSION] = function() {
 };
 
 structureTypes[STRUCTURE_LINK] = function() {
-  if (!this.isControllerLink() && !this.cooldown && this.room.getControllerLink() && this.room.getControllerLink().energy < 100  && this.isFull()) {
+  if (!this.isControllerLink() && !this.cooldown && this.room.getControllerLink() && this.room.getControllerLink().energy < 100) {
     this.transferEnergy(this.room.getControllerLink());
   }
 };
