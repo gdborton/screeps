@@ -36,7 +36,7 @@ var roles = {
 
   courier: function() {
     var dumpTarget = this.pos.findClosestByRange(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-      return structure.energyCapacity && structure.energy < structure.energyCapacity;
+      return structure.energyCapacity && structure.energy < structure.energyCapacity && structure.structureType !== STRUCTURE_LINK;
     }));
 
     if (this.carry.energy === this.carryCapacity) {

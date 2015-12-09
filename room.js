@@ -329,13 +329,13 @@ Room.prototype.getEnergyThatNeedsPickedUp = function() {
 };
 
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {
-  var targets = this.courierTargets();
-
-  var potentialTargets = this.getEnergyThatNeedsPickedUp();
-
-  if (!potentialTargets.length) {
+  if (this.getEnergyThatNeedsPickedUp().length) {
+    return this.getEnergyThatNeedsPickedUp();
+  } else if (this.getCreepsThatNeedOffloading().length) {
     return this.getCreepsThatNeedOffloading();
+  } else if (this.getStorage() && !this.getStorage().isEmpty()) {
+    return [this.getStorage()];
   }
 
-  return potentialTargets;
+  return [];
 };

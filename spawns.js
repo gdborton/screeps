@@ -18,7 +18,7 @@ Spawn.prototype.buildHarvester = function() {
       } else if(body.filter(function(part) { return part === CARRY }).length < 10) {
         body.push(CARRY);
       } else {
-        body.push(WORK, WORK);
+        body.push(WORK, WORK, WORK, WORK);
         forcedReturn = true;
       }
       cost = bodyCosts.calculateCosts(body);
