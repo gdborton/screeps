@@ -25,6 +25,28 @@ Room.prototype.damagedBuildings = function() {
   });
 };
 
+Room.prototype.getStorage = function() {
+  return this.getStructures().filter(function (structure) {
+    return structure.structureType === STRUCTURE_STORAGE;
+  })[0];
+};
+
+Room.prototype.getLinks = function() {
+  if (!this._links) {
+    this._links = this.getStructures().filter(function(structure) {
+      return structure.structureType === STRUCTURE_LINK;
+    });
+  }
+
+  return this._links;
+};
+
+Room.prototype.getControllerLink = function() {
+  return this.getLinks().filter(function(link) {
+    return link.isControllerLink();
+  })[0];
+};
+
 Room.prototype.upgraderWorkParts = function() {
   if (!this._upgraderWorkParts) {
     var upgraderWorkParts = this.getUpgraders();

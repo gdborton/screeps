@@ -10,7 +10,16 @@ var roles = {
     } else if (this.room.courierCount() === 0) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
-      this.dropEnergy();
+      var storage = this.room.getStorage();
+      var links = this.room.getLinks();
+      var closestLink = this.pos.findClosestByRange(links);
+      if (storage && this.pos.getRangeTo(storage) === 1) {
+        this.deliverEnergyTo(storage);
+      } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
+        this.deliveryEnergyTo(closestLink);
+      } else {
+        this.dropEnergy();
+      }
     }
   },
 
@@ -117,8 +126,14 @@ var roles = {
   },
 
   upgrader: function() {
-    if (this.carry.energy === 0 && this.room.droppedControllerEnergy()) {
+    var empty = this.carry.energy === 0;
+    if (empty && this.room.droppedControllerEnergy()) {
       this.takeEnergyFrom(this.room.droppedControllerEnergy());
+    } else if (empty && this.room.getLinks().length) {
+      var closestLink = this.pos.findClosestByRange(this.room.getLinks());
+      if (this.pos.getRangeTo(closestLink) < 5) {
+        this.takeEnergyFrom(closestLink);
+      }
     } else {
       this.moveToAndUpgrade(this.room.controller);
     }
