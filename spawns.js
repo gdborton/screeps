@@ -15,10 +15,11 @@ Spawn.prototype.buildHarvester = function() {
     while (cost <= this.availableEnergy() && !forcedReturn) {
       if (body.filter(function(part) { return part === WORK }).length < 5) {
         body.push(WORK);
-      } else if(body.filter(function(part) { return part === CARRY }.length < 10)) {
+      } else if(body.filter(function(part) { return part === CARRY }).length < 10) {
         body.push(CARRY);
-      }else {
+      } else {
         body.push(WORK, WORK);
+        forcedReturn = true;
       }
       cost = bodyCosts.calculateCosts(body);
     }

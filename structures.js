@@ -26,9 +26,9 @@ Structure.prototype.isControllerLink = function() {
 
 Structure.prototype.isFull = function() {
   if (this.energyCapacity) {
-    return this.energy < this.energyCapacity;
+    return this.energy === this.energyCapacity;
   } else if (this.storeCapacity) {
-    return this.store < this.storeCapacity;
+    return this.store === this.storeCapacity;
   }
   return true;
 };

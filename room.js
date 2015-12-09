@@ -237,7 +237,7 @@ Room.prototype.getSourcesNeedingHarvesters = function() {
 };
 
 Room.prototype.needsHarvesters = function() {
-  return this.getSourcesNeedingHarvesters.length > 0;
+  return this.getSourcesNeedingHarvesters().length > 0;
 };
 
 Room.prototype.getEnergySourceStructures = function() {

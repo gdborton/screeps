@@ -16,7 +16,7 @@ var roles = {
       if (storage && this.pos.getRangeTo(storage) === 1) {
         this.deliverEnergyTo(storage);
       } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
-        this.deliveryEnergyTo(closestLink);
+        this.deliverEnergyTo(closestLink);
       } else {
         this.dropEnergy();
       }
