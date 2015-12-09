@@ -4,29 +4,25 @@ var settings = require('settings');
 var bodyCosts = require('body-costs');
 
 Spawn.prototype.buildHarvester = function() {
-  var closestSource = this.pos.findClosestByRange(FIND_SOURCES);
-  var sourceId;
-  if (closestSource && closestSource.needsHarvesters()) {
-    sourceId = closestSource.id;
-  } else {
-    this.room.find(FIND_SOURCES).forEach(function(source) {
-      if (!sourceId && source.needsHarvesters()) {
-        sourceId = source.id;
-      }
-    });
-  }
+  var sources = this.room.getSourcesNeedingHarvesters();
+  var closestSource = this.pos.findClosestByRange(sources);
 
-  if (sourceId) {
+  if (closestSource) {
+    var sourceId = closestSource.id;
     var body = [MOVE, WORK, WORK, CARRY];
     var cost = bodyCosts.calculateCosts(body);
-    while (cost <= this.availableEnergy()) {
-      if (body.length < 7 && cost <= this.availableEnergy() - 100) {
+    var forcedReturn = false;
+    while (cost <= this.availableEnergy() && !forcedReturn) {
+      if (body.filter(function(part) { return part === WORK }).length < 5) {
         body.push(WORK);
-      } else {
+      } else if(body.filter(function(part) { return part === CARRY }.length < 10)) {
         body.push(CARRY);
+      }else {
+        body.push(WORK, WORK);
       }
       cost = bodyCosts.calculateCosts(body);
     }
+
     while(cost > this.availableEnergy()) {
       body.pop();
       cost = bodyCosts.calculateCosts(body);

@@ -230,10 +230,14 @@ Room.prototype.getSources = function() {
   return this.find(FIND_SOURCES);
 };
 
-Room.prototype.needsHarvesters = function() {
+Room.prototype.getSourcesNeedingHarvesters = function() {
   return this.getSources().filter(function(source) {
     return source.needsHarvesters();
-  }).length > 0;
+  });
+};
+
+Room.prototype.needsHarvesters = function() {
+  return this.getSourcesNeedingHarvesters.length > 0;
 };
 
 Room.prototype.getEnergySourceStructures = function() {
