@@ -336,6 +336,23 @@ Room.prototype.getEnergyThatNeedsPickedUp = function() {
   });
 };
 
+Room.prototype.getControllerOwned = function() {
+  return this.getMyStructures().filter(function(structure) {
+    return structure.structureType === STRUCTURE_CONTROLLER;
+  }).length > 0;
+};
+
+function getAllScouts() {
+  return Object.keys(Game.creeps).filter(function(creepName) {
+    var creep = Game.creeps[creepName];
+    return creep.memory.role === 'scout';
+  });
+};
+
+Room.prototype.needsScout = function() {
+  return Game.flags['Scout'] && getAllScouts().length < 1;
+};
+
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {
   if (this.getEnergyThatNeedsPickedUp().length) {
     return this.getEnergyThatNeedsPickedUp();

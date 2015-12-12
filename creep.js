@@ -182,6 +182,16 @@ var roles = {
         this.takeEnergyFrom(closestEnergySource);
       }
     }
+  },
+
+  scout: function() {
+    if (this.room.name !== Game.flags['Scout'].roomName) {
+      this.moveTo(Game.flags['Scout'], {reusePath: 50});
+    } else if (!this.room.getControllerOwned()){
+      this.moveToAndClaimController(this.room.controller);
+    } else if (this.room.getContructionSites().length && this.energy) {
+      this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
+    }
   }
 };
 
@@ -203,6 +213,14 @@ Creep.prototype.getSpawn = function() {
     if (spawn.room === this.room) {
       return spawn;
     }
+  }
+};
+
+Creep.prototype.moveToAndClaimController = function(controller) {
+  if(this.pos.getRangeTo(controller) > 1) {
+    this.moveTo(controller);
+  } else {
+    this.claimController(controller);
   }
 };
 

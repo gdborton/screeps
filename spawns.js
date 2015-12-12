@@ -32,6 +32,18 @@ Spawn.prototype.buildHarvester = function() {
   }
 };
 
+Spawn.prototype.buildScout = function() {
+  var body = [ATTACK, MOVE, CARRY, WORK];
+  while (cost < this.availableEnergy()) {
+    body.push(MOVE, CARRY);
+  }
+  while(cost > this.availableEnergy()) {
+    body.pop();
+    cost = bodyCosts.calculateCosts();
+  }
+  this.createCreep(body, undefined, {role: 'scout'});
+};
+
 Spawn.prototype.buildMailman = function() {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
@@ -102,6 +114,9 @@ Spawn.prototype.buildUpgrader = function() {
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
   var workPartsNeeded = this.room.maxEnergyProducedPerTick() - this.room.upgraderWorkParts();
+  if (this.room.controller.pos.freeEdges() > 1) {
+    workPartsNeeded = Math.min(workPartsNeeded, this.room.maxEnergyProducedPerTick() / 2);
+  }
   while (cost < this.availableEnergy() && workParts < workPartsNeeded) {
     body.push(WORK);
     workParts++;
