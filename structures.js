@@ -14,6 +14,12 @@ structureTypes[STRUCTURE_LINK] = function() {
   }
 };
 
+structureTypes[STRUCTURE_TOWER] = function() {
+  if (this.room.hasHostileCreeps() && !this.isEmpty()) {
+    this.attack(this.pos.findClosest(this.room.getHostileCreeps()));
+  }
+};
+
 Structure.prototype.work = function() {
   if (structureTypes[this.structureType]) {
     structureTypes[this.structureType].call(this);

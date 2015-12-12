@@ -11,6 +11,14 @@ Room.prototype.work = function() {
   });
 };
 
+Room.prototype.hasHostileCreeps = function() {
+  return this.getHostileCreeps().length > 0;
+};
+
+Room.prototype.getHostileCreeps = function() {
+  return this.find(FIND_HOSTILE_CREEPS);
+};
+
 Room.prototype.needsUpgraders = function() {
   return this.upgraderCount() < this.controller.pos.freeEdges() && !!this.droppedControllerEnergy() && this.upgraderWorkParts() < this.maxEnergyProducedPerTick();
 };
