@@ -164,6 +164,8 @@ Spawn.prototype.work = function() {
       //this.retireOldCreep();
     } else if (this.room.needsBuilders()) {
       this.buildBuilder();
+    } else if (this.room.needsScouts()) {
+      this.buildScout();
     } else {
       this.extend();
     }
