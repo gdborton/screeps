@@ -349,7 +349,7 @@ function getAllScouts() {
   });
 };
 
-Room.prototype.needsScout = function() {
+Room.prototype.needsScouts = function() {
   return Game.flags['Scout'] && getAllScouts().length < 1;
 };
 
