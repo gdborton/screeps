@@ -18,7 +18,7 @@ Spawn.prototype.buildHarvester = function() {
       } else if(body.filter(function(part) { return part === CARRY }).length < 10) {
         body.push(CARRY);
       } else {
-        body.push(WORK, WORK, WORK, WORK);
+        body.push(WORK);
         forcedReturn = true;
       }
       cost = bodyCosts.calculateCosts(body);
@@ -64,9 +64,12 @@ Spawn.prototype.buildMailman = function() {
 Spawn.prototype.buildCourier = function() {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.availableEnergy()) {
+  var maxCarryParts = this.room.getStorage() ? 10 : 100;
+  var carryParts = 3;
+  while (cost < this.availableEnergy() && carryParts < maxCarryParts) {
     body.push(MOVE);
     body.push(CARRY);
+    carryParts++;
     cost = bodyCosts.calculateCosts(body);
   }
 
@@ -147,7 +150,9 @@ Spawn.prototype.work = function() {
     var mailmanCount = this.room.mailmanCount();
     var upgraderCount = this.room.upgraderCount();
 
-    if (settings.courierToWorkerRatio > courierCount / workerCount) {
+    if (!this.room.getStorage() && settings.courierToWorkerRatio > courierCount / workerCount) {
+      this.buildCourier();
+    } else if (this.room.getStorage() && courierCount < 1) {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
