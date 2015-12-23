@@ -185,8 +185,8 @@ var roles = {
   },
 
   scout: function() {
-    if (this.room.name !== Game.flags['Scout'].roomName) {
-      this.moveTo(Game.flags['Scout'], {reusePath: 50});
+    if (this.findUnvisitedScoutFlags().length > 0) {
+      this.scout();
     } else if (!this.room.getControllerOwned()){
       this.moveToAndClaimController(this.room.controller);
     } else if (this.room.getContructionSites().length && this.energy) {
@@ -280,6 +280,45 @@ Creep.prototype.moveToAndBuild = function(target) {
   if (range <= 3) {
     this.build(target);
   }
+};
+
+Creep.prototype.findScoutFlags = function() {
+  return Object.keys(Game.flags).filter(function(flagName) {
+    return flagName.indexOf('Scout') !== -1;
+  }).map(function(flagName) {
+    return Game.flags[flagName];
+  });
+};
+
+Creep.prototype.hasVisitedFlag = function(flag) {
+  var visitedFlags = this.memory.visitedFlags || [];
+  return visitedFlags.indexOf(flag.name) !== -1;
+};
+
+Creep.prototype.findUnvisitedScoutFlags = function() {
+  if (!this._unvisitedFlags) {
+    var flags = this.findScoutFlags();
+    this._unvisitedFlags = flags.filter((flag) => {
+      return !this.hasVisitedFlag(flag);
+    });
+  }
+  return this._unvisitedFlags;
+};
+
+Creep.prototype.scout = function() {
+  var unvisitedFlags = this.findUnvisitedScoutFlags();
+  unvisitedFlags.sort((flagA, flagB) => {
+    return parseInt(flagA.name) - parseInt(flagB.name);
+  });
+  var targetFlag = unvisitedFlags[0];
+  if (this.pos.getRangeTo(targetFlag) === 0) {
+    if (!this.memory.visitedFlags) {
+      this.memory.visitedFlags = [];
+    }
+    this.memory.visitedFlags.push(targetFlag.name);
+    targetFlag = unvisitedFlags[1];
+  }
+  this.moveTo(targetFlag, {reusePath: 50});
 };
 
 Creep.prototype.moveToAndRepair = function(target) {
