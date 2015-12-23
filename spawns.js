@@ -33,16 +33,16 @@ Spawn.prototype.buildHarvester = function() {
 };
 
 Spawn.prototype.buildScout = function() {
-  var body = [ATTACK, MOVE, CARRY, WORK];
+  var body = [MOVE, MOVE, CARRY, WORK];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.availableEnergy()) {
-    body.push(MOVE, CARRY);
-    cost = bodyCosts.calculateCosts(body);
-  }
-  while(cost > this.availableEnergy()) {
-    body.pop();
-    cost = bodyCosts.calculateCosts(body);
-  }
+  // while (cost < this.availableEnergy()) {
+  //   body.push(MOVE, CARRY);
+  //   cost = bodyCosts.calculateCosts(body);
+  // }
+  // while(cost > this.availableEnergy()) {
+  //   body.pop();
+  //   cost = bodyCosts.calculateCosts(body);
+  // }
   this.createCreep(body, undefined, {role: 'scout'});
 };
 
