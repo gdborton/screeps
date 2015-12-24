@@ -33,14 +33,13 @@ Spawn.prototype.buildHarvester = function() {
 };
 
 Spawn.prototype.buildScout = function() {
-  var body = [];
+  var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
   var cost = bodyCosts.calculateCosts(body);
   while (cost < this.availableEnergy()) {
-    body.push(MOVE, CARRY, WORK);
+    body.push(MOVE, CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
   while(cost > this.availableEnergy()) {
-    body.pop();
     body.pop();
     body.pop();
     cost = bodyCosts.calculateCosts(body);

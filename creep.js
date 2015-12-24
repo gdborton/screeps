@@ -4,7 +4,7 @@ var bodyCosts = require('body-costs');
 
 var roles = {
   harvester: function() {
-    if (this.carry.energy < this.carryCapacity) {
+    if (this.carry.energy < this.carryCapacity || this.carry.energy === 0) {
       var source = this.targetSource();
       this.moveToAndHarvest(source);
     } else if (this.room.courierCount() === 0) {
@@ -24,7 +24,7 @@ var roles = {
   },
 
   scoutharvester: function() {
-    if (this.findUnvisitedFlags().length > 0) {
+    if (this.findUnvisitedScoutFlags().length > 0) {
       this.scout();
     } else {
       var sourcesNeedingHarvesters = this.room.getSourcesNeedingHarvesters();
@@ -201,9 +201,9 @@ var roles = {
       this.scout();
     } else if (!this.room.getControllerOwned()){
       this.moveToAndClaimController(this.room.controller);
-    } else if (this.room.getContructionSites().length && this.energy > 0) {
+    } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
       this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
-    } else if (this.energy === 0) {
+    } else if (this.carry.energy === 0) {
       var droppedEnergies = this.room.getDroppedEnergy();
       if (droppedEnergies.length > 0) {
         this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
