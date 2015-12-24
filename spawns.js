@@ -33,17 +33,24 @@ Spawn.prototype.buildHarvester = function() {
 };
 
 Spawn.prototype.buildScout = function() {
-  var body = [MOVE, MOVE, CARRY, WORK];
+  var body = [];
   var cost = bodyCosts.calculateCosts(body);
-  // while (cost < this.availableEnergy()) {
-  //   body.push(MOVE, CARRY);
-  //   cost = bodyCosts.calculateCosts(body);
-  // }
-  // while(cost > this.availableEnergy()) {
-  //   body.pop();
-  //   cost = bodyCosts.calculateCosts(body);
-  // }
+  while (cost < this.availableEnergy()) {
+    body.push(MOVE, CARRY, WORK);
+    cost = bodyCosts.calculateCosts(body);
+  }
+  while(cost > this.availableEnergy()) {
+    body.pop();
+    body.pop();
+    body.pop();
+    cost = bodyCosts.calculateCosts(body);
+  }
   this.createCreep(body, undefined, {role: 'scout'});
+};
+
+Spawn.prototype.buildScoutHarvester = function() {
+  var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+  this.createCreep(body, undefined, {role: 'scoutharvester'});
 };
 
 Spawn.prototype.buildMailman = function() {
@@ -168,6 +175,8 @@ Spawn.prototype.work = function() {
       this.buildBuilder();
     } else if (this.room.needsScouts()) {
       this.buildScout();
+    } else if (this.room.needsScoutHarvesters()) {
+      this.buildScoutHarvester();
     } else {
       this.extend();
     }

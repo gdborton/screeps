@@ -23,6 +23,19 @@ var roles = {
     }
   },
 
+  scoutharvester: function() {
+    if (this.findUnvisitedFlags().length > 0) {
+      this.scout();
+    } else {
+      var sourcesNeedingHarvesters = this.room.getSourcesNeedingHarvesters();
+      if (sourcesNeedingHarvesters.length > 0) {
+        this.memory.role = 'harvester';
+        this.memory.oldRole = 'scoutharvester';
+        this.memory.source = sourcesNeedingHarvesters[0].id;
+      }
+    }
+  },
+
   defender: function() {
     var enemy = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
     if (enemy) {
@@ -67,7 +80,6 @@ var roles = {
         if (!target || result === 0) {
           this.memory.target = '';
         }
-
       } else {
         this.deliverEnergyTo(dumpTarget);
       }
@@ -189,8 +201,13 @@ var roles = {
       this.scout();
     } else if (!this.room.getControllerOwned()){
       this.moveToAndClaimController(this.room.controller);
-    } else if (this.room.getContructionSites().length && this.energy) {
+    } else if (this.room.getContructionSites().length && this.energy > 0) {
       this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
+    } else if (this.energy === 0) {
+      var droppedEnergies = this.room.getDroppedEnergy();
+      if (droppedEnergies.length > 0) {
+        this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
+      }
     }
   }
 };
@@ -230,7 +247,7 @@ Creep.prototype.moveTo = function() {
   var potentialOptions;
   if (typeof arguments[0] === 'number') {
     potentialOptions = args[2];
-  }else {
+  } else {
     potentialOptions = args[1];
   }
   if (!potentialOptions) {

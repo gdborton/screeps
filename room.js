@@ -349,8 +349,19 @@ function getAllScouts() {
   });
 };
 
+function getAllScoutHarvesters() {
+  return Object.keys(Game.creeps).filter(function(creepName) {
+    var creep = Game.creeps[creepName];
+    return creep.memory.role === 'scoutharvester' || creep.memory.oldRole === 'scoutharvester';
+  });
+};
+
 Room.prototype.needsScouts = function() {
-  return Game.flags['Scout'] && getAllScouts().length < 1;
+  return Game.flags['1Scout'] && getAllScouts().length < 1;
+};
+
+Room.prototype.needsScoutHarvesters = function() {
+  return Game.flags['1Scout'] && getAllScoutHarvesters().length < 2;
 };
 
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {
