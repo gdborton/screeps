@@ -34,9 +34,13 @@ Room.prototype.damagedBuildings = function() {
 };
 
 Room.prototype.getStorage = function() {
-  return this.getStructures().filter(function (structure) {
-    return structure.structureType === STRUCTURE_STORAGE;
-  })[0];
+  if (!this._storageCalc) {
+    this._storageCalc = true;
+    this._storage = this.getStructures().filter(function (structure) {
+      return structure.structureType === STRUCTURE_STORAGE;
+    })[0];
+  }
+  return this._storage;
 };
 
 Room.prototype.getLinks = function() {
