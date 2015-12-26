@@ -122,7 +122,7 @@ Room.prototype.needsRoadWorkers = function() {
     return false;
   }
 
-  return this.roadWorkerCount() < 1 && this.hasDamagedRoads;
+  return this.roadWorkerCount() < 1 && this.hasDamagedRoads();
 };
 
 Room.prototype.needsCouriers = function() {
