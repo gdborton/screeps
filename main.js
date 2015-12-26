@@ -8,8 +8,12 @@ var profiler = require('profiler');
 profiler.enable();
 module.exports.loop = function() {
   profiler.wrap(function() {
+    var index = 0;
     for (var roomName in Game.rooms) {
-      Game.rooms[roomName].work();
+      index++;
+      if (index === 1 || Game.cpuLimit > 40) {
+        Game.rooms[roomName].work();
+      }
     }
   });
 }
