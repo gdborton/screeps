@@ -145,7 +145,6 @@ Spawn.prototype.buildUpgrader = function() {
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
   var courierCount = this.room.courierCount();
-
   if (this.availableEnergy() >= 300 && harvesterCount < 1) {
     this.buildHarvester();
   } else if (this.availableEnergy() >= 300 && courierCount < 1) {
@@ -172,10 +171,10 @@ Spawn.prototype.work = function() {
       //this.retireOldCreep();
     } else if (this.room.needsBuilders()) {
       this.buildBuilder();
-    } else if (this.room.needsScouts()) {
-      this.buildScout();
-    } else if (this.room.needsScoutHarvesters()) {
-      this.buildScoutHarvester();
+    // } else if (this.room.needsScouts()) {
+    //   this.buildScout();
+    // } else if (this.room.needsScoutHarvesters()) {
+    //   this.buildScoutHarvester();
     } else {
       this.extend();
     }
@@ -201,12 +200,15 @@ Spawn.prototype.maxEnergy = function() {
 };
 
 Spawn.prototype.availableEnergy = function() {
-  var extensions = this.room.getExtensions();
-  var availableEnergy = this.energy;
-  extensions.forEach(function(extension) {
-    availableEnergy += extension.energy;
-  });
-  return availableEnergy;
+  if (!this._availableEnergy) {
+    var extensions = this.room.getExtensions();
+    this._availableEnergy = this.energy;
+    extensions.forEach((extension) => {
+      this._availableEnergy += extension.energy;
+    });
+  }
+
+  return this._availableEnergy;
 };
 
 Spawn.prototype.extend = function() {
