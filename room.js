@@ -126,7 +126,7 @@ Room.prototype.needsRoadWorkers = function() {
 };
 
 Room.prototype.needsCouriers = function() {
-  return (this.room.getStorage() && this.courierCount() < 1) || this.courierCount() < 2;
+  return (this.getStorage() && this.courierCount() < 1) || this.courierCount() < 2;
 };
 
 Room.prototype.getMyStructures = function() {
