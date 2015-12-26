@@ -6,7 +6,7 @@ Room.prototype.work = function() {
     structure.work();
   });
 
-  this.getCreeps().forEach(function(creep) {
+  this.myCreeps().forEach(function(creep) {
     creep.work();
   });
 };
@@ -86,10 +86,6 @@ Room.prototype.sourceCount = function() {
   return this.getSources().length;
 };
 
-Room.prototype.getCreeps = function() {
-  return this.find(FIND_MY_CREEPS);
-};
-
 Room.prototype.getStructures = function() {
   if (!this._structures) {
     this._structures = this.find(FIND_STRUCTURES);
@@ -129,6 +125,10 @@ Room.prototype.needsRoadWorkers = function() {
   return this.roadWorkerCount() < 1 && this.hasDamagedRoads;
 };
 
+Room.prototype.needsCouriers = function() {
+  return (this.room.getStorage() && this.courierCount() < 1) || this.courierCount() < 2;
+};
+
 Room.prototype.getMyStructures = function() {
   if (!this._myStructures) {
     this._myStructures = this.find(FIND_MY_STRUCTURES);
@@ -139,14 +139,18 @@ Room.prototype.getMyStructures = function() {
 
 Room.prototype.getHarvesters = function() {
   if (!this._harvesters) {
-    this._harvesters = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'harvester'}}});
+    this._harvesters = this.myCreeps().filter((creep) => {
+      return creep.memory.role === 'harvester';
+    });
   }
   return this._harvesters;
 };
 
 Room.prototype.getRoadWorkers = function() {
   if (!this._roadWorkers) {
-    this._roadWorkers = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'roadworker'}}});
+    this._roadWorkers = this.myCreeps().filter((creep) => {
+      return creep.memory.role === 'roadworker';
+    });
   }
 
   return this._roadWorkers;
@@ -161,7 +165,13 @@ Room.prototype.harvesterCount = function() {
 };
 
 Room.prototype.getMailmen = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'mailman'}}});
+  if (!this._mailmen) {
+    this._mailmen = this.myCreeps().filter((creep) => {
+      return creep.memory.role === 'mailman';
+    })
+  }
+
+  return this._mailmen;
 };
 
 Room.prototype.mailmanCount = function() {
@@ -199,7 +209,7 @@ Room.prototype.hasOutdatedCreeps = function() {
 
 Room.prototype.getOutdatedCreeps = function() {
   var self = this;
-  return this.find(FIND_MY_CREEPS).filter(function(creep) {
+  return this.myCreeps().filter(function(creep) {
     return creep.cost() <= self.getSpawn().maxEnergy() - 100;
   });
 };
@@ -233,15 +243,39 @@ Room.prototype.workerCount = function() {
 };
 
 Room.prototype.courierCount = function() {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'courier'}}}).length;
+  return this.getCouriers().length;
 };
+
+Room.prototype.getCouriers = function() {
+  if (!this._couriers) {
+    this._couriers = this.myCreeps().filter((creep) {
+      return creep.memory.role === 'courier';
+    });
+  }
+
+  return this._couriers;
+};
+
+Room.prototype.myCreeps = function() {
+  if (!this._myCreeps) {
+    this._myCreeps = this.find(FIND_MY_CREEPS);
+  }
+
+  return this._myCreeps;
+}
 
 Room.prototype.builderCount = function() {
   return this.getBuilders().length;
 };
 
 Room.prototype.getBuilders = function () {
-  return this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'builder'}}});
+  if (!this._builders) {
+    this._builders = this.myCreeps().filter((creep) => {
+      return creep.memory.role === 'builder';
+    });
+  }
+
+  return this._builders;
 };
 
 Room.prototype.upgraderCount = function() {
@@ -250,7 +284,9 @@ Room.prototype.upgraderCount = function() {
 
 Room.prototype.getUpgraders = function () {
   if (!this._upgraders) {
-    this._upgraders = this.find(FIND_MY_CREEPS, {filter: {memory: {role: 'upgrader'}}});
+    this._upgraders = this.myCreeps().filter((creep)=> {
+      return creep.memory.role === 'upgrader';
+    });
   }
   return this._upgraders;
 };
@@ -260,7 +296,11 @@ Room.prototype.getConstructionSites = function() {
 };
 
 Room.prototype.getSources = function() {
-  return this.find(FIND_SOURCES);
+  if (!this._sources) {
+    this._sources = this.find(FIND_SOURCES);
+  }
+
+  return this._sources;
 };
 
 Room.prototype.getSourcesNeedingHarvesters = function() {
@@ -274,7 +314,7 @@ Room.prototype.needsHarvesters = function() {
 };
 
 Room.prototype.getEnergySourceStructures = function() {
-  return this.find(FIND_MY_STRUCTURES).filter(function(structure) {
+  return this.getMyStructures().filter(function(structure) {
     return structure.energy;
   });
 };
@@ -330,7 +370,7 @@ Room.prototype.getExtensions = function() {
 };
 
 Room.prototype.courierTargets = function() {
-  return this.find(FIND_MY_CREEPS).filter(function(creep) {
+  return this.getCouriers().filter(function(creep) {
     return creep.memory.role === 'courier' && !!creep.memory.target;
   }).map(function(courier) {
     return courier.memory.target;

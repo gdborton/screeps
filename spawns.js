@@ -144,22 +144,16 @@ Spawn.prototype.buildUpgrader = function() {
 
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
-  var courierCount = this.room.courierCount();
   if (this.availableEnergy() >= 300 && harvesterCount < 1) {
     this.buildHarvester();
-  } else if (this.availableEnergy() >= 300 && courierCount < 1) {
+  } else if (this.availableEnergy() >= 300 && this.room.needsCouriers()) {
     this.buildCourier();
   } else if(this.availableEnergy() >= 300 && this.room.needsRoadWorkers()) {
     this.buildRoadWorker();
   } else if (this.availableEnergy() === this.maxEnergy()) {
-    var builderCount = this.room.builderCount();
-    var workerCount = this.room.workerCount();
     var mailmanCount = this.room.mailmanCount();
-    var upgraderCount = this.room.upgraderCount();
 
-    if (!this.room.getStorage() && settings.courierToWorkerRatio > courierCount / workerCount) {
-      this.buildCourier();
-    } else if (this.room.getStorage() && courierCount < 1) {
+    if (this.room.needsCouriers()) {
       this.buildCourier();
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester();
