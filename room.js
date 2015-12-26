@@ -196,7 +196,9 @@ Room.prototype.createControllerEnergyDropFlag = function() {
 };
 
 Room.prototype.getControllerEnergyDropFlag = function() {
-  return this.find(FIND_FLAGS, {filter: {name: 'CONTROLLER_ENERGY_DROP'}})[0];
+  return this.find(FIND_FLAGS).filter(function(flag) {
+    return flag.name.indexOf('CONTROLLER_ENERGY_DROP') !== -1;
+  })[0];
 };
 
 Room.prototype.getSpawnEnergyDropFlag = function() {
@@ -357,7 +359,7 @@ function getAllScoutHarvesters() {
 };
 
 Room.prototype.needsScouts = function() {
-  return Game.flags['1Scout'] && getAllScouts().length < 1;
+  return Game.flags['1Scout'] && getAllScouts().length < 2;
 };
 
 Room.prototype.needsScoutHarvesters = function() {
