@@ -29,7 +29,7 @@ Room.prototype.needsBuilders = function() {
 
 Room.prototype.damagedBuildings = function() {
   return this.getStructures().filter(function(structure) {
-    return structure.hits / structure.hitsMax < .9;
+    return structure.hits / structure.hitsMax < 0.9;
   });
 };
 
@@ -106,7 +106,7 @@ Room.prototype.getRoads = function() {
 Room.prototype.getDamagedRoads = function() {
   if (!this._damagedRoads) {
     this._damagedRoads = this.getRoads().filter(function(road) {
-      return road.structureType === STRUCTURE_ROAD && road.hits / road.hitsMax < .5;
+      return road.structureType === STRUCTURE_ROAD && road.hits / road.hitsMax < 0.5;
     });
   }
 
@@ -168,7 +168,7 @@ Room.prototype.getMailmen = function() {
   if (!this._mailmen) {
     this._mailmen = this.myCreeps().filter((creep) => {
       return creep.memory.role === 'mailman';
-    })
+    });
   }
 
   return this._mailmen;
@@ -248,7 +248,7 @@ Room.prototype.courierCount = function() {
 
 Room.prototype.getCouriers = function() {
   if (!this._couriers) {
-    this._couriers = this.myCreeps().filter((creep) {
+    this._couriers = this.myCreeps().filter((creep) => {
       return creep.memory.role === 'courier';
     });
   }
@@ -262,7 +262,7 @@ Room.prototype.myCreeps = function() {
   }
 
   return this._myCreeps;
-}
+};
 
 Room.prototype.builderCount = function() {
   return this.getBuilders().length;
@@ -412,14 +412,14 @@ function getAllScouts() {
     var creep = Game.creeps[creepName];
     return creep.memory.role === 'scout';
   });
-};
+}
 
 function getAllScoutHarvesters() {
   return Object.keys(Game.creeps).filter(function(creepName) {
     var creep = Game.creeps[creepName];
     return creep.memory.role === 'scoutharvester' || creep.memory.oldRole === 'scoutharvester';
   });
-};
+}
 
 Room.prototype.needsScouts = function() {
   return Game.flags['1Scout'] && getAllScouts().length < 2;

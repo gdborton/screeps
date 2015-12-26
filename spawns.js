@@ -13,9 +13,9 @@ Spawn.prototype.buildHarvester = function() {
     var cost = bodyCosts.calculateCosts(body);
     var forcedReturn = false;
     while (cost <= this.availableEnergy() && !forcedReturn) {
-      if (body.filter(function(part) { return part === WORK }).length < 5) {
+      if (body.filter(function(part) { return part === WORK; }).length < 5) {
         body.push(WORK);
-      } else if(body.filter(function(part) { return part === CARRY }).length < 10) {
+      } else if(body.filter(function(part) { return part === CARRY; }).length < 10) {
         body.push(CARRY);
       } else {
         body.push(WORK);
@@ -91,7 +91,7 @@ Spawn.prototype.buildCourier = function() {
 
 Spawn.prototype.buildRoadWorker = function() {
   var body = [MOVE, WORK, WORK, CARRY];
-  this.createCreep(body, undefined, {role: 'roadworker'})
+  this.createCreep(body, undefined, {role: 'roadworker'});
 };
 
 Spawn.prototype.buildBuilder = function() {
