@@ -208,12 +208,14 @@ var roles = {
       if (droppedEnergies.length > 0) {
         this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
       }
+    } else {
+      this.moveToAndUpgrade(this.room.controller);
     }
   }
 };
 
 Creep.prototype.work = function() {
-  if (this.memory.role) {
+  if (this.memory.role && roles[this.memory.role]) {
     roles[this.memory.role].call(this);
   }
 };
@@ -268,6 +270,10 @@ Creep.prototype.moveTo = function() {
     } else {
       potentialOptions.avoid = avoid;
     }
+  }
+
+  if (!potentialOptions.reusePath) {
+    potentialOptions.reusePath = 20;
   }
 
   return originalMoveTo.apply(this, args);
