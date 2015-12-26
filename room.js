@@ -87,23 +87,42 @@ Room.prototype.getCreeps = function() {
 };
 
 Room.prototype.getStructures = function() {
-  return this.find(FIND_STRUCTURES);
+  if (!this._structures) {
+    this._structures = this.find(FIND_STRUCTURES);
+  }
+  return this._structures;
 };
 
 Room.prototype.getRoads = function() {
-  return this.getStructures().filter(function(structure) {
-    return structure.structureType === STRUCTURE_ROAD;
-  });
+  if (!this._roads) {
+    this._roads = this.getStructures().filter(function(structure) {
+      return structure.structureType === STRUCTURE_ROAD;
+    });
+  }
+
+  return this._roads;
 };
 
 Room.prototype.getDamagedRoads = function() {
-  return this.getStructures().filter(function(road) {
-    return road.structureType === STRUCTURE_ROAD && road.hits / road.hitsMax < .5;
-  });
+  if (!this._damagedRoads) {
+    this._damagedRoads = this.getRoads().filter(function(road) {
+      return road.structureType === STRUCTURE_ROAD && road.hits / road.hitsMax < .5;
+    });
+  }
+
+  return this._damagedRoads;
 };
 
 Room.prototype.hasDamagedRoads = function() {
   return this.getDamagedRoads().length > 0;
+};
+
+Room.prototype.needsRoadWorkers = function() {
+  if (Game.time % 30 !== 0) {
+    return false;
+  }
+
+  return this.roadWorkerCount() < 1 && this.hasDamagedRoads;
 };
 
 Room.prototype.getMyStructures = function() {

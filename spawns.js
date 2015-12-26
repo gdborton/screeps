@@ -149,7 +149,7 @@ Spawn.prototype.work = function() {
     this.buildHarvester();
   } else if (this.availableEnergy() >= 300 && courierCount < 1) {
     this.buildCourier();
-  } else if(this.availableEnergy() >= 300 && this.room.hasDamagedRoads() && this.room.roadWorkerCount() < 1) {
+  } else if(this.availableEnergy() >= 300 && this.room.needsRoadWorkers()) {
     this.buildRoadWorker();
   } else if (this.availableEnergy() === this.maxEnergy()) {
     var builderCount = this.room.builderCount();
