@@ -3,15 +3,16 @@ var enabled = false;
 
 function setupProfiler() {
   Game.profiler = {
-    stream: function(duration) {
-      setupMemory('stream', duration || 10);
+    stream: function (duration, filter) {
+      setupMemory('stream', duration || 10, filter);
     },
-    email: function(duration) {
-      setupMemory('email', duration || 100);
+    email: function (duration, filter) {
+      setupMemory('email', duration || 100, filter);
     },
-    profile: function(duration) {
-      setupMemory('profile', duration || 100);
-    }
+    profile: function (duration, filter) {
+      setupMemory('profile', duration || 100, filter);
+    },
+    reset: resetMemory
   };
 }
 
@@ -19,7 +20,7 @@ function additionReducer(val1, val2) {
   return val1 + val2;
 }
 
-function setupMemory(profileType, duration) {
+function setupMemory(profileType, duration, filter) {
   overloadCPUCalc();
   resetMemory();
   if (!Memory.profiler) {
@@ -29,7 +30,8 @@ function setupMemory(profileType, duration) {
       bucketSize: 0,
       enabledTick: Game.time + 1,
       disableTick: Game.time + duration,
-      type: profileType
+      type: profileType,
+      filter: filter
     };
   }
 }
@@ -46,21 +48,38 @@ function overloadCPUCalc() {
   }
 }
 
+function getFilter() {
+  return Memory.profiler.filter;
+}
+
 function hookUpPrototypes() {
+  var depth = 0;
   Profiler.prototypes.forEach(function eachPrototype(proto) {
     var foundProto = proto.val.prototype ? proto.val.prototype : proto.val;
     Object.keys(foundProto).forEach(function eachKeyOnPrototype(prototypeFunctionName) {
       var key = `${proto.name}.${prototypeFunctionName}`;
-
+      var keyMatchesFilter = key === getFilter();
       try {
         if (typeof foundProto[prototypeFunctionName] === 'function' && prototypeFunctionName !== 'getUsedCpu') {
           var originalFunction = foundProto[prototypeFunctionName];
           foundProto[prototypeFunctionName] = function() {
-            var start = Game.getUsedCpu();
-            var result = originalFunction.apply(this, arguments);
-            var end = Game.getUsedCpu();
-            Profiler.record(key, end - start);
-            return result;
+            if (Profiler.isProfiling()) {
+              var start = Game.getUsedCpu();
+              if (keyMatchesFilter) {
+                depth++;
+              }
+              var result = originalFunction.apply(this, arguments);
+              if (depth > 0 || !getFilter()) {
+                var end = Game.getUsedCpu();
+                Profiler.record(key, end - start);
+              }
+              if (keyMatchesFilter) {
+                depth--;
+              }
+              return result;
+            } else {
+              return originalFunction.apply(this, arguments);
+            }
           };
         }
       } catch (ex) { }
@@ -175,15 +194,19 @@ module.exports = {
 
     if (Profiler.isProfiling()) {
       usedOnStart = Game.getUsedCpu();
-      var callbackStart = Game.getUsedCpu();
-      callback();
-      var callbackEnd = Game.getUsedCpu();
-      Profiler.endTick();
-      var end = Game.getUsedCpu();
 
-      var profilerTime = (end - start) - (callbackEnd - callbackStart);
-      var callbackTime = callbackEnd - callbackStart;
-      var unaccounted = end - profilerTime - callbackTime;
+      // Commented lines are part of an on going experiment to keep the profiler
+      // performant, and measure certain types of overhead.
+
+      //var callbackStart = Game.getUsedCpu();
+      callback();
+      // var callbackEnd = Game.getUsedCpu();
+      Profiler.endTick();
+      // var end = Game.getUsedCpu();
+
+      // var profilerTime = (end - start) - (callbackEnd - callbackStart);
+      // var callbackTime = callbackEnd - callbackStart;
+      // var unaccounted = end - profilerTime - callbackTime;
       //console.log('total-', end, 'profiler-', profilerTime, 'callbacktime-', callbackTime, 'start-', start, 'unaccounted', unaccounted);
     } else {
       return callback();
