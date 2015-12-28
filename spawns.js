@@ -3,7 +3,7 @@ require('room');
 var settings = require('settings');
 var bodyCosts = require('body-costs');
 
-Spawn.prototype.buildHarvester = function() {
+Spawn.prototype.buildHarvester = function(availableEnergy) {
   var sources = this.room.getSourcesNeedingHarvesters();
   var closestSource = this.pos.findClosestByRange(sources);
 
@@ -12,7 +12,7 @@ Spawn.prototype.buildHarvester = function() {
     var body = [MOVE, WORK, WORK, CARRY];
     var cost = bodyCosts.calculateCosts(body);
     var forcedReturn = false;
-    while (cost <= this.availableEnergy() && !forcedReturn) {
+    while (cost <= availableEnergy && !forcedReturn) {
       if (body.filter(function(part) { return part === WORK; }).length < 5) {
         body.push(WORK);
       } else if(body.filter(function(part) { return part === CARRY; }).length < 10) {
@@ -24,7 +24,7 @@ Spawn.prototype.buildHarvester = function() {
       cost = bodyCosts.calculateCosts(body);
     }
 
-    while(cost > this.availableEnergy()) {
+    while (cost > availableEnergy) {
       body.pop();
       cost = bodyCosts.calculateCosts(body);
     }
@@ -32,14 +32,14 @@ Spawn.prototype.buildHarvester = function() {
   }
 };
 
-Spawn.prototype.buildScout = function() {
+Spawn.prototype.buildScout = function (availableEnergy) {
   var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.availableEnergy()) {
+  while (cost < availableEnergy) {
     body.push(MOVE, CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
-  while(cost > this.availableEnergy()) {
+  while(cost > availableEnergy) {
     body.pop();
     body.pop();
     cost = bodyCosts.calculateCosts(body);
@@ -47,21 +47,21 @@ Spawn.prototype.buildScout = function() {
   this.createCreep(body, undefined, {role: 'scout'});
 };
 
-Spawn.prototype.buildScoutHarvester = function() {
+Spawn.prototype.buildScoutHarvester = function(availableEnergy) {
   var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
   this.createCreep(body, undefined, {role: 'scoutharvester'});
 };
 
-Spawn.prototype.buildMailman = function() {
+Spawn.prototype.buildMailman = function(availableEnergy) {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < this.availableEnergy()) {
+  while (cost < availableEnergy) {
     body.push(MOVE);
     body.push(CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while(cost > this.availableEnergy()) {
+  while(cost > availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -69,19 +69,19 @@ Spawn.prototype.buildMailman = function() {
   this.createCreep(body, undefined, {role: 'mailman'});
 };
 
-Spawn.prototype.buildCourier = function() {
+Spawn.prototype.buildCourier = function(availableEnergy) {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
   var maxCarryParts = this.room.getStorage() ? 10 : 100;
   var carryParts = 3;
-  while (cost < this.availableEnergy() && carryParts < maxCarryParts) {
+  while (cost < availableEnergy && carryParts < maxCarryParts) {
     body.push(MOVE);
     body.push(CARRY);
     carryParts++;
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > this.availableEnergy()) {
+  while (cost > availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -89,38 +89,38 @@ Spawn.prototype.buildCourier = function() {
   this.createCreep(body, undefined, {role: 'courier'});
 };
 
-Spawn.prototype.buildRoadWorker = function() {
+Spawn.prototype.buildRoadWorker = function(availableEnergy) {
   var body = [MOVE, WORK, WORK, CARRY];
   this.createCreep(body, undefined, {role: 'roadworker'});
 };
 
-Spawn.prototype.buildBuilder = function() {
+Spawn.prototype.buildBuilder = function(availableEnergy) {
   var body = [MOVE, MOVE, WORK, CARRY];
   var cost = bodyCosts.calculateCosts(body);
 
-  while (cost < this.availableEnergy()) {
+  while (cost < availableEnergy) {
     body.push(MOVE);
     body.push(CARRY);
     body.push(WORK);
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > this.availableEnergy()) {
+  while (cost > availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
   this.createCreep(body, undefined, {role: 'builder'});
 };
 
-Spawn.prototype.buildDefender = function() {
+Spawn.prototype.buildDefender = function(availableEnergy) {
   this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
 };
 
-Spawn.prototype.buildHealer = function() {
+Spawn.prototype.buildHealer = function(availableEnergy) {
   this.createCreep([MOVE, HEAL], undefined, {role: 'healer'});
 };
 
-Spawn.prototype.buildUpgrader = function() {
+Spawn.prototype.buildUpgrader = function(availableEnergy) {
   var body = [MOVE, WORK, WORK, CARRY];
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
@@ -128,13 +128,13 @@ Spawn.prototype.buildUpgrader = function() {
   if (this.room.controller.pos.freeEdges() > 1) {
     workPartsNeeded = Math.min(workPartsNeeded, this.room.maxEnergyProducedPerTick() / 2);
   }
-  while (cost < this.availableEnergy() && workParts < workPartsNeeded) {
+  while (cost < availableEnergy && workParts < workPartsNeeded) {
     body.push(WORK);
     workParts++;
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > this.availableEnergy()) {
+  while (cost > availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
@@ -144,31 +144,30 @@ Spawn.prototype.buildUpgrader = function() {
 
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
-  if (this.availableEnergy() >= 300 && harvesterCount < 1) {
-    this.buildHarvester();
-  } else if (this.availableEnergy() >= 300 && this.room.needsCouriers()) {
-    this.buildCourier();
-  } else if(this.availableEnergy() >= 300 && this.room.needsRoadWorkers()) {
-    this.buildRoadWorker();
-  } else if (this.availableEnergy() === this.maxEnergy()) {
+  var availableEnergy = this.availableEnergy();
+  if (availableEnergy >= 300 && harvesterCount < 1) {
+    this.buildHarvester(availableEnergy);
+  } else if (availableEnergy >= 300 && this.room.needsCouriers()) {
+    this.buildCourier(availableEnergy);
+  } else if(availableEnergy >= 300 && this.room.needsRoadWorkers()) {
+    this.buildRoadWorker(availableEnergy);
+  } else if (availableEnergy === this.maxEnergy()) {
     var mailmanCount = this.room.mailmanCount();
 
     if (this.room.needsCouriers()) {
-      this.buildCourier();
+      this.buildCourier(availableEnergy);
     } else if (this.room.needsHarvesters()) {
-      this.buildHarvester();
+      this.buildHarvester(availableEnergy);
     } else if (this.room.needsUpgraders()) {
-      this.buildUpgrader();
+      this.buildUpgrader(availableEnergy);
     } else if (mailmanCount < 2 && this.maxEnergy() < 600) {
-      this.buildMailman();
-    //} else if (this.room.hasOutdatedCreeps()) {
-      //this.retireOldCreep();
+      this.buildMailman(availableEnergy);
     } else if (this.room.needsBuilders()) {
-      this.buildBuilder();
+      this.buildBuilder(availableEnergy);
     // } else if (this.room.needsScouts()) {
-    //   this.buildScout();
+    //   this.buildScout(availableEnergy);
     // } else if (this.room.needsScoutHarvesters()) {
-    //   this.buildScoutHarvester();
+    //   this.buildScoutHarvester(availableEnergy);
     } else {
       this.extend();
     }
@@ -177,15 +176,6 @@ Spawn.prototype.work = function() {
   }
 
   this.room.setupFlags();
-};
-
-Spawn.prototype.retireOldCreep = function() {
-  var self = this;
-  var outdatedCreeps = this.room.getOutdatedCreeps();
-
-  if (outdatedCreeps.length) {
-    outdatedCreeps[0].suicide();
-  }
 };
 
 Spawn.prototype.maxEnergy = function() {

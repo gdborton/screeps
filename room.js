@@ -216,7 +216,9 @@ Room.prototype.getOutdatedCreeps = function() {
 };
 
 Room.prototype.setupFlags = function() {
-  this.createControllerEnergyDropFlag();
+  if (Game.time % 50) {
+    this.createControllerEnergyDropFlag();
+  }
 };
 
 Room.prototype.createSpawnEnergyDropFlag = function() {
