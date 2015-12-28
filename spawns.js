@@ -145,22 +145,22 @@ Spawn.prototype.buildUpgrader = function(availableEnergy) {
 Spawn.prototype.work = function() {
   var harvesterCount = this.room.harvesterCount();
   var availableEnergy = this.availableEnergy();
-  if (availableEnergy >= 300 && harvesterCount < 1) {
-    this.buildHarvester(availableEnergy);
-  } else if (availableEnergy >= 300 && this.room.needsCouriers()) {
-    this.buildCourier(availableEnergy);
-  } else if(availableEnergy >= 300 && this.room.needsRoadWorkers()) {
-    this.buildRoadWorker(availableEnergy);
+  if (availableEnergy >= 300 && availableEnergy < this.maxEnergy()) {
+    if (harvesterCount < 1) {
+      this.buildHarvester(availableEnergy);
+    } else if (this.room.needsCouriers()) {
+      this.buildCourier(availableEnergy);
+    } else if (this.room.needsRoadWorkers()) {
+      this.buildRoadWorker(availableEnergy);
+    }
   } else if (availableEnergy === this.maxEnergy()) {
-    var mailmanCount = this.room.mailmanCount();
-
     if (this.room.needsCouriers()) {
       this.buildCourier(availableEnergy);
     } else if (this.room.needsHarvesters()) {
       this.buildHarvester(availableEnergy);
     } else if (this.room.needsUpgraders()) {
       this.buildUpgrader(availableEnergy);
-    } else if (mailmanCount < 2 && this.maxEnergy() < 600) {
+    } else if (this.room.mailmanCount() < 2 && this.maxEnergy() < 600) {
       this.buildMailman(availableEnergy);
     } else if (this.room.needsBuilders()) {
       this.buildBuilder(availableEnergy);
