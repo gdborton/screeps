@@ -126,8 +126,12 @@ Room.prototype.needsRoadWorkers = function() {
 };
 
 Room.prototype.needsCouriers = function() {
-  var requiredCouriers = this.getStorage() ? 1 : 2;
-  return this.courierCount() < requiredCouriers;
+  var storage = this.getStorage();
+  if (!storage || storage.store.energy > 500000) {
+    return this.courierCount() < 2;
+  }
+
+  return this.courierCount() < 1;
 };
 
 Room.prototype.getMyStructures = function() {
