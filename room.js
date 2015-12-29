@@ -447,3 +447,24 @@ Room.prototype.getEnergySourcesThatNeedsStocked = function() {
 
   return [];
 };
+
+
+/**
+ * FIND PATH OPTIMIZATION
+ */
+
+var originalFindPath = Room.prototype.findPath;
+Room.prototype.findPath = function(fromPos, toPos, options) {
+  if (!Memory.pathOptimizer) {
+    Memory.pathOptimizer = {};
+  }
+  var pathIdentifier = fromPos.identifier() + toPos.identifier();
+  if (!Memory.pathOptimizer[pathIdentifier] || Game.time - Memory.pathOptimizer[pathIdentifier].tick > 2000) {
+    var path = originalFindPath.apply(this, arguments);
+    Memory.pathOptimizer[pathIdentifier] = {
+      tick: Game.time,
+      path: Room.serializePath(path)
+    }
+  }
+  return Room.deserializePath(Memory.pathOptimizer[pathIdentifier].path);
+}
