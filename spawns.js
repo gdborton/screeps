@@ -105,7 +105,7 @@ Spawn.prototype.buildBuilder = function(availableEnergy) {
     cost = bodyCosts.calculateCosts(body);
   }
 
-  while (cost > availableEnergy) {
+  while (cost > availableEnergy || body.length > 50) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
