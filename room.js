@@ -459,7 +459,7 @@ Room.prototype.findPath = function(fromPos, toPos, options) {
     Memory.pathOptimizer = {};
   }
   var pathIdentifier = fromPos.identifier() + toPos.identifier();
-  if (!Memory.pathOptimizer[pathIdentifier] || Game.time - Memory.pathOptimizer[pathIdentifier].tick > 2000) {
+  if (!Memory.pathOptimizer[pathIdentifier] || Game.time - Memory.pathOptimizer[pathIdentifier].tick > 10000) {
     var path = originalFindPath.apply(this, arguments);
     Memory.pathOptimizer[pathIdentifier] = {
       tick: Game.time,
