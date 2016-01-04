@@ -5,31 +5,22 @@ require('spawns');
 require('structures');
 require('room-position');
 var profiler = require('profiler');
-
 profiler.enable();
+
 module.exports.loop = function() {
-  var wastedCPU = Game.getUsedCpu();
-  if (!Memory.requireProfile) {
-    Memory.requireProfile = {
-      requireCPU: 0,
-      ticks: 0,
-      runningOverhead: 0,
-      usedCPU: 0,
-      avgUsedCPU: 0
-    }
+  // var start = Game.getUsedCpu();
+  if (Room.prototype.work && Game.cpuLimit > 100) {
+    // var workStart = 0;
+    // var workEnd = 0;
+    profiler.wrap(function () {
+      //workStart = Game.getUsedCpu();
+      Object.keys(Game.rooms).forEach((roomName, index) => {
+        if (index === 1 || Game.cpuLimit > 50) {
+          Game.rooms[roomName].work();
+        }
+      });
+      //workEnd = Game.getUsedCpu();
+    });
+    //console.log('require time', start, 'work', workEnd - workStart, 'wrapped', Game.getUsedCpu() - start, 'total', Game.getUsedCpu());
   }
-  profiler.wrap(function() {
-    var index = 0;
-    for (var roomName in Game.rooms) {
-      index++;
-      if (index === 1 || Game.cpuLimit > 40) {
-        Game.rooms[roomName].work();
-      }
-    }
-  });
-  Memory.requireProfile.requireCPU = Memory.requireProfile.requireCPU + wastedCPU;
-  Memory.requireProfile.ticks++;
-  Memory.requireProfile.runningOverhead = Memory.requireProfile.requireCPU / Memory.requireProfile.ticks;
-  Memory.requireProfile.usedCPU = Memory.requireProfile.usedCPU + Game.getUsedCpu() - wastedCPU;
-  Memory.requireProfile.avgUsedCPU = Memory.requireProfile.usedCPU / Memory.requireProfile.ticks;
 }
