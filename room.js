@@ -36,7 +36,7 @@ Room.prototype.damagedBuildings = function() {
 Room.prototype.getStorage = function() {
   if (!this._storageCalc) {
     this._storageCalc = true;
-    this._storage = this.getStructures().filter(function (structure) {
+    this._storage = this.getMyStructures().filter(function (structure) {
       return structure.structureType === STRUCTURE_STORAGE;
     })[0];
   }
@@ -45,7 +45,7 @@ Room.prototype.getStorage = function() {
 
 Room.prototype.getLinks = function() {
   if (!this._links) {
-    this._links = this.getStructures().filter(function(structure) {
+    this._links = this.getMyStructures().filter(function(structure) {
       return structure.structureType === STRUCTURE_LINK;
     });
   }
