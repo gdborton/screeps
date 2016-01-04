@@ -54,11 +54,11 @@ function hookUpPrototypes() {
     var foundProto = proto.val.prototype ? proto.val.prototype : proto.val;
     Object.keys(foundProto).forEach(function eachKeyOnPrototype(prototypeFunctionName) {
       var key = `${proto.name}.${prototypeFunctionName}`;
-      var keyMatchesFilter = key === getFilter();
       try {
         if (typeof foundProto[prototypeFunctionName] === 'function' && prototypeFunctionName !== 'getUsedCpu') {
           var originalFunction = foundProto[prototypeFunctionName];
           foundProto[prototypeFunctionName] = function() {
+            var keyMatchesFilter = key === getFilter();
             if (Profiler.isProfiling()) {
               var start = Game.getUsedCpu();
               if (keyMatchesFilter) {
