@@ -456,15 +456,32 @@ Room.prototype.getEnergySourcesThatNeedsStocked = function() {
 var originalFindPath = Room.prototype.findPath;
 Room.prototype.findPath = function(fromPos, toPos, options) {
   if (!Memory.pathOptimizer) {
-    Memory.pathOptimizer = {};
+    Memory.pathOptimizer = { lastCleaned: Game.time};
   }
+
+  if (Game.time - Memory.pathOptimizer.lastCleaned > 40 && !this._cleanedUp) {
+    var keys = Object.keys(Memory.pathOptimizer);
+    keys.forEach((key) => {
+      var val = Memory.pathOptimizer[key];
+      if (val && ((val.used / (Game.time - val.tick) < 1 / 200) || Game.time - val.tick > 10000)) {
+        Memory.pathOptimizer[key] = undefined;
+      }
+    });
+    this._cleanedUp = true;
+    Memory.pathOptimizer.lastCleaned = Game.time;
+  }
+
   var pathIdentifier = fromPos.identifier() + toPos.identifier();
-  if (!Memory.pathOptimizer[pathIdentifier] || Game.time - Memory.pathOptimizer[pathIdentifier].tick > 10000) {
+  if (!Memory.pathOptimizer[pathIdentifier]) {
     var path = originalFindPath.apply(this, arguments);
     Memory.pathOptimizer[pathIdentifier] = {
       tick: Game.time,
-      path: Room.serializePath(path)
+      path: Room.serializePath(path),
+      used: 1
     }
+  } else {
+    Memory.pathOptimizer[pathIdentifier].used++;
   }
+
   return Room.deserializePath(Memory.pathOptimizer[pathIdentifier].path);
 }
