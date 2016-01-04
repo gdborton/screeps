@@ -143,6 +143,9 @@ Spawn.prototype.buildUpgrader = function(availableEnergy) {
 };
 
 Spawn.prototype.work = function() {
+  if (this.spawning) {
+    return;
+  }
   var harvesterCount = this.room.harvesterCount();
   var availableEnergy = this.availableEnergy();
   if (availableEnergy >= 300 && availableEnergy < this.maxEnergy()) {
