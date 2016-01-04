@@ -16,10 +16,6 @@ function setupProfiler() {
   };
 }
 
-function additionReducer(val1, val2) {
-  return val1 + val2;
-}
-
 function setupMemory(profileType, duration, filter) {
   overloadCPUCalc();
   resetMemory();
@@ -184,10 +180,8 @@ var Profiler = {
     return Profiler.type() === 'email' && Memory.profiler.disableTick === Game.time;
   }
 };
-
 module.exports = {
   wrap(callback) {
-    var start = Game.getUsedCpu();
     if (enabled) {
       setupProfiler();
     }
@@ -199,7 +193,7 @@ module.exports = {
       // performant, and measure certain types of overhead.
 
       //var callbackStart = Game.getUsedCpu();
-      callback();
+      var returnVal = callback();
       // var callbackEnd = Game.getUsedCpu();
       Profiler.endTick();
       // var end = Game.getUsedCpu();
@@ -208,6 +202,7 @@ module.exports = {
       // var callbackTime = callbackEnd - callbackStart;
       // var unaccounted = end - profilerTime - callbackTime;
       //console.log('total-', end, 'profiler-', profilerTime, 'callbacktime-', callbackTime, 'start-', start, 'unaccounted', unaccounted);
+      return returnVal;
     } else {
       return callback();
     }
