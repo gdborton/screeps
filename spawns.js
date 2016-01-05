@@ -72,7 +72,7 @@ Spawn.prototype.buildMailman = function(availableEnergy) {
 Spawn.prototype.buildCourier = function(availableEnergy) {
   var body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
   var cost = bodyCosts.calculateCosts(body);
-  var maxCarryParts = this.room.getStorage() ? 10 : 100;
+  var maxCarryParts = this.room.getStorage() && this.room.getLinks().length > 1 ? 10 : 100;
   var carryParts = 3;
   while (cost < availableEnergy && carryParts < maxCarryParts) {
     body.push(MOVE);

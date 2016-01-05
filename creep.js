@@ -13,7 +13,7 @@ var roles = {
       var storage = this.room.getStorage();
       var links = this.room.getLinks();
       var closestLink = this.pos.findClosestByRange(links);
-      if (storage && this.pos.getRangeTo(storage) === 1) {
+      if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
         this.deliverEnergyTo(storage);
       } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
         this.deliverEnergyTo(closestLink);
