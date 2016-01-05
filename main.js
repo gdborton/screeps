@@ -1,4 +1,4 @@
-require('perf');
+require('perf')();
 require('creep');
 require('source');
 require('spawns');
