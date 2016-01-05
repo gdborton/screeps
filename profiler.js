@@ -58,8 +58,8 @@ function hookUpPrototypes() {
         if (typeof foundProto[prototypeFunctionName] === 'function' && prototypeFunctionName !== 'getUsedCpu') {
           var originalFunction = foundProto[prototypeFunctionName];
           foundProto[prototypeFunctionName] = function() {
-            var keyMatchesFilter = key === getFilter();
             if (Profiler.isProfiling()) {
+              var keyMatchesFilter = key === getFilter();
               var start = Game.getUsedCpu();
               if (keyMatchesFilter) {
                 depth++;
