@@ -129,7 +129,7 @@ Room.prototype.needsCouriers = function() {
   var storage = this.getStorage();
   if (!storage) {
     return this.courierCount() < 2;
-  } else {
+  } else if (storage.store.energy > 500000) {
     return this.courierCount() < Math.floor(storage.store.energy / 200000);
   }
 
