@@ -112,6 +112,31 @@ Spawn.prototype.buildBuilder = function(availableEnergy) {
   this.createCreep(body, undefined, {role: 'builder'});
 };
 
+Spawn.prototype.buildSourceTaker = function (availableEnergy) {
+  var body = [];
+  var cost = bodyCosts.calculateCosts(body);
+  var toughParts = 0;
+  while (toughParts < 10) {
+    toughParts++;
+    body.push(TOUGH, MOVE);
+  }
+  var rangedAttackParts < 15;
+  while (cost < availableEnergy) {
+    rangedAttackParts++;
+    body.push(RANGED_ATTACK, MOVE);
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  body.push(HEAL);
+
+  while (cost > availableEnergy || body.length > 50) {
+    body.pop();
+    cost = bodyCosts.calculateCosts(body);
+  }
+
+  this.createCreep(body, undefined, {role: 'sourcetaker'});
+};
+
 Spawn.prototype.buildDefender = function(availableEnergy) {
   this.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK, MOVE, ATTACK], undefined, {role: 'defender'});
 };
