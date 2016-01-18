@@ -431,7 +431,7 @@ function getAllScoutHarvesters() {
 }
 
 Room.prototype.hasScoutFlag = function() {
-  return Game.getScoutFlags.filter((flag) => {
+  return Game.getScoutFlags().filter((flag) => {
     return flag.room === this;
   }).length > 0;
 };
