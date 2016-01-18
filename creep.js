@@ -215,9 +215,7 @@ var roles = {
 };
 
 Creep.prototype.work = function() {
-  var creepFlag = Game.getCreepFlags().filter((flag) => {
-    return flag.name === this.name;
-  })[0];
+  var creepFlag = Game.flags[this.name];
   // move to creep flag if it is defined.
   if (creepFlag !== undefined) {
     if (this.pos.getRangeTo(creepFlag) === 0) {
