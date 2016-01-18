@@ -216,11 +216,11 @@ var roles = {
 
 Creep.prototype.work = function() {
   var creepFlag = Game.getCreepFlags().filter((flag) => {
-    return flag.name === this.name
+    return flag.name === this.name;
   })[0];
   // move to creep flag if it is defined.
-  if (!creepFlag !== undefined) {
-    if(this.pos.getRangeTo(creepFlag)) {
+  if (creepFlag !== undefined) {
+    if (this.pos.getRangeTo(creepFlag) === 0) {
       creepFlag.remove();
     } else {
       this.moveTo(creepFlag);
@@ -354,7 +354,7 @@ Creep.prototype.moveToAndRepair = function(target) {
   if (range <= 3) {
     this.repair(target);
   }
-}
+};
 
 Creep.prototype.takeEnergyFrom = function(target) {
   var range = this.pos.getRangeTo(target);

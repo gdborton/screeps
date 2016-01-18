@@ -120,7 +120,7 @@ Spawn.prototype.buildSourceTaker = function (availableEnergy) {
     toughParts++;
     body.push(TOUGH, MOVE);
   }
-  var rangedAttackParts < 15;
+  var rangedAttackParts = 0;
   while (cost < availableEnergy) {
     rangedAttackParts++;
     body.push(RANGED_ATTACK, MOVE);

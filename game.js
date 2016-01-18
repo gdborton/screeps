@@ -1,7 +1,7 @@
 module.exports = {
   setup: function() {
-    var creepFlags = undefined;
-    var scoutFlags = undefined;
+    var creepFlags;
+    var scoutFlags;
     Game.clearScoutFlags = function() {
       Game.getScoutFlags().forEach((flag) => {
         flag.remove();
@@ -22,12 +22,12 @@ module.exports = {
 
     Game.getCreepFlags = function() {
       if (creepFlags === undefined) {
-        creepFlags = Object.keys(Game.flags).filter(() => {
+        creepFlags = Object.keys(Game.flags).filter((flag) => {
           return flag.color === COLOR_PURPLE;
         });
       }
 
       return creepFlags;
     };
-  };
-}
+  }
+};
