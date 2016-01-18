@@ -19,15 +19,15 @@ module.exports = {
 
       return scoutFlags;
     };
-  };
 
-  Game.getCreepFlags = function() {
-    if(creepFlags === undefined) {
-      creepFlags = Object.keys(Game.flags).filter(() => {
-        return flag.color === COLOR_PURPLE;
-      });
-    }
+    Game.getCreepFlags = function() {
+      if (creepFlags === undefined) {
+        creepFlags = Object.keys(Game.flags).filter(() => {
+          return flag.color === COLOR_PURPLE;
+        });
+      }
 
-    return creepFlags;
+      return creepFlags;
+    };
   };
 }
