@@ -4,13 +4,35 @@ var bodyCosts = require('body-costs');
 
 var roles = {
   harvester: function() {
-    if (this.carry.energy < this.carryCapacity) {
+    if (this.carry.energy < this.carryCapacity || this.carry.energy === 0) {
       var source = this.targetSource();
       this.moveToAndHarvest(source);
     } else if (this.room.courierCount() === 0) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
-      this.dropEnergy();
+      var storage = this.room.getStorage();
+      var links = this.room.getLinks();
+      var closestLink = this.pos.findClosestByRange(links);
+      if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+        this.deliverEnergyTo(storage);
+      } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
+        this.deliverEnergyTo(closestLink);
+      } else {
+        this.dropEnergy();
+      }
+    }
+  },
+
+  scoutharvester: function() {
+    if (this.findUnvisitedScoutFlags().length > 0) {
+      this.scout();
+    } else {
+      var sourcesNeedingHarvesters = this.room.getSourcesNeedingHarvesters();
+      if (sourcesNeedingHarvesters.length > 0) {
+        this.memory.role = 'harvester';
+        this.memory.oldRole = 'scoutharvester';
+        this.memory.source = sourcesNeedingHarvesters[0].id;
+      }
     }
   },
 
@@ -27,7 +49,7 @@ var roles = {
 
   courier: function() {
     var dumpTarget = this.pos.findClosestByRange(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-      return structure.energyCapacity && structure.energy < structure.energyCapacity;
+      return structure.energyCapacity && structure.energy < structure.energyCapacity && structure.structureType !== STRUCTURE_LINK;
     }));
 
     if (this.carry.energy === this.carryCapacity) {
@@ -58,7 +80,6 @@ var roles = {
         if (!target || result === 0) {
           this.memory.target = '';
         }
-
       } else {
         this.deliverEnergyTo(dumpTarget);
       }
@@ -87,9 +108,10 @@ var roles = {
     } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
       this.memory.target = null;
       this.memory.task = 'stockup';
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
-      if (closestEnergySource) {
-        this.takeEnergyFrom(closestEnergySource);
+      if (this.room.droppedControllerEnergy()) {
+        this.takeEnergyFrom(this.room.droppedControllerEnergy());
+      } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
+        this.takeEnergyFrom(this.room.getControllerLink());
       }
     }
 
@@ -100,11 +122,16 @@ var roles = {
         this.moveToAndBuild(closestConstructionSite);
       } else if (this.memory.target) {
         var target = Game.getObjectById(this.memory.target);
-        this.moveToAndRepair(target);
+        if (target.hits < target.hitsMax) {
+          this.moveToAndRepair(target);
+        } else {
+          this.memory.target = null;
+        }
       } else {
         var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
           return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
         });
+
         if (damagedStructures.length) {
           this.memory.target = damagedStructures[0].id;
         }
@@ -113,10 +140,37 @@ var roles = {
   },
 
   upgrader: function() {
-    if (this.carry.energy === 0 && this.room.droppedControllerEnergy()) {
-      this.takeEnergyFrom(this.room.droppedControllerEnergy());
-    } else {
+    var empty = this.carry.energy === 0;
+    if (!empty) {
       this.moveToAndUpgrade(this.room.controller);
+    } else if (empty && this.room.droppedControllerEnergy()) {
+      this.takeEnergyFrom(this.room.droppedControllerEnergy());
+    } else if (empty && this.room.getLinks().length) {
+      var closestLink = this.pos.findClosestByRange(this.room.getLinks());
+      if (this.pos.getRangeTo(closestLink) < 5) {
+        this.takeEnergyFrom(closestLink);
+      } else {
+          this.moveToAndUpgrade(this.room.controller);
+      }
+    }
+  },
+
+  roadworker: function() {
+    if (this.carry.energy === 0) {
+      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
+      if (closestEnergySource) {
+        this.takeEnergyFrom(closestEnergySource);
+      }
+    } else {
+      var roads = this.room.getRoads().filter(function(road) {
+        return road.hits < road.hitsMax;
+      });
+      if (roads.length) {
+        var road = this.pos.findClosestByRange(roads);
+        this.moveToAndRepair(road);
+      } else {
+        this.suicide();
+      }
     }
   },
 
@@ -140,11 +194,28 @@ var roles = {
         this.takeEnergyFrom(closestEnergySource);
       }
     }
+  },
+
+  scout: function() {
+    if (this.findUnvisitedScoutFlags().length > 0) {
+      this.scout();
+    } else if (!this.room.getControllerOwned()){
+      this.moveToAndClaimController(this.room.controller);
+    } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
+      this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
+    } else if (this.carry.energy === 0) {
+      var droppedEnergies = this.room.getDroppedEnergy();
+      if (droppedEnergies.length > 0) {
+        this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
+      }
+    } else {
+      this.moveToAndUpgrade(this.room.controller);
+    }
   }
 };
 
 Creep.prototype.work = function() {
-  if (this.memory.role) {
+  if (this.memory.role && roles[this.memory.role]) {
     roles[this.memory.role].call(this);
   }
 };
@@ -164,13 +235,21 @@ Creep.prototype.getSpawn = function() {
   }
 };
 
+Creep.prototype.moveToAndClaimController = function(controller) {
+  if(this.pos.getRangeTo(controller) > 1) {
+    this.moveTo(controller);
+  } else {
+    this.claimController(controller);
+  }
+};
+
 var originalMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
   var args = [].map.call(arguments, function(arg) { return arg; });
   var potentialOptions;
   if (typeof arguments[0] === 'number') {
     potentialOptions = args[2];
-  }else {
+  } else {
     potentialOptions = args[1];
   }
   if (!potentialOptions) {
@@ -191,6 +270,10 @@ Creep.prototype.moveTo = function() {
     } else {
       potentialOptions.avoid = avoid;
     }
+  }
+
+  if (!potentialOptions.reusePath) {
+    potentialOptions.reusePath = 20;
   }
 
   return originalMoveTo.apply(this, args);
@@ -220,6 +303,45 @@ Creep.prototype.moveToAndBuild = function(target) {
   if (range <= 3) {
     this.build(target);
   }
+};
+
+Creep.prototype.findScoutFlags = function() {
+  return Object.keys(Game.flags).filter(function(flagName) {
+    return flagName.indexOf('Scout') !== -1;
+  }).map(function(flagName) {
+    return Game.flags[flagName];
+  });
+};
+
+Creep.prototype.hasVisitedFlag = function(flag) {
+  var visitedFlags = this.memory.visitedFlags || [];
+  return visitedFlags.indexOf(flag.name) !== -1;
+};
+
+Creep.prototype.findUnvisitedScoutFlags = function() {
+  if (!this._unvisitedFlags) {
+    var flags = this.findScoutFlags();
+    this._unvisitedFlags = flags.filter((flag) => {
+      return !this.hasVisitedFlag(flag);
+    });
+  }
+  return this._unvisitedFlags;
+};
+
+Creep.prototype.scout = function() {
+  var unvisitedFlags = this.findUnvisitedScoutFlags();
+  unvisitedFlags.sort((flagA, flagB) => {
+    return parseInt(flagA.name) - parseInt(flagB.name);
+  });
+  var targetFlag = unvisitedFlags[0];
+  if (this.pos.getRangeTo(targetFlag) === 0) {
+    if (!this.memory.visitedFlags) {
+      this.memory.visitedFlags = [];
+    }
+    this.memory.visitedFlags.push(targetFlag.name);
+    targetFlag = unvisitedFlags[1];
+  }
+  this.moveTo(targetFlag, {reusePath: 50});
 };
 
 Creep.prototype.moveToAndRepair = function(target) {
