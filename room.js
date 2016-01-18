@@ -430,12 +430,18 @@ function getAllScoutHarvesters() {
   });
 }
 
+Room.prototype.hasScoutFlag = function() {
+  return Game.getScoutFlags.filter((flag) => {
+    return flag.room === this;
+  }).length > 0;
+};
+
 Room.prototype.needsScouts = function() {
-  return Game.flags['1Scout'] && getAllScouts().length < 2;
+  return this.hasScoutFlag() && getAllScouts().length < 2;
 };
 
 Room.prototype.needsScoutHarvesters = function() {
-  return Game.flags['1Scout'] && getAllScoutHarvesters().length < 2;
+  return this.hasScoutFlag() && getAllScoutHarvesters().length < 2;
 };
 
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {
