@@ -305,14 +305,6 @@ Creep.prototype.moveToAndBuild = function(target) {
   }
 };
 
-Creep.prototype.findScoutFlags = function() {
-  return Object.keys(Game.flags).filter(function(flagName) {
-    return flagName.indexOf('Scout') !== -1;
-  }).map(function(flagName) {
-    return Game.flags[flagName];
-  });
-};
-
 Creep.prototype.hasVisitedFlag = function(flag) {
   var visitedFlags = this.memory.visitedFlags || [];
   return visitedFlags.indexOf(flag.name) !== -1;
@@ -320,7 +312,7 @@ Creep.prototype.hasVisitedFlag = function(flag) {
 
 Creep.prototype.findUnvisitedScoutFlags = function() {
   if (!this._unvisitedFlags) {
-    var flags = this.findScoutFlags();
+    var flags = Game.getScoutFlags();
     this._unvisitedFlags = flags.filter((flag) => {
       return !this.hasVisitedFlag(flag);
     });

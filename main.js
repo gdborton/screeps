@@ -1,4 +1,5 @@
 require('perf')();
+require('game');
 require('creep');
 require('source');
 require('spawns');
