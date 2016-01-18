@@ -220,7 +220,11 @@ Creep.prototype.work = function() {
   })[0];
   // move to creep flag if it is defined.
   if (!creepFlag !== undefined) {
-    this.moveTo(creepFlag);
+    if(this.pos.getRangeTo(creepFlag)) {
+      creepFlag.remove();
+    } else {
+      this.moveTo(creepFlag);
+    }
   } else if (this.memory.role && roles[this.memory.role]) {
     roles[this.memory.role].call(this);
   }
