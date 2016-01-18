@@ -167,10 +167,10 @@ Spawn.prototype.work = function() {
       this.buildMailman(availableEnergy);
     } else if (this.room.needsBuilders()) {
       this.buildBuilder(availableEnergy);
-    // } else if (this.room.needsScouts()) {
-    //   this.buildScout(availableEnergy);
-    // } else if (this.room.needsScoutHarvesters()) {
-    //   this.buildScoutHarvester(availableEnergy);
+    } else if (this.room.needsScouts()) {
+      this.buildScout(availableEnergy);
+    } else if (this.room.needsScoutHarvesters()) {
+      this.buildScoutHarvester(availableEnergy);
     } else {
       this.extend();
     }
