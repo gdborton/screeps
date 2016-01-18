@@ -215,7 +215,13 @@ var roles = {
 };
 
 Creep.prototype.work = function() {
-  if (this.memory.role && roles[this.memory.role]) {
+  var creepFlag = Game.getCreepFlags().filter((flag) => {
+    return flag.name === this.name
+  })[0];
+  // move to creep flag if it is defined.
+  if (!creepFlag !== undefined) {
+    this.moveTo(creepFlag);
+  } else if (this.memory.role && roles[this.memory.role]) {
     roles[this.memory.role].call(this);
   }
 };
