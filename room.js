@@ -459,7 +459,7 @@ Room.prototype.hasScoutFlag = function() {
 
 Room.prototype.needsScouts = function() {
   var desiredValue = 2;
-  if (game.dismantleFlags().length > 0) {
+  if (Game.dismantleFlags().length > 0) {
     desiredValue = 4;
   }
   return this.hasScoutFlag() && getAllScouts().length < desiredValue;
@@ -467,7 +467,7 @@ Room.prototype.needsScouts = function() {
 
 Room.prototype.needsScoutHarvesters = function() {
   var desiredValue = 2;
-  if (game.dismantleFlags().length > 0) {
+  if (Game.dismantleFlags().length > 0) {
     desiredValue = 0;
   }
   return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;

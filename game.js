@@ -36,7 +36,7 @@ module.exports = {
     };
 
     Game.dismantleFlags = function() {
-      return Game.flagArray().filter((flagName) => {
+      return Game.flagArray().filter((flag) => {
         return flag.name.indexOf('dismantle') !== -1;
       });
     }
