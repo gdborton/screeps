@@ -201,6 +201,14 @@ var roles = {
     }
   },
 
+  claimer: function() {
+    if (this.findUnvisitedScoutFlags().length > 0) {
+      this.scout();
+    } else if (!this.room.getControllerOwned()) {
+      this.moveToAndClaimController(this.room.controller);
+    }
+  },
+
   scout: function() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       if (this.room.getDismantleFlag()) {
@@ -257,7 +265,14 @@ Creep.prototype.moveToAndClaimController = function(controller) {
   if(this.pos.getRangeTo(controller) > 1) {
     this.moveTo(controller);
   } else {
-    this.claimController(controller);
+    if (this.claimController(controller) === 0) {
+      var flag = Game.claimFlags().filter(flag => {
+        return flag.pos.toGetRangeTo(controller) === 0;
+      })[0];
+      if (flag) {
+        flag.remove();
+      }
+    }
   }
 };
 
@@ -282,7 +297,9 @@ Creep.prototype.moveTo = function() {
     potentialOptions = {};
     args.push(potentialOptions);
   }
-  if (this.memory.role !== 'upgrader' && this.room.controller && typeof potentialOptions === 'object') {
+  var whitelist = ['upgrader', 'claimer', 'scout'];
+
+  if (whitelist.indexOf(this.memory.role) === -1 && this.room.controller && typeof potentialOptions === 'object') {
     var coord = this.room.controller.pos;
     var avoid = [];
     for (var x = coord.x - 1; x <= coord.x + 1; x++) {

@@ -113,6 +113,11 @@ Spawn.prototype.buildBuilder = function(availableEnergy) {
   this.createCreep(body, undefined, {role: 'builder'});
 };
 
+Spawn.protottype.buildClaimer = function(availableEnergy) {
+  var body = [move, claim];
+  this.createCreep(body, undefined, {role: 'claimer'});
+};
+
 Spawn.prototype.buildSourceTaker = function (availableEnergy) {
   var body = [];
   var cost = bodyCosts.calculateCosts(body);
@@ -200,6 +205,8 @@ Spawn.prototype.work = function() {
       this.buildScout(availableEnergy);
     } else if (this.room.needsScoutHarvesters()) {
       this.buildScoutHarvester(availableEnergy);
+    } else if (this.room.needsClaimers()) {
+      this.buildClaimer(availableEnergy);
     } else {
       this.extend();
     }

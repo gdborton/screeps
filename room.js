@@ -465,6 +465,17 @@ Room.prototype.needsScouts = function() {
   return this.hasScoutFlag() && getAllScouts().length < desiredValue;
 };
 
+function getAllClaimers() {
+  return Object.keys(Game.creeps).filter((creepName) => {
+    var creep = Game.creeps[creepName];
+    return creep.memory.role === 'claimer';
+  });
+};
+
+Room.prototype.needsClaimers = function() {
+  return Game.claimFlags().length > 0 && getAllClaimers().length < 1;
+};
+
 Room.prototype.needsScoutHarvesters = function() {
   var desiredValue = 2;
   if (Game.dismantleFlags().length > 0) {

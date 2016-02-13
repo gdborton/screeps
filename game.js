@@ -1,3 +1,9 @@
+function getFlagsOfType(type) {
+  return Game.flagArray().filter((flag) => {
+    return flag.name.toLowerCase().indexOf(type) !== -1;
+  });
+}
+
 module.exports = {
   setup: function() {
     var creepFlags;
@@ -17,28 +23,18 @@ module.exports = {
 
     Game.getScoutFlags = function() {
       if (scoutFlags === undefined) {
-        scoutFlags = Game.flagArray().filter(function(flag) {
-          return flag.name.toLowerCase().indexOf('scout') !== -1;
-        });
+        scoutFlags = getFlagsOfType('scout');
       }
 
       return scoutFlags;
     };
 
-    Game.getCreepFlags = function() {
-      if (creepFlags === undefined) {
-        creepFlags = Game.flagArray().filter((flag) => {
-          return flag.color === COLOR_PURPLE;
-        });
-      }
-
-      return creepFlags;
-    };
-
     Game.dismantleFlags = function() {
-      return Game.flagArray().filter((flag) => {
-        return flag.name.toLowerCase().indexOf('dismantle') !== -1;
-      });
+      return getFlagsOfType('dismantle');
+    }
+
+    Game.claimFlags = function() {
+      return getFlagsOfType('claim');
     }
   }
 };
