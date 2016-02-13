@@ -441,7 +441,7 @@ function getAllScoutHarvesters() {
 
 Room.prototype.getDismantleFlag = function() {
   return Game.dismantleFlags().filter((flag) => {
-    return Game.flags[flagName].room === this;
+    return flag.room === this;
   })[0];
 };
 
