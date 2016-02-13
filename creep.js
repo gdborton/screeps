@@ -353,7 +353,7 @@ Creep.prototype.moveToAndDismantle = function(target) {
   if (this.pos.getRangeTo(target) === 1) {
     this.dismantle(target);
   } else {
-    this.dismantle(target);
+    this.moveTo(target);
   }
 };
 
