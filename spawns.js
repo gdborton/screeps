@@ -150,9 +150,15 @@ Spawn.prototype.buildUpgrader = function(availableEnergy) {
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
   var workPartsNeeded = this.room.maxEnergyProducedPerTick() - this.room.upgraderWorkParts();
+
+  if (this.room.controller.level === 8) {
+    workPartsNeeded = Math.min(15, workPartsNeeded);
+  }
+
   if (this.room.controller.pos.freeEdges() > 1) {
     workPartsNeeded = Math.min(workPartsNeeded, this.room.maxEnergyProducedPerTick() / 2);
   }
+
   while (cost < availableEnergy && workParts < workPartsNeeded) {
     body.push(WORK);
     workParts++;
