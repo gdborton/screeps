@@ -7,16 +7,19 @@ var roles = {
     if (this.carry.energy < this.carryCapacity || this.carry.energy === 0) {
       var source = this.targetSource();
       this.moveToAndHarvest(source);
-    } else if (this.room.courierCount() === 0) {
+    } else if (this.room.courierCount() === 0 && this.getSpawn().availableEnergy() < 300) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
       var storage = this.room.getStorage();
       var links = this.room.getLinks();
       var closestLink = this.pos.findClosestByRange(links);
-      if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+
+      if (storage && storage.store.energy < storage.storeCapacity * .3 && this.pos.getRangeTo(storage)) {
         this.deliverEnergyTo(storage);
       } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
         this.deliverEnergyTo(closestLink);
+      } else if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+        this.deliverEnergyTo(storage);
       } else {
         this.dropEnergy();
       }
@@ -112,6 +115,8 @@ var roles = {
         this.takeEnergyFrom(this.room.droppedControllerEnergy());
       } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
         this.takeEnergyFrom(this.room.getControllerLink());
+      } else if (this.room.getStorage() && !this.room.getStorage().isEmpty()) {
+        this.takeEnergyFrom(this.room.getStorage());
       }
     }
 
