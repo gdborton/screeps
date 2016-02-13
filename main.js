@@ -5,6 +5,7 @@ require('source');
 require('spawns');
 require('structures');
 require('room-position');
+require('flag');
 var profiler = require('profiler');
 profiler.enable();
 

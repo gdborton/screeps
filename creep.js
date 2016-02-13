@@ -204,8 +204,7 @@ var roles = {
   scout: function() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       if (this.room.getDismantleFlag()) {
-        var structure = this.room.getStructureAt(this.room.getDismantleFlag().pos);
-        this.moveToAndDismantle(structure);
+        this.dismantleFlag(this.room.getDismantleFlag());
       } else {
         this.scout();
       }
@@ -346,6 +345,15 @@ Creep.prototype.findUnvisitedScoutFlags = function() {
   }
   return this._unvisitedFlags;
 };
+
+Creep.prototype.dismantleFlag = function(flag) {
+  var structure = this.room.getStructureAt(flag.pos);
+  if (structure) {
+    this.moveToAndDismantle(structure);
+  } else {
+    flag.remove();
+  }
+}
 
 Creep.prototype.moveToAndDismantle = function(target) {
   if (this.pos.getRangeTo(target) === 1) {
