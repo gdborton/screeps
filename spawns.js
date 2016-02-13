@@ -44,7 +44,7 @@ Spawn.prototype.buildScout = function (availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
-  this.createCreep(body, undefined, {role: 'scout'});
+  this.createCreep(body, undefined, {role: 'scout', spawn: this.name});
 };
 
 Spawn.prototype.buildScoutHarvester = function(availableEnergy) {

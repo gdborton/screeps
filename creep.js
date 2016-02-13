@@ -203,7 +203,14 @@ var roles = {
 
   scout: function() {
     if (this.findUnvisitedScoutFlags().length > 0) {
-      this.scout();
+      if (this.carry.enery === this.carryCapacity) {
+        this.moveToThenDrop(this.getSpawn());
+      } else if (this.room.getDismantleFlag()) {
+        var structure = this.room.getStructureAt(this.room.getDismantleFlag().pos);
+        this.moveToAndDismantle(structure);
+      } else {
+        this.scout();
+      }
     } else if (!this.room.getControllerOwned()){
       this.moveToAndClaimController(this.room.controller);
     } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
@@ -246,6 +253,7 @@ Creep.prototype.getSpawn = function() {
       return spawn;
     }
   }
+  return Game.spawns(this.memory.spawn);
 };
 
 Creep.prototype.moveToAndClaimController = function(controller) {
@@ -255,6 +263,14 @@ Creep.prototype.moveToAndClaimController = function(controller) {
     this.claimController(controller);
   }
 };
+
+Creep.prototype.moveToThenDrop = function(target) {
+  if (this.pos.getRangeTo(target) > 1) {
+    this.moveTo(target);
+  } else {
+    this.dropEnergy();
+  }
+}
 
 var originalMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
@@ -342,24 +358,19 @@ Creep.prototype.moveToAndDismantle = function(target) {
 };
 
 Creep.prototype.scout = function() {
-  if (this.room.getDismantleFlag()) {
-    var structure = this.room.getStructureAt(this.room.getDismantleFlag().pos);
-    this.moveToAndDismantle(structure);
-  } else {
-    var unvisitedFlags = this.findUnvisitedScoutFlags();
-    unvisitedFlags.sort((flagA, flagB) => {
-      return parseInt(flagA.name) - parseInt(flagB.name);
-    });
-    var targetFlag = unvisitedFlags[0];
-    if (this.pos.getRangeTo(targetFlag) === 0) {
-      if (!this.memory.visitedFlags) {
-        this.memory.visitedFlags = [];
-      }
-      this.memory.visitedFlags.push(targetFlag.name);
-      targetFlag = unvisitedFlags[1];
+  var unvisitedFlags = this.findUnvisitedScoutFlags();
+  unvisitedFlags.sort((flagA, flagB) => {
+    return parseInt(flagA.name) - parseInt(flagB.name);
+  });
+  var targetFlag = unvisitedFlags[0];
+  if (this.pos.getRangeTo(targetFlag) === 0) {
+    if (!this.memory.visitedFlags) {
+      this.memory.visitedFlags = [];
     }
-    this.moveTo(targetFlag, {reusePath: 50});
+    this.memory.visitedFlags.push(targetFlag.name);
+    targetFlag = unvisitedFlags[1];
   }
+  this.moveTo(targetFlag, {reusePath: 50});
 };
 
 Creep.prototype.moveToAndRepair = function(target) {
