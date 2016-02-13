@@ -440,12 +440,9 @@ function getAllScoutHarvesters() {
 }
 
 Room.prototype.getDismantleFlag = function() {
-  var dismantleFlags = Object.keys(Game.flags).filter((flagName) => {
-    return flagName.toLowerCase().indexOf('dismantle') !== -1 && Game.flags[flagName].room === this;
-  }).map((flagName) => {
-    return Game.flags[flagName];
-  });
-  return dismantleFlags[0];
+  return Game.dismantleFlags().filter((flag) => {
+    return Game.flags[flagName].room === this;
+  })[0];
 };
 
 Room.prototype.getStructureAt = function(roomPosition) {
@@ -461,11 +458,19 @@ Room.prototype.hasScoutFlag = function() {
 };
 
 Room.prototype.needsScouts = function() {
-  return this.hasScoutFlag() && getAllScouts().length < 4;
+  var desiredValue = 2;
+  if (game.dismantleFlags().length > 0) {
+    desiredValue = 4;
+  }
+  return this.hasScoutFlag() && getAllScouts().length < desiredValue;
 };
 
 Room.prototype.needsScoutHarvesters = function() {
-  return this.hasScoutFlag() && getAllScoutHarvesters().length < 2;
+  var desiredValue = 2;
+  if (game.dismantleFlags().length > 0) {
+    desiredValue = 0;
+  }
+  return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;
 };
 
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {

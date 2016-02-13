@@ -2,6 +2,13 @@ module.exports = {
   setup: function() {
     var creepFlags;
     var scoutFlags;
+
+    Game.flagArray = function() {
+      return Object.keys(Game.flags).map((flagName) => {
+        return Game.flags[flagName];
+      });
+    }
+
     Game.clearScoutFlags = function() {
       Game.getScoutFlags().forEach((flag) => {
         flag.remove();
@@ -10,10 +17,8 @@ module.exports = {
 
     Game.getScoutFlags = function() {
       if (scoutFlags === undefined) {
-        scoutFlags = Object.keys(Game.flags).filter(function(flagName) {
-          return flagName.toLowerCase().indexOf('scout') !== -1;
-        }).map(function(flagName) {
-          return Game.flags[flagName];
+        scoutFlags = Game.flagArray().filter(function(flag) {
+          return flag.name.toLowerCase().indexOf('scout') !== -1;
         });
       }
 
@@ -22,15 +27,18 @@ module.exports = {
 
     Game.getCreepFlags = function() {
       if (creepFlags === undefined) {
-        creepFlags = Object.keys(Game.flags).filter((flagName) => {
-          var flag = Game.flags[flagName];
+        creepFlags = Game.flagArray().filter((flag) => {
           return flag.color === COLOR_PURPLE;
-        }).map((flagName) => {
-          return Game.flags[flagName];
         });
       }
 
       return creepFlags;
     };
+
+    Game.dismantleFlags = function() {
+      return Game.flagArray().filter((flagName) => {
+        return flag.name.indexOf('dismantle') !== -1;
+      });
+    }
   }
 };
