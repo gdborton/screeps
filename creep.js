@@ -333,20 +333,33 @@ Creep.prototype.findUnvisitedScoutFlags = function() {
   return this._unvisitedFlags;
 };
 
-Creep.prototype.scout = function() {
-  var unvisitedFlags = this.findUnvisitedScoutFlags();
-  unvisitedFlags.sort((flagA, flagB) => {
-    return parseInt(flagA.name) - parseInt(flagB.name);
-  });
-  var targetFlag = unvisitedFlags[0];
-  if (this.pos.getRangeTo(targetFlag) === 0) {
-    if (!this.memory.visitedFlags) {
-      this.memory.visitedFlags = [];
-    }
-    this.memory.visitedFlags.push(targetFlag.name);
-    targetFlag = unvisitedFlags[1];
+Creep.prototype.moveToAndDismantle = function(target) {
+  if (this.pos.getRangeTo(target) === 1) {
+    this.dismantle(target);
+  } else {
+    this.dismantle(target);
   }
-  this.moveTo(targetFlag, {reusePath: 50});
+};
+
+Creep.prototype.scout = function() {
+  if (this.room.getDismantleFlag()) {
+    var structure = this.room.getStructureAt(this.room.getDismantleFlag().pos);
+    this.moveToAndDismantle(structure);
+  } else {
+    var unvisitedFlags = this.findUnvisitedScoutFlags();
+    unvisitedFlags.sort((flagA, flagB) => {
+      return parseInt(flagA.name) - parseInt(flagB.name);
+    });
+    var targetFlag = unvisitedFlags[0];
+    if (this.pos.getRangeTo(targetFlag) === 0) {
+      if (!this.memory.visitedFlags) {
+        this.memory.visitedFlags = [];
+      }
+      this.memory.visitedFlags.push(targetFlag.name);
+      targetFlag = unvisitedFlags[1];
+    }
+    this.moveTo(targetFlag, {reusePath: 50});
+  }
 };
 
 Creep.prototype.moveToAndRepair = function(target) {

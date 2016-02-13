@@ -435,6 +435,21 @@ function getAllScoutHarvesters() {
   });
 }
 
+Room.prototype.getDismantleFlag = function() {
+  var dismantleFlags = Object.keys(Game.flags).filter((flagName) => {
+    return flagName.toLowerCase().indexOf('dismantle') !== -1 && Game.flags[flagName].room === this;
+  }).map((flagName) => {
+    return Game.flags[flagName];
+  });
+  return dismantleFlags[0];
+};
+
+Room.prototype.getStructureAt = function(roomPosition) {
+  return this.getStructures().filter((structure) => {
+    return structure.pos.getRangeTo(roomPosition) === 0;
+  })[0];
+};
+
 Room.prototype.hasScoutFlag = function() {
   return Game.getScoutFlags().filter((flag) => {
     return flag.room === this;
