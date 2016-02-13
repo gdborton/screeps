@@ -1,4 +1,6 @@
 var structureTypes = {};
+var TEN_MILLION = 10000000;
+
 structureTypes[STRUCTURE_EXTENSION] = function() {
   if (Game.time % 10 === 0) {
     if (this.room.canBuildExtension()) {
@@ -39,6 +41,10 @@ Structure.prototype.isFull = function() {
     return this.store === this.storeCapacity;
   }
   return true;
+};
+
+Structure.prototype.needsRepaired = function() {
+  return this.hits / this.hitsMax < 0.9 && this.hits < TEN_MILLION;
 };
 
 Structure.prototype.isEmpty = function() {

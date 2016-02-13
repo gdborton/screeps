@@ -29,7 +29,7 @@ Room.prototype.needsBuilders = function() {
 
 Room.prototype.damagedBuildings = function() {
   return this.getStructures().filter(function(structure) {
-    return structure.hits / structure.hitsMax < 0.9;
+    return structure.needsRepaired();
   });
 };
 
