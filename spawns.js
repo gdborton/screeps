@@ -36,7 +36,8 @@ Spawn.prototype.buildScout = function (availableEnergy) {
   var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
   var cost = bodyCosts.calculateCosts(body);
   while (cost < availableEnergy && body.length < 50) {
-    body.push(MOVE, CARRY);
+    //body.push(MOVE, CARRY);
+    body.push(MOVE, WORK);
     cost = bodyCosts.calculateCosts(body);
   }
   while(cost > availableEnergy) {
@@ -197,8 +198,8 @@ Spawn.prototype.work = function() {
       this.buildBuilder(availableEnergy);
     } else if (this.room.needsScouts()) {
       this.buildScout(availableEnergy);
-    } else if (this.room.needsScoutHarvesters()) {
-      this.buildScoutHarvester(availableEnergy);
+    // } else if (this.room.needsScoutHarvesters()) {
+    //   this.buildScoutHarvester(availableEnergy);
     } else {
       this.extend();
     }

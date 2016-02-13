@@ -461,7 +461,7 @@ Room.prototype.hasScoutFlag = function() {
 };
 
 Room.prototype.needsScouts = function() {
-  return this.hasScoutFlag() && getAllScouts().length < 2;
+  return this.hasScoutFlag() && getAllScouts().length < 4;
 };
 
 Room.prototype.needsScoutHarvesters = function() {
