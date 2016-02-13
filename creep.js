@@ -203,9 +203,7 @@ var roles = {
 
   scout: function() {
     if (this.findUnvisitedScoutFlags().length > 0) {
-      if (this.carry.enery === this.carryCapacity) {
-        this.moveToThenDrop(this.getSpawn());
-      } else if (this.room.getDismantleFlag()) {
+      if (this.room.getDismantleFlag()) {
         var structure = this.room.getStructureAt(this.room.getDismantleFlag().pos);
         this.moveToAndDismantle(structure);
       } else {
