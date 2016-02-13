@@ -211,6 +211,10 @@ Spawn.prototype.maxEnergy = function() {
   return this.energyCapacity + (extensions.length * (extensions.length ? extensions[0].energyCapacity : 0));
 };
 
+Spawn.prototype.needsRepaired = function() {
+  return this.hits < this.hitsMax;
+};
+
 Spawn.prototype.availableEnergy = function() {
   if (!this._availableEnergy) {
     var extensions = this.room.getExtensions();
