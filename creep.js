@@ -221,7 +221,7 @@ var roles = {
     } else if (this.carry.energy === 0) {
       var droppedEnergies = this.room.getDroppedEnergy();
       if (droppedEnergies.length > 0) {
-        this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
+        this.takeEnergyFrom(droppedEnergies[0]);
       }
     } else {
       this.moveToAndUpgrade(this.room.controller);
