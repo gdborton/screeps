@@ -127,6 +127,10 @@ Room.prototype.needsRoadWorkers = function() {
 };
 
 Room.prototype.needsCouriers = function() {
+  if (this.courierCount() === 1 && this.getCouriers()[0].ticksToLive < 70) {
+    return true;
+  }
+
   var storage = this.getStorage();
   if (!storage) {
     return this.courierCount() < 2;
