@@ -216,8 +216,6 @@ var roles = {
       } else {
         this.scout();
       }
-    } else if (!this.room.getControllerOwned()){
-      this.moveToAndClaimController(this.room.controller);
     } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
       this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
     } else if (this.carry.energy === 0) {

@@ -473,7 +473,7 @@ function getAllClaimers() {
 };
 
 Room.prototype.needsClaimers = function() {
-  return Game.claimFlags().length > 0 && getAllClaimers().length < 1;
+  return this.hasScoutFlag() && Game.claimFlags().length > 0 && getAllClaimers().length < 1;
 };
 
 Room.prototype.needsScoutHarvesters = function() {

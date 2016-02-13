@@ -113,8 +113,8 @@ Spawn.prototype.buildBuilder = function(availableEnergy) {
   this.createCreep(body, undefined, {role: 'builder'});
 };
 
-Spawn.protottype.buildClaimer = function(availableEnergy) {
-  var body = [move, claim];
+Spawn.prototype.buildClaimer = function(availableEnergy) {
+  var body = [MOVE, CLAIM];
   this.createCreep(body, undefined, {role: 'claimer'});
 };
 
