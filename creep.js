@@ -265,7 +265,7 @@ Creep.prototype.moveToAndClaimController = function(controller) {
   } else {
     if (this.claimController(controller) === 0) {
       var flag = Game.claimFlags().filter(flag => {
-        return flag.pos.toGetRangeTo(controller) === 0;
+        return flag.pos.getRangeTo(controller) === 0;
       })[0];
       if (flag) {
         flag.remove();
