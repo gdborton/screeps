@@ -406,7 +406,9 @@ Room.prototype.getCreepsThatNeedOffloading = function() {
 };
 
 Room.prototype.getDroppedEnergy = function() {
-  return this.find(FIND_DROPPED_ENERGY);
+  return this.find(FIND_DROPPED_ENERGY).sort((energyA, energyB) => {
+    return energyB.energy - energyA.energy;
+  });
 };
 
 Room.prototype.getEnergyThatNeedsPickedUp = function() {
@@ -416,8 +418,6 @@ Room.prototype.getEnergyThatNeedsPickedUp = function() {
   return this.getDroppedEnergy().filter(function(energy) {
     var targeted = targets.indexOf(energy.id) !== -1;
     return !targeted && energy.pos.getRangeTo(dumpFlag) !== 0;
-  }).sort(function(energyA, energyB) {
-    return energyA.enery - energyB.energy;
   });
 };
 
