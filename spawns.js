@@ -35,8 +35,9 @@ Spawn.prototype.buildHarvester = function(availableEnergy) {
 Spawn.prototype.buildScout = function (availableEnergy) {
   var body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
   var cost = bodyCosts.calculateCosts(body);
-  while (cost < availableEnergy) {
-    body.push(MOVE, CARRY);
+  while (cost < availableEnergy && body.length < 50) {
+    body.push(MOVE);
+    body.push(Game.dismantleFlags().length ? WORK : CARRY);
     cost = bodyCosts.calculateCosts(body);
   }
   while(cost > availableEnergy) {
@@ -44,7 +45,7 @@ Spawn.prototype.buildScout = function (availableEnergy) {
     body.pop();
     cost = bodyCosts.calculateCosts(body);
   }
-  this.createCreep(body, undefined, {role: 'scout'});
+  this.createCreep(body, undefined, {role: 'scout', spawn: this.name});
 };
 
 Spawn.prototype.buildScoutHarvester = function(availableEnergy) {
@@ -112,6 +113,11 @@ Spawn.prototype.buildBuilder = function(availableEnergy) {
   this.createCreep(body, undefined, {role: 'builder'});
 };
 
+Spawn.prototype.buildClaimer = function(availableEnergy) {
+  var body = [MOVE, CLAIM];
+  this.createCreep(body, undefined, {role: 'claimer'});
+};
+
 Spawn.prototype.buildSourceTaker = function (availableEnergy) {
   var body = [];
   var cost = bodyCosts.calculateCosts(body);
@@ -150,6 +156,9 @@ Spawn.prototype.buildUpgrader = function(availableEnergy) {
   var workParts = 2;
   var cost = bodyCosts.calculateCosts(body);
   var workPartsNeeded = this.room.maxEnergyProducedPerTick() - this.room.upgraderWorkParts();
+  if (this.room.controller.level === 8) {
+    workPartsNeeded = Math.min(15, workPartsNeeded);
+  }
   if (this.room.controller.pos.freeEdges() > 1) {
     workPartsNeeded = Math.min(workPartsNeeded, this.room.maxEnergyProducedPerTick() / 2);
   }
@@ -196,6 +205,8 @@ Spawn.prototype.work = function() {
       this.buildScout(availableEnergy);
     } else if (this.room.needsScoutHarvesters()) {
       this.buildScoutHarvester(availableEnergy);
+    } else if (this.room.needsClaimers()) {
+      this.buildClaimer(availableEnergy);
     } else {
       this.extend();
     }
@@ -209,6 +220,10 @@ Spawn.prototype.work = function() {
 Spawn.prototype.maxEnergy = function() {
   var extensions = this.room.getExtensions();
   return this.energyCapacity + (extensions.length * (extensions.length ? extensions[0].energyCapacity : 0));
+};
+
+Spawn.prototype.needsRepaired = function() {
+  return this.hits < this.hitsMax;
 };
 
 Spawn.prototype.availableEnergy = function() {

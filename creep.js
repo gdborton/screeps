@@ -7,16 +7,19 @@ var roles = {
     if (this.carry.energy < this.carryCapacity || this.carry.energy === 0) {
       var source = this.targetSource();
       this.moveToAndHarvest(source);
-    } else if (this.room.courierCount() === 0) {
+    } else if (this.room.courierCount() === 0 && this.getSpawn().availableEnergy() < 300) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
       var storage = this.room.getStorage();
       var links = this.room.getLinks();
       var closestLink = this.pos.findClosestByRange(links);
-      if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+
+      if (storage && storage.store.energy < storage.storeCapacity * 0.3 && this.pos.getRangeTo(storage) === 1) {
         this.deliverEnergyTo(storage);
       } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
         this.deliverEnergyTo(closestLink);
+      } else if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+        this.deliverEnergyTo(storage);
       } else {
         this.dropEnergy();
       }
@@ -112,6 +115,8 @@ var roles = {
         this.takeEnergyFrom(this.room.droppedControllerEnergy());
       } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
         this.takeEnergyFrom(this.room.getControllerLink());
+      } else if (this.room.getStorage() && !this.room.getStorage().isEmpty()) {
+        this.takeEnergyFrom(this.room.getStorage());
       }
     }
 
@@ -196,17 +201,27 @@ var roles = {
     }
   },
 
-  scout: function() {
+  claimer: function() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       this.scout();
-    } else if (!this.room.getControllerOwned()){
+    } else if (!this.room.getControllerOwned()) {
       this.moveToAndClaimController(this.room.controller);
+    }
+  },
+
+  scout: function() {
+    if (this.findUnvisitedScoutFlags().length > 0) {
+      if (this.room.getDismantleFlag()) {
+        this.dismantleFlag(this.room.getDismantleFlag());
+      } else {
+        this.scout();
+      }
     } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
       this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
     } else if (this.carry.energy === 0) {
       var droppedEnergies = this.room.getDroppedEnergy();
       if (droppedEnergies.length > 0) {
-        this.takeEnergyFrom(this.pos.findClosestByRange(droppedEnergies));
+        this.takeEnergyFrom(droppedEnergies[0]);
       }
     } else {
       this.moveToAndUpgrade(this.room.controller);
@@ -241,15 +256,31 @@ Creep.prototype.getSpawn = function() {
       return spawn;
     }
   }
+  return Game.spawns(this.memory.spawn);
 };
 
 Creep.prototype.moveToAndClaimController = function(controller) {
   if(this.pos.getRangeTo(controller) > 1) {
     this.moveTo(controller);
   } else {
-    this.claimController(controller);
+    if (this.claimController(controller) === 0) {
+      var flag = Game.claimFlags().filter(flag => {
+        return flag.pos.getRangeTo(controller) === 0;
+      })[0];
+      if (flag) {
+        flag.remove();
+      }
+    }
   }
 };
+
+Creep.prototype.moveToThenDrop = function(target) {
+  if (this.pos.getRangeTo(target) > 1) {
+    this.moveTo(target);
+  } else {
+    this.dropEnergy();
+  }
+}
 
 var originalMoveTo = Creep.prototype.moveTo;
 Creep.prototype.moveTo = function() {
@@ -264,7 +295,9 @@ Creep.prototype.moveTo = function() {
     potentialOptions = {};
     args.push(potentialOptions);
   }
-  if (this.memory.role !== 'upgrader' && this.room.controller && typeof potentialOptions === 'object') {
+  var whitelist = ['upgrader', 'claimer', 'scout'];
+
+  if (whitelist.indexOf(this.memory.role) === -1 && this.room.controller && typeof potentialOptions === 'object') {
     var coord = this.room.controller.pos;
     var avoid = [];
     for (var x = coord.x - 1; x <= coord.x + 1; x++) {
@@ -326,6 +359,23 @@ Creep.prototype.findUnvisitedScoutFlags = function() {
     });
   }
   return this._unvisitedFlags;
+};
+
+Creep.prototype.dismantleFlag = function(flag) {
+  var structure = this.room.getStructureAt(flag.pos);
+  if (structure) {
+    this.moveToAndDismantle(structure);
+  } else {
+    flag.remove();
+  }
+}
+
+Creep.prototype.moveToAndDismantle = function(target) {
+  if (this.pos.getRangeTo(target) === 1) {
+    this.dismantle(target);
+  } else {
+    this.moveTo(target);
+  }
 };
 
 Creep.prototype.scout = function() {

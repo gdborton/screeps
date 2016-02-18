@@ -2,12 +2,16 @@ var settings = require('settings');
 var validExitCoord = require('valid-exit-coord');
 
 Room.prototype.work = function() {
-  this.getMyStructures().forEach(function(structure) {
+  this.getMyStructures().forEach((structure) => {
     structure.work();
   });
 
-  this.myCreeps().forEach(function(creep) {
+  this.myCreeps().forEach((creep) => {
     creep.work();
+  });
+
+  this.getFlags().forEach((flag) => {
+    flag.work();
   });
 };
 
@@ -24,12 +28,13 @@ Room.prototype.needsUpgraders = function() {
 };
 
 Room.prototype.needsBuilders = function() {
+  this.damagedBuildings();
   return this.builderCount() < 1  && (this.getConstructionSites().length > 0 || this.damagedBuildings().length > 0);
 };
 
 Room.prototype.damagedBuildings = function() {
   return this.getStructures().filter(function(structure) {
-    return structure.hits / structure.hitsMax < 0.9;
+    return structure.structureType !== STRUCTURE_ROAD && structure.needsRepaired();
   });
 };
 
@@ -126,6 +131,10 @@ Room.prototype.needsRoadWorkers = function() {
 };
 
 Room.prototype.needsCouriers = function() {
+  if (this.courierCount() === 1 && this.getCouriers()[0].ticksToLive < 70) {
+    return true;
+  }
+
   var storage = this.getStorage();
   if (!storage) {
     return this.courierCount() < 2;
@@ -237,14 +246,16 @@ Room.prototype.createControllerEnergyDropFlag = function() {
   this.createFlag(controller.pos.x, controller.pos.y + 2, 'CONTROLLER_ENERGY_DROP', COLOR_YELLOW);
 };
 
-Room.prototype.getControllerEnergyDropFlag = function() {
-  return this.find(FIND_FLAGS).filter(function(flag) {
-    return flag.name.indexOf('CONTROLLER_ENERGY_DROP') !== -1;
-  })[0];
+Room.prototype.getFlags = function() {
+  return this.find(FIND_FLAGS).filter((flag) => {
+    return flag.room === this;
+  });
 };
 
-Room.prototype.getSpawnEnergyDropFlag = function() {
-  return this.find(FIND_FLAGS, {filter: {name: 'SPAWN_ENERGY_DROP'}})[0];
+Room.prototype.getControllerEnergyDropFlag = function() {
+  return this.getFlags().filter(function(flag) {
+    return flag.name.indexOf('CONTROLLER_ENERGY_DROP') !== -1;
+  })[0];
 };
 
 Room.prototype.workerCount = function() {
@@ -411,9 +422,7 @@ Room.prototype.getEnergyThatNeedsPickedUp = function() {
 };
 
 Room.prototype.getControllerOwned = function() {
-  return this.getMyStructures().filter(function(structure) {
-    return structure.structureType === STRUCTURE_CONTROLLER;
-  }).length > 0;
+  return this.controller.my;
 };
 
 function getAllScouts() {
@@ -430,6 +439,18 @@ function getAllScoutHarvesters() {
   });
 }
 
+Room.prototype.getDismantleFlag = function() {
+  return Game.dismantleFlags().filter((flag) => {
+    return flag.room === this;
+  })[0];
+};
+
+Room.prototype.getStructureAt = function(roomPosition) {
+  return this.getStructures().filter((structure) => {
+    return structure.pos.getRangeTo(roomPosition) === 0;
+  })[0];
+};
+
 Room.prototype.hasScoutFlag = function() {
   return Game.getScoutFlags().filter((flag) => {
     return flag.room === this;
@@ -437,11 +458,30 @@ Room.prototype.hasScoutFlag = function() {
 };
 
 Room.prototype.needsScouts = function() {
-  return this.hasScoutFlag() && getAllScouts().length < 2;
+  var desiredValue = 2;
+  if (Game.dismantleFlags().length > 0) {
+    desiredValue = 4;
+  }
+  return this.hasScoutFlag() && getAllScouts().length < desiredValue;
+};
+
+function getAllClaimers() {
+  return Object.keys(Game.creeps).filter((creepName) => {
+    var creep = Game.creeps[creepName];
+    return creep.memory.role === 'claimer';
+  });
+};
+
+Room.prototype.needsClaimers = function() {
+  return this.hasScoutFlag() && Game.claimFlags().length > 0 && getAllClaimers().length < 1;
 };
 
 Room.prototype.needsScoutHarvesters = function() {
-  return this.hasScoutFlag() && getAllScoutHarvesters().length < 2;
+  var desiredValue = 2;
+  if (Game.dismantleFlags().length > 0) {
+    desiredValue = 0;
+  }
+  return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;
 };
 
 Room.prototype.getEnergySourcesThatNeedsStocked = function() {
