@@ -69,9 +69,8 @@ var roles = {
       var targets = this.room.courierTargets();
 
       if (!this.memory.target) {
-        var harvesters = this.room.getEnergySourcesThatNeedsStocked();
-        var closest = this.pos.findClosestByRange(harvesters);
-        this.memory.target = closest ? closest.id : '';
+        var target = this.room.getEnergySourcesThatNeedsStocked()[0];
+        this.memory.target = target ? target.id : '';
       }
 
       if (this.memory.target) {
