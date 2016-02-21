@@ -8,10 +8,10 @@ const bodyCosts = {
   [TOUGH]: 10,
 };
 
-bodyCosts.calculateCosts = function(bodyParts) {
-  var cost = 0;
-  bodyParts.forEach(function(bodyPart) {
-    var part = typeof bodyPart === 'string' ? bodyPart : bodyPart.type;
+bodyCosts.calculateCosts = (bodyParts) => {
+  let cost = 0;
+  bodyParts.forEach((bodyPart) => {
+    const part = typeof bodyPart === 'string' ? bodyPart : bodyPart.type;
     cost += bodyCosts[part];
   });
 
