@@ -38,6 +38,7 @@
     "STRUCTURE_ROAD": true,
     "STRUCTURE_SPAWN": true,
     "STRUCTURE_STORAGE": true,
+    "STRUCTURE_TOWER": true,
     "Memory": true,
   }
 }

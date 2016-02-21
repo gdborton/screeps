@@ -1,40 +1,44 @@
-var structureTypes = {};
-var TEN_MILLION = 10000000;
-
-structureTypes[STRUCTURE_EXTENSION] = function() {
-  if (Game.time % 10 === 0) {
-    if (this.room.canBuildExtension()) {
-      this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+const structureTypes = {
+  [STRUCTURE_EXTENSION]() {
+    if (Game.time % 10 === 0) {
+      if (this.room.canBuildExtension()) {
+        this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+      }
+      if (this.room.canBuildExtension()) {
+        this.room.createConstructionSite(this.pos.x - 1, this.pos.y + 1, STRUCTURE_EXTENSION);
+      }
     }
-    if (this.room.canBuildExtension()) {
-      this.room.createConstructionSite(this.pos.x - 1, this.pos.y + 1, STRUCTURE_EXTENSION);
+  },
+
+  [STRUCTURE_LINK]() {
+    const shouldTransfer = !this.isControllerLink() && !this.cooldown;
+    const controllerLink = this.room.getControllerLink();
+    const controllerLinkNeedsEnergy = controllerLink && controllerLink.energy < 100;
+    if (shouldTransfer && controllerLinkNeedsEnergy) {
+      this.transferEnergy(this.room.getControllerLink());
     }
-  }
+  },
+
+  [STRUCTURE_TOWER]() {
+    if (this.room.hasHostileCreeps() && !this.isEmpty()) {
+      this.attack(this.pos.findClosestByRange(this.room.getHostileCreeps()));
+    }
+  },
 };
 
-structureTypes[STRUCTURE_LINK] = function() {
-  if (!this.isControllerLink() && !this.cooldown && this.room.getControllerLink() && this.room.getControllerLink().energy < 100) {
-    this.transferEnergy(this.room.getControllerLink());
-  }
-};
+const TEN_MILLION = 10000000;
 
-structureTypes[STRUCTURE_TOWER] = function() {
-  if (this.room.hasHostileCreeps() && !this.isEmpty()) {
-    this.attack(this.pos.findClosestByRange(this.room.getHostileCreeps()));
-  }
-};
-
-Structure.prototype.work = function() {
+Structure.prototype.work = function work() {
   if (structureTypes[this.structureType]) {
     structureTypes[this.structureType].call(this);
   }
 };
 
-Structure.prototype.isControllerLink = function() {
+Structure.prototype.isControllerLink = function isControllerLink() {
   return this.structureType === STRUCTURE_LINK && this.pos.getRangeTo(this.room.controller) < 5;
 };
 
-Structure.prototype.isFull = function() {
+Structure.prototype.isFull = function isFull() {
   if (this.energyCapacity) {
     return this.energy === this.energyCapacity;
   } else if (this.storeCapacity) {
@@ -43,11 +47,11 @@ Structure.prototype.isFull = function() {
   return true;
 };
 
-Structure.prototype.needsRepaired = function() {
+Structure.prototype.needsRepaired = function needsRepaired() {
   return this.hits / this.hitsMax < 0.9 && this.hits < TEN_MILLION;
 };
 
-Structure.prototype.isEmpty = function() {
+Structure.prototype.isEmpty = function isEmpty() {
   if (this.energyCapacity) {
     return this.energy === 0;
   } else if (this.storeCapacity) {
