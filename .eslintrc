@@ -23,5 +23,6 @@
     "STRUCTURE_LINK": true,
     "STRUCTURE_SPAWN": true,
     "STRUCTURE_STORAGE": true,
+    "Memory": true,
   }
 }
