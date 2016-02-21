@@ -218,7 +218,7 @@ Spawn.prototype.needsRepaired = function needsRepaired() {
 };
 
 Spawn.prototype.availableEnergy = function availableEnergy() {
-  return this.room.availableEnergy;
+  return this.room.energyAvailable;
 };
 
 Spawn.prototype.extend = function extend() {
