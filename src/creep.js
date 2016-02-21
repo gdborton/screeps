@@ -1,6 +1,6 @@
-require('room');
-var validExitCoord = require('valid-exit-coord');
-var bodyCosts = require('body-costs');
+require('./room');
+var validExitCoord = require('./valid-exit-coord');
+var bodyCosts = require('./body-costs');
 
 var roles = {
   harvester: function() {

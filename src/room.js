@@ -1,5 +1,5 @@
-var settings = require('settings');
-var validExitCoord = require('valid-exit-coord');
+var settings = require('./settings');
+var validExitCoord = require('./valid-exit-coord');
 
 Room.prototype.work = function() {
   this.getMyStructures().forEach((structure) => {

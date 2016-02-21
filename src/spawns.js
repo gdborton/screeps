@@ -1,7 +1,7 @@
-require('source');
-require('room');
-var settings = require('settings');
-var bodyCosts = require('body-costs');
+require('./source');
+require('./room');
+var settings = require('./settings');
+var bodyCosts = require('./body-costs');
 
 Spawn.prototype.buildHarvester = function(availableEnergy) {
   var sources = this.room.getSourcesNeedingHarvesters();

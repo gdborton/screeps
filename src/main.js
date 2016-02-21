@@ -1,12 +1,12 @@
-require('perf')();
-var game = require('game');
-require('creep');
-require('source');
-require('spawns');
-require('structures');
-require('room-position');
-require('flag');
-var profiler = require('profiler');
+require('./perf')();
+var game = require('./game');
+require('./creep');
+require('./source');
+require('./spawns');
+require('./structures');
+require('./room-position');
+require('./flag');
+var profiler = require('./profiler');
 profiler.enable();
 
 module.exports.loop = function() {
