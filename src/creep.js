@@ -1,24 +1,24 @@
 import './room';
-import validExitCoord from './valid-exit-coord';
 import bodyCosts from './body-costs';
 
-var roles = {
-  harvester: function() {
+const roles = {
+  harvester() {
     if (this.carry.energy < this.carryCapacity || this.carry.energy === 0) {
-      var source = this.targetSource();
+      const source = this.targetSource();
       this.moveToAndHarvest(source);
     } else if (this.room.courierCount() === 0 && this.getSpawn().availableEnergy() < 300) {
       this.deliverEnergyTo(this.getSpawn());
     } else {
-      var storage = this.room.getStorage();
-      var links = this.room.getLinks();
-      var closestLink = this.pos.findClosestByRange(links);
+      const storage = this.room.getStorage();
+      const links = this.room.getLinks();
+      const closestLink = this.pos.findClosestByRange(links);
+      const rangeToStore = storage ? this.pos.getRangeTo(storage) : 100;
 
-      if (storage && storage.store.energy < storage.storeCapacity * 0.3 && this.pos.getRangeTo(storage) === 1) {
+      if (storage && storage.store.energy < storage.storeCapacity * 0.3 && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
       } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
         this.deliverEnergyTo(closestLink);
-      } else if (storage && storage.store.energy < storage.storeCapacity && this.pos.getRangeTo(storage) === 1) {
+      } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
       } else {
         this.dropEnergy();
@@ -26,11 +26,11 @@ var roles = {
     }
   },
 
-  scoutharvester: function() {
+  scoutharvester() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       this.scout();
     } else {
-      var sourcesNeedingHarvesters = this.room.getSourcesNeedingHarvesters();
+      const sourcesNeedingHarvesters = this.room.getSourcesNeedingHarvesters();
       if (sourcesNeedingHarvesters.length > 0) {
         this.memory.role = 'harvester';
         this.memory.oldRole = 'scoutharvester';
@@ -39,21 +39,13 @@ var roles = {
     }
   },
 
-  defender: function() {
-    var enemy = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-    if (enemy) {
-      var range = this.pos.getRangeTo(enemy);
-      if (range < 12) {
-        this.moveTo(enemy);
-        this.attack(enemy);
-      }
-    }
-  },
+  courier() {
+    const potentialTargets = this.room.getMyStructures().filter(structure => {
+      const notALink = structure.structureType !== STRUCTURE_LINK;
+      return structure.energyCapacity && structure.energy < structure.energyCapacity && notALink;
+    });
 
-  courier: function() {
-    var dumpTarget = this.pos.findClosestByRange(this.room.find(FIND_MY_STRUCTURES).filter(function(structure) {
-      return structure.energyCapacity && structure.energy < structure.energyCapacity && structure.structureType !== STRUCTURE_LINK;
-    }));
+    let dumpTarget = this.pos.findClosestByRange(potentialTargets);
 
     if (this.carry.energy === this.carryCapacity) {
       this.memory.task = 'deliver';
@@ -66,16 +58,14 @@ var roles = {
     }
 
     if (this.memory.task === 'pickup') {
-      var targets = this.room.courierTargets();
-
       if (!this.memory.target) {
-        var target = this.room.getEnergySourcesThatNeedsStocked()[0];
+        const target = this.room.getEnergySourcesThatNeedsStocked()[0];
         this.memory.target = target ? target.id : '';
       }
 
       if (this.memory.target) {
-        var target = Game.getObjectById(this.memory.target);
-        var result;
+        const target = Game.getObjectById(this.memory.target);
+        let result;
         if (target) {
           result = this.takeEnergyFrom(target);
         }
@@ -90,21 +80,7 @@ var roles = {
     }
   },
 
-  healer: function() {
-    var target = this.pos.findClosestByRange(FIND_MY_CREEPS, {
-      filter: function(object) {
-        return object.hits < object.hitsMax;
-      }
-    });
-
-    if (target) {
-      this.moveTo(target);
-      this.heal(target);
-      this.rangedHeal(target);
-    }
-  },
-
-  builder: function() {
+  builder() {
     if (this.carry.energy === this.carryCapacity) {
       this.memory.task = 'work';
     } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
@@ -120,19 +96,19 @@ var roles = {
     }
 
     if (this.memory.task === 'work') {
-      var constructionSites = this.room.getConstructionSites();
+      const constructionSites = this.room.getConstructionSites();
       if (constructionSites.length) {
-        var closestConstructionSite = this.pos.findClosestByRange(constructionSites);
+        const closestConstructionSite = this.pos.findClosestByRange(constructionSites);
         this.moveToAndBuild(closestConstructionSite);
       } else if (this.memory.target) {
-        var target = Game.getObjectById(this.memory.target);
+        const target = Game.getObjectById(this.memory.target);
         if (target.hits < target.hitsMax) {
           this.moveToAndRepair(target);
         } else {
           this.memory.target = null;
         }
       } else {
-        var damagedStructures = this.room.getStructures().sort(function(structureA, structureB) {
+        const damagedStructures = this.room.getStructures().sort((structureA, structureB) => {
           return (structureA.hits / structureA.hitsMax) - (structureB.hits / structureB.hitsMax);
         });
 
@@ -143,34 +119,34 @@ var roles = {
     }
   },
 
-  upgrader: function() {
-    var empty = this.carry.energy === 0;
+  upgrader() {
+    const empty = this.carry.energy === 0;
     if (!empty) {
       this.moveToAndUpgrade(this.room.controller);
     } else if (empty && this.room.droppedControllerEnergy()) {
       this.takeEnergyFrom(this.room.droppedControllerEnergy());
     } else if (empty && this.room.getLinks().length) {
-      var closestLink = this.pos.findClosestByRange(this.room.getLinks());
+      const closestLink = this.pos.findClosestByRange(this.room.getLinks());
       if (this.pos.getRangeTo(closestLink) < 5) {
         this.takeEnergyFrom(closestLink);
       } else {
-          this.moveToAndUpgrade(this.room.controller);
+        this.moveToAndUpgrade(this.room.controller);
       }
     }
   },
 
-  roadworker: function() {
+  roadworker() {
     if (this.carry.energy === 0) {
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
+      const closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.takeEnergyFrom(closestEnergySource);
       }
     } else {
-      var roads = this.room.getRoads().filter(function(road) {
+      const roads = this.room.getRoads().filter(road => {
         return road.hits < road.hitsMax;
       });
       if (roads.length) {
-        var road = this.pos.findClosestByRange(roads);
+        const road = this.pos.findClosestByRange(roads);
         this.moveToAndRepair(road);
       } else {
         this.suicide();
@@ -178,7 +154,7 @@ var roles = {
     }
   },
 
-  mailman: function() {
+  mailman() {
     if (this.carry.energy === 0) {
       this.memory.task = 'stock';
     } else if (this.carry.energy === this.carryCapacity) {
@@ -186,21 +162,21 @@ var roles = {
     }
 
     if (this.memory.task === 'deliver') {
-      var target = this.pos.findClosestByRange(this.room.find(FIND_MY_CREEPS).filter(function(creep) {
+      const target = this.pos.findClosestByRange(this.room.myCreeps().filter(creep => {
         return creep.needsEnergyDelivered();
       }));
       if (target) {
         this.deliverEnergyTo(target);
       }
     } else {
-      var closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
+      const closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());
       if (closestEnergySource) {
         this.takeEnergyFrom(closestEnergySource);
       }
     }
   },
 
-  claimer: function() {
+  claimer() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       this.scout();
     } else if (!this.room.getControllerOwned()) {
@@ -208,7 +184,7 @@ var roles = {
     }
   },
 
-  scout: function() {
+  scout() {
     if (this.findUnvisitedScoutFlags().length > 0) {
       if (this.room.getDismantleFlag()) {
         this.dismantleFlag(this.room.getDismantleFlag());
@@ -218,18 +194,18 @@ var roles = {
     } else if (this.room.getConstructionSites().length && this.carry.energy > 0) {
       this.moveToAndBuild(this.pos.findClosestByRange(this.room.getConstructionSites()));
     } else if (this.carry.energy === 0) {
-      var droppedEnergies = this.room.getDroppedEnergy();
+      const droppedEnergies = this.room.getDroppedEnergy();
       if (droppedEnergies.length > 0) {
         this.takeEnergyFrom(droppedEnergies[0]);
       }
     } else {
       this.moveToAndUpgrade(this.room.controller);
     }
-  }
+  },
 };
 
-Creep.prototype.work = function() {
-  var creepFlag = Game.flags[this.name];
+Creep.prototype.work = function work() {
+  const creepFlag = Game.flags[this.name];
   // move to creep flag if it is defined.
   if (creepFlag !== undefined) {
     if (this.pos.getRangeTo(creepFlag) === 0) {
@@ -242,50 +218,50 @@ Creep.prototype.work = function() {
   }
 };
 
-Creep.prototype.targetSource = function() {
-  return this.room.find(FIND_SOURCES).filter(function(source) {
+Creep.prototype.targetSource = function target() {
+  return this.room.getSources().filter(source => {
     return this.memory.source === source.id;
-  }.bind(this))[0];
+  })[0];
 };
 
-Creep.prototype.getSpawn = function() {
-  for (var spawnName in Game.spawns) {
-    var spawn = Game.spawns[spawnName];
-    if (spawn.room === this.room) {
-      return spawn;
-    }
-  }
-  return Game.spawns(this.memory.spawn);
+Creep.prototype.getSpawn = function getSpawn() {
+  const validSpawns = Object.keys(Game.spawns).filter(spawnName => {
+    const spawn = Game.spawns[spawnName];
+    return spawn.room === this.room;
+  });
+  return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns(this.memory.spawn);
 };
 
-Creep.prototype.moveToAndClaimController = function(controller) {
-  if(this.pos.getRangeTo(controller) > 1) {
+Creep.prototype.moveToAndClaimController = function moveToAndClaimController(controller) {
+  if (this.pos.getRangeTo(controller) > 1) {
     this.moveTo(controller);
   } else {
     if (this.claimController(controller) === 0) {
-      var flag = Game.claimFlags().filter(flag => {
+      const claimFlag = Game.claimFlags().filter(flag => {
         return flag.pos.getRangeTo(controller) === 0;
       })[0];
-      if (flag) {
-        flag.remove();
+
+      if (claimFlag) {
+        claimFlag.remove();
       }
     }
   }
 };
 
-Creep.prototype.moveToThenDrop = function(target) {
+Creep.prototype.moveToThenDrop = function moveToThenDrop(target) {
   if (this.pos.getRangeTo(target) > 1) {
     this.moveTo(target);
   } else {
     this.dropEnergy();
   }
-}
+};
 
-var originalMoveTo = Creep.prototype.moveTo;
-Creep.prototype.moveTo = function() {
-  var args = [].map.call(arguments, function(arg) { return arg; });
-  var potentialOptions;
-  if (typeof arguments[0] === 'number') {
+const originalMoveTo = Creep.prototype.moveTo;
+Creep.prototype.moveTo = function moveTo(...myArgs) {
+  const args = [].map.call(myArgs, arg => { return arg; });
+  const whitelist = ['upgrader', 'claimer', 'scout'];
+  let potentialOptions;
+  if (typeof myArgs[0] === 'number') {
     potentialOptions = args[2];
   } else {
     potentialOptions = args[1];
@@ -294,14 +270,14 @@ Creep.prototype.moveTo = function() {
     potentialOptions = {};
     args.push(potentialOptions);
   }
-  var whitelist = ['upgrader', 'claimer', 'scout'];
 
-  if (whitelist.indexOf(this.memory.role) === -1 && this.room.controller && typeof potentialOptions === 'object') {
-    var coord = this.room.controller.pos;
-    var avoid = [];
-    for (var x = coord.x - 1; x <= coord.x + 1; x++) {
-      for (var y = coord.y - 1; y <= coord.y + 1; y++) {
-        avoid.push({x: x, y: y});
+  const whitelisted = whitelist.indexOf(this.memory.role) !== -1;
+  if (!whitelisted && this.room.controller && typeof potentialOptions === 'object') {
+    const coord = this.room.controller.pos;
+    const avoid = [];
+    for (let x = coord.x - 1; x <= coord.x + 1; x++) {
+      for (let y = coord.y - 1; y <= coord.y + 1; y++) {
+        avoid.push({ x, y });
       }
     }
 
@@ -319,7 +295,7 @@ Creep.prototype.moveTo = function() {
   return originalMoveTo.apply(this, args);
 };
 
-Creep.prototype.moveToAndHarvest = function(target) {
+Creep.prototype.moveToAndHarvest = function moveToAndHarvest(target) {
   if (this.pos.getRangeTo(target) > 1) {
     this.moveTo(target);
   } else {
@@ -327,7 +303,7 @@ Creep.prototype.moveToAndHarvest = function(target) {
   }
 };
 
-Creep.prototype.moveToAndUpgrade = function(target) {
+Creep.prototype.moveToAndUpgrade = function moveToAndUpgrade(target) {
   if (this.pos.getRangeTo(target) > 1) {
     this.moveTo(this.room.controller);
   } else {
@@ -335,8 +311,8 @@ Creep.prototype.moveToAndUpgrade = function(target) {
   }
 };
 
-Creep.prototype.moveToAndBuild = function(target) {
-  var range = this.pos.getRangeTo(target);
+Creep.prototype.moveToAndBuild = function moveToAndBuild(target) {
+  const range = this.pos.getRangeTo(target);
   if (range > 1) {
     this.moveTo(target);
   }
@@ -345,14 +321,14 @@ Creep.prototype.moveToAndBuild = function(target) {
   }
 };
 
-Creep.prototype.hasVisitedFlag = function(flag) {
-  var visitedFlags = this.memory.visitedFlags || [];
+Creep.prototype.hasVisitedFlag = function hasVisitedFlag(flag) {
+  const visitedFlags = this.memory.visitedFlags || [];
   return visitedFlags.indexOf(flag.name) !== -1;
 };
 
-Creep.prototype.findUnvisitedScoutFlags = function() {
+Creep.prototype.findUnvisitedScoutFlags = function findUnvisitedScoutFlags() {
   if (!this._unvisitedFlags) {
-    var flags = Game.getScoutFlags();
+    const flags = Game.getScoutFlags();
     this._unvisitedFlags = flags.filter((flag) => {
       return !this.hasVisitedFlag(flag);
     });
@@ -360,16 +336,16 @@ Creep.prototype.findUnvisitedScoutFlags = function() {
   return this._unvisitedFlags;
 };
 
-Creep.prototype.dismantleFlag = function(flag) {
-  var structure = this.room.getStructureAt(flag.pos);
+Creep.prototype.dismantleFlag = function dismantleFlag(flag) {
+  const structure = this.room.getStructureAt(flag.pos);
   if (structure) {
     this.moveToAndDismantle(structure);
   } else {
     flag.remove();
   }
-}
+};
 
-Creep.prototype.moveToAndDismantle = function(target) {
+Creep.prototype.moveToAndDismantle = function moveToAndDismantle(target) {
   if (this.pos.getRangeTo(target) === 1) {
     this.dismantle(target);
   } else {
@@ -377,12 +353,12 @@ Creep.prototype.moveToAndDismantle = function(target) {
   }
 };
 
-Creep.prototype.scout = function() {
-  var unvisitedFlags = this.findUnvisitedScoutFlags();
+Creep.prototype.scout = function scout() {
+  const unvisitedFlags = this.findUnvisitedScoutFlags();
   unvisitedFlags.sort((flagA, flagB) => {
-    return parseInt(flagA.name) - parseInt(flagB.name);
+    return parseInt(flagA.name, 10) - parseInt(flagB.name, 10);
   });
-  var targetFlag = unvisitedFlags[0];
+  let targetFlag = unvisitedFlags[0];
   if (this.pos.getRangeTo(targetFlag) === 0) {
     if (!this.memory.visitedFlags) {
       this.memory.visitedFlags = [];
@@ -390,12 +366,12 @@ Creep.prototype.scout = function() {
     this.memory.visitedFlags.push(targetFlag.name);
     targetFlag = unvisitedFlags[1];
   }
-  this.moveTo(targetFlag, {reusePath: 50});
+  this.moveTo(targetFlag, { reusePath: 50 });
 };
 
-Creep.prototype.moveToAndRepair = function(target) {
-  var range = this.pos.getRangeTo(target);
-  if (this.pos.getRangeTo(target) > 1) {
+Creep.prototype.moveToAndRepair = function moveToAndRepair(target) {
+  const range = this.pos.getRangeTo(target);
+  if (range > 1) {
     this.moveTo(target);
   }
   if (range <= 3) {
@@ -403,25 +379,22 @@ Creep.prototype.moveToAndRepair = function(target) {
   }
 };
 
-Creep.prototype.takeEnergyFrom = function(target) {
-  var range = this.pos.getRangeTo(target);
+Creep.prototype.takeEnergyFrom = function takeEnergyFrom(target) {
+  const range = this.pos.getRangeTo(target);
   if (target instanceof Energy) {
     if (range > 1) {
       this.moveTo(target);
-    } else {
-      return this.pickup(target);
     }
-  } else {
-    if (range > 1) {
-      this.moveTo(target);
-    } else {
-      return target.transferEnergy(this);
-    }
+    return this.pickup(target);
   }
+  if (range > 1) {
+    this.moveTo(target);
+  }
+  return target.transferEnergy(this);
 };
 
-Creep.prototype.deliverEnergyTo = function(target) {
-  var range = this.pos.getRangeTo(target);
+Creep.prototype.deliverEnergyTo = function deliverEnergyTo(target) {
+  const range = this.pos.getRangeTo(target);
   if (target instanceof Flag) {
     if (range === 0) {
       this.dropEnergy();
@@ -437,18 +410,19 @@ Creep.prototype.deliverEnergyTo = function(target) {
   }
 };
 
-Creep.prototype.needsOffloaded = function() {
+Creep.prototype.needsOffloaded = function needsOffloaded() {
   return this.carry.energy / this.carryCapacity > 0.6;
 };
 
-Creep.prototype.needsEnergyDelivered = function() {
-  if (this.memory.role === 'harvester' || this.memory.role === 'courier' || this.memory.role === 'mailman') {
+Creep.prototype.needsEnergyDelivered = function needsEnergyDelivered() {
+  const blacklist = ['harvester', 'courier', 'mailman'];
+  if (blacklist.indexOf(this.memory.role) !== -1) {
     return false;
-  } else {
-    return this.carry.energy / this.carryCapacity < 0.6;
   }
+
+  return this.carry.energy / this.carryCapacity < 0.6;
 };
 
-Creep.prototype.cost = function() {
+Creep.prototype.cost = function cost() {
   return bodyCosts.calculateCosts(this.body);
 };
