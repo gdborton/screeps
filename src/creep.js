@@ -1,5 +1,6 @@
 import './room';
 import bodyCosts from './body-costs';
+const originalMoveTo = Creep.prototype.moveTo;
 
 const roles = {
   harvester() {
@@ -204,225 +205,226 @@ const roles = {
   },
 };
 
-Creep.prototype.work = function work() {
-  const creepFlag = Game.flags[this.name];
-  // move to creep flag if it is defined.
-  if (creepFlag !== undefined) {
-    if (this.pos.getRangeTo(creepFlag) === 0) {
-      creepFlag.remove();
-    } else {
-      this.moveTo(creepFlag);
-    }
-  } else if (this.memory.role && roles[this.memory.role]) {
-    roles[this.memory.role].call(this);
-  }
-};
-
-Creep.prototype.targetSource = function target() {
-  return this.room.getSources().filter(source => {
-    return this.memory.source === source.id;
-  })[0];
-};
-
-Creep.prototype.getSpawn = function getSpawn() {
-  const validSpawns = Object.keys(Game.spawns).filter(spawnName => {
-    const spawn = Game.spawns[spawnName];
-    return spawn.room === this.room;
-  });
-  return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns(this.memory.spawn);
-};
-
-Creep.prototype.moveToAndClaimController = function moveToAndClaimController(controller) {
-  if (this.pos.getRangeTo(controller) > 1) {
-    this.moveTo(controller);
-  } else {
-    if (this.claimController(controller) === 0) {
-      const claimFlag = Game.claimFlags().filter(flag => {
-        return flag.pos.getRangeTo(controller) === 0;
-      })[0];
-
-      if (claimFlag) {
-        claimFlag.remove();
+Object.assign(Creep.prototype, {
+  work() {
+    const creepFlag = Game.flags[this.name];
+    // move to creep flag if it is defined.
+    if (creepFlag !== undefined) {
+      if (this.pos.getRangeTo(creepFlag) === 0) {
+        creepFlag.remove();
+      } else {
+        this.moveTo(creepFlag);
       }
+    } else if (this.memory.role && roles[this.memory.role]) {
+      roles[this.memory.role].call(this);
     }
-  }
-};
+  },
 
-Creep.prototype.moveToThenDrop = function moveToThenDrop(target) {
-  if (this.pos.getRangeTo(target) > 1) {
-    this.moveTo(target);
-  } else {
-    this.dropEnergy();
-  }
-};
+  targetSource() {
+    return this.room.getSources().filter(source => {
+      return this.memory.source === source.id;
+    })[0];
+  },
 
-const originalMoveTo = Creep.prototype.moveTo;
-Creep.prototype.moveTo = function moveTo(...myArgs) {
-  const args = [].map.call(myArgs, arg => { return arg; });
-  const whitelist = ['upgrader', 'claimer', 'scout'];
-  let potentialOptions;
-  if (typeof myArgs[0] === 'number') {
-    potentialOptions = args[2];
-  } else {
-    potentialOptions = args[1];
-  }
-  if (!potentialOptions) {
-    potentialOptions = {};
-    args.push(potentialOptions);
-  }
-
-  const whitelisted = whitelist.indexOf(this.memory.role) !== -1;
-  if (!whitelisted && this.room.controller && typeof potentialOptions === 'object') {
-    const coord = this.room.controller.pos;
-    const avoid = [];
-    for (let x = coord.x - 1; x <= coord.x + 1; x++) {
-      for (let y = coord.y - 1; y <= coord.y + 1; y++) {
-        avoid.push({ x, y });
-      }
-    }
-
-    if (potentialOptions.avoid) {
-      potentialOptions.avoid = potentialOptions.avoid.concat(avoid);
-    } else {
-      potentialOptions.avoid = avoid;
-    }
-  }
-
-  if (!potentialOptions.reusePath) {
-    potentialOptions.reusePath = 20;
-  }
-
-  return originalMoveTo.apply(this, args);
-};
-
-Creep.prototype.moveToAndHarvest = function moveToAndHarvest(target) {
-  if (this.pos.getRangeTo(target) > 1) {
-    this.moveTo(target);
-  } else {
-    this.harvest(target);
-  }
-};
-
-Creep.prototype.moveToAndUpgrade = function moveToAndUpgrade(target) {
-  if (this.pos.getRangeTo(target) > 1) {
-    this.moveTo(this.room.controller);
-  } else {
-    this.upgradeController(this.room.controller);
-  }
-};
-
-Creep.prototype.moveToAndBuild = function moveToAndBuild(target) {
-  const range = this.pos.getRangeTo(target);
-  if (range > 1) {
-    this.moveTo(target);
-  }
-  if (range <= 3) {
-    this.build(target);
-  }
-};
-
-Creep.prototype.hasVisitedFlag = function hasVisitedFlag(flag) {
-  const visitedFlags = this.memory.visitedFlags || [];
-  return visitedFlags.indexOf(flag.name) !== -1;
-};
-
-Creep.prototype.findUnvisitedScoutFlags = function findUnvisitedScoutFlags() {
-  if (!this._unvisitedFlags) {
-    const flags = Game.getScoutFlags();
-    this._unvisitedFlags = flags.filter((flag) => {
-      return !this.hasVisitedFlag(flag);
+  getSpawn() {
+    const validSpawns = Object.keys(Game.spawns).filter(spawnName => {
+      const spawn = Game.spawns[spawnName];
+      return spawn.room === this.room;
     });
-  }
-  return this._unvisitedFlags;
-};
+    return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns(this.memory.spawn);
+  },
 
-Creep.prototype.dismantleFlag = function dismantleFlag(flag) {
-  const structure = this.room.getStructureAt(flag.pos);
-  if (structure) {
-    this.moveToAndDismantle(structure);
-  } else {
-    flag.remove();
-  }
-};
+  moveToAndClaimController(controller) {
+    if (this.pos.getRangeTo(controller) > 1) {
+      this.moveTo(controller);
+    } else {
+      if (this.claimController(controller) === 0) {
+        const claimFlag = Game.claimFlags().filter(flag => {
+          return flag.pos.getRangeTo(controller) === 0;
+        })[0];
 
-Creep.prototype.moveToAndDismantle = function moveToAndDismantle(target) {
-  if (this.pos.getRangeTo(target) === 1) {
-    this.dismantle(target);
-  } else {
-    this.moveTo(target);
-  }
-};
-
-Creep.prototype.scout = function scout() {
-  const unvisitedFlags = this.findUnvisitedScoutFlags();
-  unvisitedFlags.sort((flagA, flagB) => {
-    return parseInt(flagA.name, 10) - parseInt(flagB.name, 10);
-  });
-  let targetFlag = unvisitedFlags[0];
-  if (this.pos.getRangeTo(targetFlag) === 0) {
-    if (!this.memory.visitedFlags) {
-      this.memory.visitedFlags = [];
+        if (claimFlag) {
+          claimFlag.remove();
+        }
+      }
     }
-    this.memory.visitedFlags.push(targetFlag.name);
-    targetFlag = unvisitedFlags[1];
-  }
-  this.moveTo(targetFlag, { reusePath: 50 });
-};
+  },
 
-Creep.prototype.moveToAndRepair = function moveToAndRepair(target) {
-  const range = this.pos.getRangeTo(target);
-  if (range > 1) {
-    this.moveTo(target);
-  }
-  if (range <= 3) {
-    this.repair(target);
-  }
-};
+  moveToThenDrop(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      this.moveTo(target);
+    } else {
+      this.dropEnergy();
+    }
+  },
 
-Creep.prototype.takeEnergyFrom = function takeEnergyFrom(target) {
-  const range = this.pos.getRangeTo(target);
-  if (target instanceof Energy) {
+  moveTo(...myArgs) {
+    const args = [].map.call(myArgs, arg => { return arg; });
+    const whitelist = ['upgrader', 'claimer', 'scout'];
+    let potentialOptions;
+    if (typeof myArgs[0] === 'number') {
+      potentialOptions = args[2];
+    } else {
+      potentialOptions = args[1];
+    }
+    if (!potentialOptions) {
+      potentialOptions = {};
+      args.push(potentialOptions);
+    }
+
+    const whitelisted = whitelist.indexOf(this.memory.role) !== -1;
+    if (!whitelisted && this.room.controller && typeof potentialOptions === 'object') {
+      const coord = this.room.controller.pos;
+      const avoid = [];
+      for (let x = coord.x - 1; x <= coord.x + 1; x++) {
+        for (let y = coord.y - 1; y <= coord.y + 1; y++) {
+          avoid.push({ x, y });
+        }
+      }
+
+      if (potentialOptions.avoid) {
+        potentialOptions.avoid = potentialOptions.avoid.concat(avoid);
+      } else {
+        potentialOptions.avoid = avoid;
+      }
+    }
+
+    if (!potentialOptions.reusePath) {
+      potentialOptions.reusePath = 20;
+    }
+
+    return originalMoveTo.apply(this, args);
+  },
+
+  moveToAndHarvest(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      this.moveTo(target);
+    } else {
+      this.harvest(target);
+    }
+  },
+
+  moveToAndUpgrade(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      this.moveTo(this.room.controller);
+    } else {
+      this.upgradeController(this.room.controller);
+    }
+  },
+
+  moveToAndBuild(target) {
+    const range = this.pos.getRangeTo(target);
     if (range > 1) {
       this.moveTo(target);
     }
-    return this.pickup(target);
-  }
-  if (range > 1) {
-    this.moveTo(target);
-  }
-  return target.transferEnergy(this);
-};
+    if (range <= 3) {
+      this.build(target);
+    }
+  },
 
-Creep.prototype.deliverEnergyTo = function deliverEnergyTo(target) {
-  const range = this.pos.getRangeTo(target);
-  if (target instanceof Flag) {
-    if (range === 0) {
-      this.dropEnergy();
+  hasVisitedFlag(flag) {
+    const visitedFlags = this.memory.visitedFlags || [];
+    return visitedFlags.indexOf(flag.name) !== -1;
+  },
+
+  findUnvisitedScoutFlags() {
+    if (!this._unvisitedFlags) {
+      const flags = Game.getScoutFlags();
+      this._unvisitedFlags = flags.filter((flag) => {
+        return !this.hasVisitedFlag(flag);
+      });
+    }
+    return this._unvisitedFlags;
+  },
+
+  dismantleFlag(flag) {
+    const structure = this.room.getStructureAt(flag.pos);
+    if (structure) {
+      this.moveToAndDismantle(structure);
+    } else {
+      flag.remove();
+    }
+  },
+
+  moveToAndDismantle(target) {
+    if (this.pos.getRangeTo(target) === 1) {
+      this.dismantle(target);
     } else {
       this.moveTo(target);
     }
-  } else {
-    if (range <= 1) {
-      this.transferEnergy(target);
-    } else {
+  },
+
+  scout() {
+    const unvisitedFlags = this.findUnvisitedScoutFlags();
+    unvisitedFlags.sort((flagA, flagB) => {
+      return parseInt(flagA.name, 10) - parseInt(flagB.name, 10);
+    });
+    let targetFlag = unvisitedFlags[0];
+    if (this.pos.getRangeTo(targetFlag) === 0) {
+      if (!this.memory.visitedFlags) {
+        this.memory.visitedFlags = [];
+      }
+      this.memory.visitedFlags.push(targetFlag.name);
+      targetFlag = unvisitedFlags[1];
+    }
+    this.moveTo(targetFlag, { reusePath: 50 });
+  },
+
+  moveToAndRepair(target) {
+    const range = this.pos.getRangeTo(target);
+    if (range > 1) {
       this.moveTo(target);
     }
-  }
-};
+    if (range <= 3) {
+      this.repair(target);
+    }
+  },
 
-Creep.prototype.needsOffloaded = function needsOffloaded() {
-  return this.carry.energy / this.carryCapacity > 0.6;
-};
+  takeEnergyFrom(target) {
+    const range = this.pos.getRangeTo(target);
+    if (target instanceof Energy) {
+      if (range > 1) {
+        this.moveTo(target);
+      }
+      return this.pickup(target);
+    }
+    if (range > 1) {
+      this.moveTo(target);
+    }
+    return target.transferEnergy(this);
+  },
 
-Creep.prototype.needsEnergyDelivered = function needsEnergyDelivered() {
-  const blacklist = ['harvester', 'courier', 'mailman'];
-  if (blacklist.indexOf(this.memory.role) !== -1) {
-    return false;
-  }
+  deliverEnergyTo(target) {
+    const range = this.pos.getRangeTo(target);
+    if (target instanceof Flag) {
+      if (range === 0) {
+        this.dropEnergy();
+      } else {
+        this.moveTo(target);
+      }
+    } else {
+      if (range <= 1) {
+        this.transferEnergy(target);
+      } else {
+        this.moveTo(target);
+      }
+    }
+  },
 
-  return this.carry.energy / this.carryCapacity < 0.6;
-};
+  needsOffloaded() {
+    return this.carry.energy / this.carryCapacity > 0.6;
+  },
 
-Creep.prototype.cost = function cost() {
-  return bodyCosts.calculateCosts(this.body);
-};
+  needsEnergyDelivered() {
+    const blacklist = ['harvester', 'courier', 'mailman'];
+    if (blacklist.indexOf(this.memory.role) !== -1) {
+      return false;
+    }
+
+    return this.carry.energy / this.carryCapacity < 0.6;
+  },
+
+  cost() {
+    return bodyCosts.calculateCosts(this.body);
+  },
+});
