@@ -1,3 +1,25 @@
 {
-  "extends": "airbnb"
+  "extends": "airbnb",
+  "rules": {
+    "newline-per-chained-call": 0,
+    "arrow-body-style": 0
+  },
+  "globals": {
+    "Game": true,
+    "Creep": true,
+    "Room": true,
+    "RoomPosition": true,
+    "Spawn": true,
+    "Structure": true,
+    "Flag": true,
+    "MOVE": true,
+    "WORK": true,
+    "CARRY": true,
+    "ATTACK": true,
+    "RANGED_ATTACK": true,
+    "HEAL": true,
+    "TOUGH": true,
+    "Energy": true,
+    "STRUCTURE_LINK": true
+  }
 }
