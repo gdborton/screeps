@@ -5,23 +5,22 @@ function getFlagsOfType(type) {
 }
 
 export default {
-  setup: function() {
-    var creepFlags;
-    var scoutFlags;
+  setup() {
+    let scoutFlags;
 
-    Game.flagArray = function() {
+    Game.flagArray = function flagArray() {
       return Object.keys(Game.flags).map((flagName) => {
         return Game.flags[flagName];
       });
-    }
+    };
 
-    Game.clearScoutFlags = function() {
+    Game.clearScoutFlags = function clearScoutFlags() {
       Game.getScoutFlags().forEach((flag) => {
         flag.remove();
       });
     };
 
-    Game.getScoutFlags = function() {
+    Game.getScoutFlags = function getScoutFlags() {
       if (scoutFlags === undefined) {
         scoutFlags = getFlagsOfType('scout');
       }
@@ -29,12 +28,12 @@ export default {
       return scoutFlags;
     };
 
-    Game.dismantleFlags = function() {
+    Game.dismantleFlags = function dismantleFlags() {
       return getFlagsOfType('dismantle');
-    }
+    };
 
-    Game.claimFlags = function() {
+    Game.claimFlags = function claimFlags() {
       return getFlagsOfType('claim');
-    }
-  }
+    };
+  },
 };

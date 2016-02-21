@@ -11,15 +11,15 @@ import profiler from './profiler';
 
 profiler.enable();
 
-export function loop () {
-    if (Room.prototype.work && Game.cpuLimit > 100) {
-      profiler.wrap(function () {
-        game.setup();
-        Object.keys(Game.rooms).forEach((roomName, index) => {
-          if (index === 1 || Game.cpuLimit > 50) {
-            Game.rooms[roomName].work();
-          }
-        });
+export function loop() {
+  if (Room.prototype.work && Game.cpuLimit > 100) {
+    profiler.wrap(() => {
+      game.setup();
+      Object.keys(Game.rooms).forEach((roomName, index) => {
+        if (index === 1 || Game.cpuLimit > 50) {
+          Game.rooms[roomName].work();
+        }
       });
-    }
-};
+    });
+  }
+}
