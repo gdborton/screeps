@@ -5,6 +5,7 @@
     "arrow-body-style": 0
   },
   "globals": {
+    "BODYPART_COST": true,
     "Game": true,
     "Creep": true,
     "Room": true,
