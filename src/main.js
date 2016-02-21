@@ -1,16 +1,17 @@
-require('./perf')();
-var game = require('./game');
-require('./creep');
-require('./source');
-require('./spawns');
-require('./structures');
-require('./room-position');
-require('./flag');
-var profiler = require('./profiler');
+// Order here is important. These modify global prototypes.
+import './perf';
+import game from './game';
+import './creep';
+import './source';
+import './spawns';
+import './structures';
+import './room-position';
+import './flag';
+import profiler from './profiler';
+
 profiler.enable();
 
-module.exports = {
-  loop() {
+export function loop () {
     if (Room.prototype.work && Game.cpuLimit > 100) {
       profiler.wrap(function () {
         game.setup();
@@ -21,5 +22,4 @@ module.exports = {
         });
       });
     }
-  }
 };

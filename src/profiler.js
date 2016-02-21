@@ -184,7 +184,8 @@ var Profiler = {
     return Profiler.type() === 'email' && Memory.profiler.disableTick === Game.time;
   }
 };
-module.exports = {
+
+export default {
   wrap(callback) {
     if (enabled) {
       depth = 0; // reset depth, this needs to be done each tick.

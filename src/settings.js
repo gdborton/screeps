@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   courierToWorkerRatio: 0.5,
   // count of structures that can be built at each controller level.
   buildingCount: {

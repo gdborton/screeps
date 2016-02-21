@@ -1,12 +1,12 @@
-var bodyCosts = {};
-
-bodyCosts[MOVE] = 50;
-bodyCosts[WORK] = 100;
-bodyCosts[CARRY] = 50;
-bodyCosts[ATTACK] = 80;
-bodyCosts[RANGED_ATTACK] = 150;
-bodyCosts[HEAL] = 250;
-bodyCosts[TOUGH] = 10;
+const bodyCosts = {
+  [MOVE]: 50,
+  [WORK]: 100,
+  [CARRY]: 50,
+  [ATTACK]: 80,
+  [RANGED_ATTACK]: 150,
+  [HEAL]: 250,
+  [TOUGH]: 10,
+};
 
 bodyCosts.calculateCosts = function(bodyParts) {
   var cost = 0;
@@ -18,4 +18,4 @@ bodyCosts.calculateCosts = function(bodyParts) {
   return cost;
 };
 
-module.exports = bodyCosts;
+export default bodyCosts;

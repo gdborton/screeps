@@ -12,7 +12,7 @@ function creepMemoryCleanUp() {
   }
 };
 
-module.exports = function(options) {
+export default function(options) {
   if (!setup) {
     options = options || {};
     Memory.screepsPerf = Memory.screepsPerf || {

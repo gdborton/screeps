@@ -4,7 +4,7 @@ function getFlagsOfType(type) {
   });
 }
 
-module.exports = {
+export default {
   setup: function() {
     var creepFlags;
     var scoutFlags;
