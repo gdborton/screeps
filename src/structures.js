@@ -20,7 +20,7 @@ structureTypes[STRUCTURE_LINK] = function() {
 
 structureTypes[STRUCTURE_TOWER] = function() {
   if (this.room.hasHostileCreeps() && !this.isEmpty()) {
-    this.attack(this.pos.findClosest(this.room.getHostileCreeps()));
+    this.attack(this.pos.findClosestByRange(this.room.getHostileCreeps()));
   }
 };
 
