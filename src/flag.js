@@ -1,8 +1,8 @@
-Flag.prototype.work = function() {
+Flag.prototype.work = function work() {
   if (this.name.toLowerCase().indexOf('build') !== -1 && this.room.getControllerOwned()) {
-    var parts = this.name.split('_');
-    var target = parts[parts.length - 1];
-    var shouldBuild = false;
+    const parts = this.name.split('_');
+    const target = parts[parts.length - 1];
+    let shouldBuild = false;
 
     if (target === STRUCTURE_SPAWN) {
       shouldBuild = true;
@@ -13,7 +13,7 @@ Flag.prototype.work = function() {
     }
 
     if (shouldBuild) {
-      var result = this.room.createConstructionSite(this.pos.x, this.pos.y, target);
+      const result = this.room.createConstructionSite(this.pos.x, this.pos.y, target);
       if (result === 0) {
         this.remove();
       }
