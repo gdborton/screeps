@@ -1,6 +1,17 @@
 var originalFindPath = Room.prototype.findPath;
 var setup = false;
 
+function creepMemoryCleanUp() {
+  if (Game.time - Memory.screepsPerf.lastMemoryCleanUp > 100) {
+    Object.keys(Memory.creeps).forEach(creepName => {
+      if (!Game.creeps[creepName]) {
+        Memory.creeps[creepName] = undefined;
+      }
+    });
+    Memory.screepsPerf.lastMemoryCleanUp = Game.time;
+  }
+};
+
 module.exports = function(options) {
   if (!setup) {
     options = options || {};
@@ -28,7 +39,7 @@ module.exports = function(options) {
       };
 
       Array.prototype.map = function(callback, thisArg) {
-        arr = this;
+        var arr = this;
         var returnVal = [];
         for (var iterator = 0; iterator < arr.length; iterator++) {
           returnVal.push(callback.call(thisArg, arr[iterator], iterator, arr));
@@ -41,17 +52,6 @@ module.exports = function(options) {
      * Creep memory clean up... this speeds up the initial memory parse each tick.
      */
     if (options.cleanUpCreepMemory || options.cleanUpCreepMemory === undefined) {
-      function creepMemoryCleanUp() {
-        if (Game.time - Memory.screepsPerf.lastMemoryCleanUp > 100) {
-          Object.keys(Memory.creeps).forEach(creepName => {
-            if (!Game.creeps[creepName]) {
-              Memory.creeps[creepName] = undefined;
-            }
-          });
-          Memory.screepsPerf.lastMemoryCleanUp = Game.time;
-        }
-      };
-
       // Monkey patch creating creeps so that we can clean up their memory without forcing the user to make a call.
       var originalCreateCreep = Spawn.prototype.createCreep;
       Spawn.prototype.createCreep = function() {

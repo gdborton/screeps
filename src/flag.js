@@ -1,7 +1,7 @@
 Flag.prototype.work = function() {
   if (this.name.toLowerCase().indexOf('build') !== -1 && this.room.getControllerOwned()) {
     var parts = this.name.split('_');
-    target = parts[parts.length - 1];
+    var target = parts[parts.length - 1];
     var shouldBuild = false;
 
     if (target === STRUCTURE_SPAWN) {
