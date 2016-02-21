@@ -1,5 +1,5 @@
 // Order here is important. These modify global prototypes.
-import './perf';
+import 'screeps-perf';
 import game from './game';
 import './creep';
 import './source';
@@ -7,7 +7,7 @@ import './spawns';
 import './structures';
 import './room-position';
 import './flag';
-import profiler from './profiler';
+import profiler from 'screeps-profiler';
 
 profiler.enable();
 

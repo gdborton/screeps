@@ -26,6 +26,7 @@
     "eslint": "^2.2.0",
     "eslint-config-airbnb": "^6.0.0",
     "eslint-plugin-react": "^4.0.0",
+    "screeps-profiler": "^1.1.0",
     "webpack": "^1.12.13"
   }
 }
