@@ -25,6 +25,7 @@
     "babel-preset-stage-2": "^6.5.0",
     "eslint": "^2.2.0",
     "eslint-config-airbnb": "^6.0.0",
+    "eslint-plugin-flowtype": "^2.1.0",
     "eslint-plugin-react": "^4.0.0",
     "screeps-perf": "0.0.1",
     "screeps-profiler": "^1.1.0",
