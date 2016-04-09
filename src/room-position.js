@@ -1,5 +1,5 @@
 /* @flow */
-import { RoomPosition } from 'screep-globals';
+import { RoomPosition } from 'screeps-globals';
 
 Object.assign(RoomPosition.prototype, {
   identifier() {

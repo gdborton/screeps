@@ -1,5 +1,5 @@
 /* @flow */
-import { Source } from 'screep-globals';
+import { Source } from 'screeps-globals';
 
 Object.assign(Source.prototype, {
   // Finds and returns the number of open spots next to the source.

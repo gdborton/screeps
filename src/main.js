@@ -9,7 +9,7 @@ import './structures';
 import './room-position';
 import './flag';
 import profiler from 'screeps-profiler';
-import { Room } from 'screep-globals';
+import { Room } from 'screeps-globals';
 
 profiler.enable();
 

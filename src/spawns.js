@@ -2,7 +2,7 @@
 import './source';
 import './room';
 import bodyCosts from './body-costs';
-import { Spawn } from 'screep-globals';
+import { Spawn } from 'screeps-globals';
 
 Object.assign(Spawn.prototype, {
   buildHarvester(availableEnergy) {

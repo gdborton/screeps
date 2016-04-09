@@ -1,7 +1,7 @@
 /* @flow */
 import './room';
 import bodyCosts from './body-costs';
-import { Creep, Flag, Energy } from 'screep-globals';
+import { Creep, Flag, Energy } from 'screeps-globals';
 
 const originalMoveTo = Creep.prototype.moveTo;
 

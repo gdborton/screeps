@@ -1,5 +1,5 @@
 /* @flow */
-import { Flag } from 'screep-globals';
+import { Flag } from 'screeps-globals';
 
 Object.assign(Flag.prototype, {
   work() {

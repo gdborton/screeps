@@ -1,6 +1,6 @@
 /* @flow */
 import settings from './settings';
-import { Room } from 'screep-globals';
+import { Room } from 'screeps-globals';
 
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
