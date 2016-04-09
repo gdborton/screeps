@@ -1,3 +1,6 @@
+/* @flow */
+import { Source } from 'screep-globals';
+
 Object.assign(Source.prototype, {
   // Finds and returns the number of open spots next to the source.
   freeEdges() {

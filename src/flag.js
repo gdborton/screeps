@@ -1,3 +1,6 @@
+/* @flow */
+import { Flag } from 'screep-globals';
+
 Object.assign(Flag.prototype, {
   work() {
     if (this.name.toLowerCase().indexOf('build') !== -1 && this.room.getControllerOwned()) {

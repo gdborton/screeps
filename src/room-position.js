@@ -1,3 +1,6 @@
+/* @flow */
+import { RoomPosition } from 'screep-globals';
+
 Object.assign(RoomPosition.prototype, {
   identifier() {
     return `${this.roomName}x${this.x}y${this.y}`;

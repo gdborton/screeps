@@ -1,3 +1,6 @@
+/* @flow */
+import { Structure } from 'screep-globals';
+
 const TEN_MILLION = 10000000;
 const structureTypes = {
   [STRUCTURE_EXTENSION]() {

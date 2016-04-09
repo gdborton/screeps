@@ -1,3 +1,5 @@
+/* @flow */
+
 function getFlagsOfType(type) {
   return Game.flagArray().filter(flag => {
     return flag.name.toLowerCase().indexOf(type) !== -1;

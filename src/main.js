@@ -1,3 +1,4 @@
+/* @flow */
 // Order here is important. These modify global prototypes.
 import 'screeps-perf';
 import game from './game';
@@ -8,6 +9,7 @@ import './structures';
 import './room-position';
 import './flag';
 import profiler from 'screeps-profiler';
+import { Room } from 'screep-globals';
 
 profiler.enable();
 

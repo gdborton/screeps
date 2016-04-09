@@ -1,4 +1,6 @@
+/* @flow */
 import settings from './settings';
+import { Room } from 'screep-globals';
 
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
@@ -234,7 +236,7 @@ Object.assign(Room.prototype, {
         }
 
         const prevCoord = exitCoords[index - 1];
-        return !Math.abs(coord.x - prevCoord.x < 2) || !Math.abs(coord.y - prevCoord.y < 2);
+        return !(Math.abs(coord.x - prevCoord.x) < 2) || !(Math.abs(coord.y - prevCoord.y) < 2);
       });
     }
 

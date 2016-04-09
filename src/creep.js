@@ -1,5 +1,8 @@
+/* @flow */
 import './room';
 import bodyCosts from './body-costs';
+import { Creep, Flag, Energy } from 'screep-globals';
+
 const originalMoveTo = Creep.prototype.moveTo;
 
 const roles = {
@@ -231,7 +234,7 @@ Object.assign(Creep.prototype, {
       const spawn = Game.spawns[spawnName];
       return spawn.room === this.room;
     });
-    return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns(this.memory.spawn);
+    return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns[this.memory.spawn];
   },
 
   moveToAndClaimController(controller) {

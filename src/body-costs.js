@@ -1,5 +1,6 @@
+/* @flow */
 export default {
-  calculateCosts(bodyParts) {
+  calculateCosts(bodyParts): number {
     let cost = 0;
     bodyParts.forEach((bodyPart) => {
       const part = typeof bodyPart === 'string' ? bodyPart : bodyPart.type;

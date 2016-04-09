@@ -10,9 +10,13 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel', // 'babel-loader' is also a legal name to reference
+        loader: 'babel-loader',
         query: {
-          presets: ['es2015', 'stage-2'],
+          presets: [
+            require.resolve('babel-preset-react'), // React preset is needed only for flow support.
+            require.resolve('babel-preset-es2015'),
+            require.resolve('babel-preset-stage-2'),
+          ],
         },
       },
     ],

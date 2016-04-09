@@ -1,6 +1,8 @@
+/* @flow */
 import './source';
 import './room';
 import bodyCosts from './body-costs';
+import { Spawn } from 'screep-globals';
 
 Object.assign(Spawn.prototype, {
   buildHarvester(availableEnergy) {
@@ -184,10 +186,10 @@ Object.assign(Spawn.prototype, {
         this.buildRoadWorker(availableEnergy);
       }
     } else if (availableEnergy === this.maxEnergy()) {
-      if (this.room.needsCouriers()) {
-        this.buildCourier(availableEnergy);
-      } else if (this.room.needsHarvesters()) {
+      if (this.room.needsHarvesters()) {
         this.buildHarvester(availableEnergy);
+      } else if (this.room.needsCouriers()) {
+        this.buildCourier(availableEnergy);
       } else if (this.room.needsUpgraders()) {
         this.buildUpgrader(availableEnergy);
       } else if (this.room.mailmanCount() < 2 && this.maxEnergy() < 600) {
