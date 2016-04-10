@@ -37,6 +37,7 @@
     "FIND_STRUCTURES": true,
     "STRUCTURE_EXTENSION": true,
     "STRUCTURE_LINK": true,
+    "STRUCTURE_OBSERVER": true,
     "STRUCTURE_ROAD": true,
     "STRUCTURE_SPAWN": true,
     "STRUCTURE_STORAGE": true,

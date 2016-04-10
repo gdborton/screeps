@@ -16,11 +16,41 @@ function getAllScoutHarvesters() {
   });
 }
 
-function getAllScouts() {
+function getAllCreepsWithRole(role) {
   return Object.keys(Game.creeps).filter(creepName => {
     const creep = Game.creeps[creepName];
-    return creep.memory.role === 'scout';
+    return creep.memory.role === role;
   });
+}
+
+function getAllScouts() {
+  return getAllCreepsWithRole('scout');
+}
+
+function getAllAttackers() {
+  return getAllCreepsWithRole('attacker');
+}
+
+const cardinality = {
+  N: -1,
+  S: 1,
+  W: -1,
+  E: 1,
+};
+
+function coordValue(roomName, regex) {
+  const xString = regex.exec(roomName)[1];
+  const modifier = cardinality[xString.substr(0, 1)];
+  const value = xString.substr(1);
+  return modifier * value;
+}
+
+function xValueFromRoomName(roomName) {
+  return coordValue(roomName, /([WE]\d+)/);
+}
+
+function yValueFromRoomName(roomName) {
+  return coordValue(roomName, /([NS]\d+)/);
 }
 
 Object.assign(Room.prototype, {
@@ -36,14 +66,51 @@ Object.assign(Room.prototype, {
     this.getFlags().forEach((flag) => {
       flag.work();
     });
+
+    this.placeStructures();
   },
 
   hasHostileCreeps() {
     return this.getHostileCreeps().length > 0;
   },
 
+  distanceToRoom(roomName) {
+    const xDistance = this.getXCoord() - xValueFromRoomName(roomName);
+    const yDistance = this.getYCoord() - yValueFromRoomName(roomName);
+    const distance = xDistance * xDistance + yDistance * yDistance;
+    return Math.sqrt(distance);
+  },
+
+  getXCoord() {
+    return xValueFromRoomName(this.name);
+  },
+
+  getYCoord() {
+    return yValueFromRoomName(this.name);
+  },
+
+  needsAttackers() {
+    return getAllAttackers().length < 2;
+  },
+
+  placeStructures() {
+    if (this.needsObserver()) {
+      this.buildObserver();
+    }
+  },
+
   getHostileCreeps() {
     return this.find(FIND_HOSTILE_CREEPS);
+  },
+
+  needsObserver() {
+    return this.controller.level >= 8 && !this.getObserver();
+  },
+
+  buildObserver() {
+    const x = this.getSpawn().pos.x + 1;
+    const y = this.getSpawn().pos.y + 1;
+    this.createConstructionSite(x, y, STRUCTURE_OBSERVER);
   },
 
   needsUpgraders() {
@@ -71,6 +138,17 @@ Object.assign(Room.prototype, {
       })[0];
     }
     return this._storage;
+  },
+
+  getObserver() {
+    if (!this._observerCalc) {
+      this._observerCalc = true;
+      this._observer = this.getMyStructures().filter(structure => {
+        return structure.structureType === STRUCTURE_OBSERVER;
+      })[0];
+    }
+
+    return this._observer;
   },
 
   getLinks() {
