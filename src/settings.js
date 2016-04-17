@@ -1,22 +1,23 @@
-module.exports = {
+/* @flow */
+export default {
   courierToWorkerRatio: 0.5,
   // count of structures that can be built at each controller level.
   buildingCount: {
     1: {
-      spawns: 1
+      spawns: 1,
     },
     2: {
       spawns: 1,
       extensions: 5,
       ramparts: true,
-      walls: true
+      walls: true,
     },
     3: {
       spawns: 1,
       extensions: 10,
       ramparts: true,
       walls: true,
-      roads: true
+      roads: true,
     },
     4: {
       spawns: 1,
@@ -24,7 +25,7 @@ module.exports = {
       ramparts: true,
       walls: true,
       roads: true,
-      storage: 1
+      storage: 1,
     },
     5: {
       spawns: 1,
@@ -32,7 +33,7 @@ module.exports = {
       ramparts: true,
       walls: true,
       roads: true,
-      storage: 1
+      storage: 1,
     },
     6: {
       spawns: 1,
@@ -40,7 +41,7 @@ module.exports = {
       ramparts: true,
       walls: true,
       roads: true,
-      storage: 1
+      storage: 1,
     },
     7: {
       spawns: 1,
@@ -48,7 +49,7 @@ module.exports = {
       ramparts: true,
       walls: true,
       roads: true,
-      storage: 1
+      storage: 1,
     },
     8: {
       spawns: 1,
@@ -56,7 +57,7 @@ module.exports = {
       ramparts: true,
       walls: true,
       roads: true,
-      storage: 1
-    }
-  }
+      storage: 1,
+    },
+  },
 };
