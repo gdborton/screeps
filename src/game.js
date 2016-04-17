@@ -7,7 +7,7 @@ function getFlagsOfType(type) {
 }
 
 let scoutFlags;
-let roomDistanceMap = {};
+const roomDistanceMap = {};
 const enhancedGame = {
   flagArray() {
     return Object.keys(Game.flags).map(flagName => {
@@ -46,6 +46,13 @@ const enhancedGame = {
       })[0];
     }
     return roomDistanceMap[targetRoomName];
+  },
+
+  clearConstructionSites() {
+    Object.keys(Game.rooms).forEach(roomName => {
+      const room = Game.rooms[roomName];
+      room.clearConstructionSites();
+    });
   },
 };
 

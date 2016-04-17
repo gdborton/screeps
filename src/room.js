@@ -104,6 +104,14 @@ Object.assign(Room.prototype, {
     if (this.needsObserver()) {
       this.buildObserver();
     }
+
+    if (this.needsExtractor()) {
+      this.buildExtractor();
+    }
+
+    if (this.needsTerminal()) {
+      this.buildTerminal();
+    }
   },
 
   getHostileCreeps() {
@@ -114,16 +122,41 @@ Object.assign(Room.prototype, {
     return this.controller.level >= 8 && !this.getObserver();
   },
 
+  needsExtractor() {
+    return this.controller.level >= 6 && !this.getExtractor();
+  },
+
+  needsTerminal() {
+    return this.controller.level >= 6 && !this.getTerminal();
+  },
+
   buildObserver() {
     const x = this.getSpawn().pos.x + 1;
     const y = this.getSpawn().pos.y + 1;
     this.createConstructionSite(x, y, STRUCTURE_OBSERVER);
   },
 
+  buildExtractor() {
+    this.getMineralSites().forEach(mineral => {
+      this.createConstructionSite(mineral.pos.x, mineral.pos.y, STRUCTURE_EXTRACTOR);
+    });
+  },
+
+  buildTerminal() {
+    const spawnPos = this.getSpawn().pos;
+    this.createConstructionSite(spawnPos.x - 2, spawnPos.y + 2, STRUCTURE_TERMINAL);
+  },
+
   needsUpgraders() {
     const hasFreeEdges = this.upgraderCount() < this.controller.pos.freeEdges();
     return hasFreeEdges && !!this.droppedControllerEnergy() &&
       this.upgraderWorkParts() < this.maxEnergyProducedPerTick();
+  },
+
+  clearConstructionSites() {
+    this.getConstructionSites().forEach(constructionSite => {
+      constructionSite.remove();
+    });
   },
 
   needsBuilders() {
@@ -156,6 +189,34 @@ Object.assign(Room.prototype, {
     }
 
     return this._observer;
+  },
+
+  getMineralSites() {
+    if (!this._minerals) {
+      this._minerals = this.find(FIND_MINERALS);
+    }
+    return this._minerals;
+  },
+
+  getExtractor() {
+    if (!this._extractorCalc) {
+      this._extractorCalc = true;
+      this._extractor = this.getMyStructures().filter(structure => {
+        return structure.structureType === STRUCTURE_EXTRACTOR;
+      })[0];
+    }
+
+    return this._extractor;
+  },
+
+  getTerminal() {
+    if (!this._terminalCalc) {
+      this._termainalCalc = true;
+      this._terminal = this.getMyStructures().filter(structure => {
+        return structure.structureType === STRUCTURE_TERMINAL;
+      })[0];
+    }
+    return this._terminal;
   },
 
   getLinks() {
