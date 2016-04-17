@@ -67,18 +67,25 @@ Object.assign(Room.prototype, {
       flag.work();
     });
 
-    this.placeStructures();
+    if (this.getControllerOwned()) {
+      this.placeStructures();
+    }
   },
 
   hasHostileCreeps() {
     return this.getHostileCreeps().length > 0;
   },
 
+  // roomName needs to be a string because we may not have access to the room object on Game.rooms.
   distanceToRoom(roomName) {
     const xDistance = this.getXCoord() - xValueFromRoomName(roomName);
     const yDistance = this.getYCoord() - yValueFromRoomName(roomName);
     const distance = xDistance * xDistance + yDistance * yDistance;
     return Math.sqrt(distance);
+  },
+
+  isClosestToRoom(roomName) {
+    return Game.getClosestOwnedRoomTo(roomName);
   },
 
   getXCoord() {

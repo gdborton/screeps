@@ -7,6 +7,7 @@ function getFlagsOfType(type) {
 }
 
 let scoutFlags;
+let roomDistanceMap = {};
 const enhancedGame = {
   flagArray() {
     return Object.keys(Game.flags).map(flagName => {
@@ -34,6 +35,17 @@ const enhancedGame = {
 
   claimFlags() {
     return getFlagsOfType('claim');
+  },
+
+  getClosestOwnedRoomTo(targetRoomName) {
+    if (!roomDistanceMap[targetRoomName]) {
+      roomDistanceMap[targetRoomName] = Object.keys(Game.rooms).sort((roomNameA, roomNameB) => {
+        const roomA = Game.rooms[roomNameA];
+        const roomB = Game.rooms[roomNameB];
+        return roomA.distanceToRoom(targetRoomName) - roomB.distanceToRoom(targetRoomName);
+      })[0];
+    }
+    return roomDistanceMap[targetRoomName];
   },
 };
 
