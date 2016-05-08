@@ -151,7 +151,8 @@ Object.assign(Room.prototype, {
   needsUpgraders() {
     const hasFreeEdges = this.upgraderCount() < this.controller.pos.freeEdges();
     return hasFreeEdges && !!this.droppedControllerEnergy() &&
-      this.upgraderWorkParts() < this.maxEnergyProducedPerTick();
+      this.upgraderWorkParts() < this.maxEnergyProducedPerTick() &&
+      !this.getConstructionSites().length;
   },
 
   clearConstructionSites() {
