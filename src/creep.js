@@ -25,7 +25,7 @@ const roles = {
       } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
       } else {
-        this.dropEnergy();
+        this.drop(RESOURCE_ENERGY);
       }
     }
   },
@@ -257,7 +257,7 @@ Object.assign(Creep.prototype, {
     if (this.pos.getRangeTo(target) > 1) {
       this.moveTo(target);
     } else {
-      this.dropEnergy();
+      this.drop(RESOURCE_ENERGY);
     }
   },
 
@@ -401,7 +401,7 @@ Object.assign(Creep.prototype, {
     const range = this.pos.getRangeTo(target);
     if (target instanceof Flag) {
       if (range === 0) {
-        this.dropEnergy();
+        this.drop(RESOURCE_ENERGY);
       } else {
         this.moveTo(target);
       }
