@@ -394,7 +394,7 @@ Object.assign(Creep.prototype, {
     if (range > 1) {
       this.moveTo(target);
     }
-    return target.transferEnergy(this);
+    return target.transfer(this, RESOURCE_ENERGY);
   },
 
   deliverEnergyTo(target) {
@@ -407,7 +407,7 @@ Object.assign(Creep.prototype, {
       }
     } else {
       if (range <= 1) {
-        this.transferEnergy(target);
+        this.transfer(target, RESOURCE_ENERGY);
       } else {
         this.moveTo(target);
       }
