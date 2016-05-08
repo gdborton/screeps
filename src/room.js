@@ -69,6 +69,7 @@ Object.assign(Room.prototype, {
 
     if (this.getControllerOwned()) {
       this.placeStructures();
+      this.placeFlags();
     }
   },
 
@@ -217,6 +218,51 @@ Object.assign(Room.prototype, {
       })[0];
     }
     return this._terminal;
+  },
+
+  plan() {
+    this.placeFlags();
+  },
+
+  placeFlags() {
+    this.placeControllerDropFlag();
+    this.placeConstructionFlags();
+  },
+
+  placeConstructionFlags() {
+    this.placeTowerFlags();
+  },
+
+  placeTowerFlags() {
+    if (this.getTowerFlags().length < 2) {
+      const sources = this.getSources();
+      sources.forEach((source, index) => {
+        if (!source.hasTowerFlag()) {
+          const openPositions = source.pos.openPositionsAtRange(2);
+          const centerPosition = new RoomPosition(25, 25, this.name);
+          openPositions.sort((posA, posB) => {
+            return posA.getRangeTo(centerPosition) - posB.getRangeTo(centerPosition);
+          });
+          this.createFlag(openPositions[0], `BUILD_${STRUCTURE_TOWER}_${Date.now()}_${index}`);
+        }
+      });
+    }
+  },
+
+  getTowerFlags() {
+    return this.getFlags().filter(flag => {
+      return flag.name.indexOf(STRUCTURE_TOWER) !== -1;
+    });
+  },
+
+  placeControllerDropFlag() {
+    if (!this.getControllerEnergyDropFlag()) {
+      const potentialSpots = this.controller.pos.openPositionsAtRange(2);
+      const bestSpot = potentialSpots.find(pos => {
+        return pos.x === this.controller.pos.x || pos.y === this.controller.pos.y;
+      });
+      this.createFlag(bestSpot || potentialSpots[0], `CONTROLLER_ENERGY_DROP_${Date.now()}`);
+    }
   },
 
   getLinks() {

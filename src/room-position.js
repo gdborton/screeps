@@ -8,22 +8,30 @@ Object.assign(RoomPosition.prototype, {
 
   freeEdges() {
     if (!(Memory.freeEdges && Memory.freeEdges[this.identifier()])) {
-      let openSpots = 0;
-      const room = Game.rooms[this.roomName];
-      const surroundings = room.lookAtArea(this.y - 1, this.x - 1, this.y + 1, this.x + 1);
-      Object.keys(surroundings).forEach(x => {
-        Object.keys(surroundings[x]).forEach(y => {
-          openSpots = openSpots + surroundings[x][y].filter(object => {
-            const isTerrain = object.type === 'terrain';
-            return isTerrain && (object.terrain === 'swamp' || object.terrain === 'plain');
-          }).length;
-        });
-      });
-
       Memory.freeEdges = Memory.freeEdges || {};
-      Memory.freeEdges[this.identifier()] = openSpots;
+      Memory.freeEdges[this.identifier()] = this.openPositionsAtRange();
     }
 
     return Memory.freeEdges[this.identifier()];
+  },
+
+  openPositionsAtRange(range = 1) {
+    const room = Game.rooms[this.roomName];
+    const openPositions = [];
+    const surroundings = room.lookAtArea(this.x - range, this.y - range, this.x + range, this.y + range); // eslint-disable-line max-len
+    Object.keys(surroundings).forEach(x => {
+      Object.keys(surroundings[x]).forEach(y => {
+        const pos = new RoomPosition(+x, +y, this.roomName); // The + is for string -> number
+        if (pos.getRangeTo(this) === range && pos.isOpen()) {
+          openPositions.push(pos);
+        }
+      });
+    });
+    return openPositions;
+  },
+
+  isOpen() {
+    const terrain = this.lookFor('terrain');
+    return terrain === 'swamp' || terrain === 'plain';
   },
 });

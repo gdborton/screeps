@@ -21,6 +21,12 @@ const enhancedGame = {
     });
   },
 
+  clearAllFlags() {
+    Game.flagArray().forEach(flag => {
+      flag.remove();
+    });
+  },
+
   getScoutFlags() {
     if (scoutFlags === undefined) {
       scoutFlags = getFlagsOfType('scout');
