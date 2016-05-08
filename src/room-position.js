@@ -9,7 +9,7 @@ Object.assign(RoomPosition.prototype, {
   freeEdges() {
     if (!(Memory.freeEdges && Memory.freeEdges[this.identifier()])) {
       Memory.freeEdges = Memory.freeEdges || {};
-      Memory.freeEdges[this.identifier()] = this.openPositionsAtRange();
+      Memory.freeEdges[this.identifier()] = this.openPositionsAtRange().length;
     }
 
     return Memory.freeEdges[this.identifier()];
@@ -18,7 +18,11 @@ Object.assign(RoomPosition.prototype, {
   openPositionsAtRange(range = 1) {
     const room = Game.rooms[this.roomName];
     const openPositions = [];
-    const surroundings = room.lookAtArea(this.x - range, this.y - range, this.x + range, this.y + range); // eslint-disable-line max-len
+    const top = Math.max(this.y - range, 0);
+    const bottom = Math.min(this.y + range, 49);
+    const left = Math.max(this.x - range, 0);
+    const right = Math.min(this.x + range, 49);
+    const surroundings = room.lookAtArea(left, top, right, bottom);
     Object.keys(surroundings).forEach(x => {
       Object.keys(surroundings[x]).forEach(y => {
         const pos = new RoomPosition(+x, +y, this.roomName); // The + is for string -> number
@@ -32,6 +36,15 @@ Object.assign(RoomPosition.prototype, {
 
   isOpen() {
     const terrain = this.lookFor('terrain');
-    return terrain === 'swamp' || terrain === 'plain';
+    const validTerrain = terrain === 'swamp' || terrain === 'plain';
+    return validTerrain && !this.hasStructure();
+  },
+
+  hasStructure() {
+    if (this._hasStructureCalced === undefined) {
+      this._hasStructureCalced = true;
+      this._hasStructure = this.lookFor('structure').length > 0;
+    }
+    return this._hasStructure;
   },
 });

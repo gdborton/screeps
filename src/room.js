@@ -69,7 +69,10 @@ Object.assign(Room.prototype, {
 
     if (this.getControllerOwned()) {
       this.placeStructures();
-      this.placeFlags();
+      // The logic for placing flags is expensive, and doesn't need to run every tick.
+      if (Game.time % 10 === 0) {
+        this.placeFlags();
+      }
     }
   },
 
@@ -221,10 +224,6 @@ Object.assign(Room.prototype, {
     return this._terminal;
   },
 
-  plan() {
-    this.placeFlags();
-  },
-
   placeFlags() {
     this.placeControllerDropFlag();
     this.placeConstructionFlags();
@@ -232,22 +231,46 @@ Object.assign(Room.prototype, {
 
   placeConstructionFlags() {
     this.placeTowerFlags();
+    this.placeWallFlags();
   },
 
   placeTowerFlags() {
     if (this.getTowerFlags().length < 2) {
       const sources = this.getSources();
-      sources.forEach((source, index) => {
+      sources.forEach(source => {
         if (!source.hasTowerFlag()) {
           const openPositions = source.pos.openPositionsAtRange(2);
           const centerPosition = new RoomPosition(25, 25, this.name);
           openPositions.sort((posA, posB) => {
             return posA.getRangeTo(centerPosition) - posB.getRangeTo(centerPosition);
           });
-          this.createFlag(openPositions[0], `BUILD_${STRUCTURE_TOWER}_${Date.now()}_${index}`);
+          this.createBuildFlag(openPositions[0], STRUCTURE_TOWER);
         }
       });
     }
+  },
+
+  placeWallFlags() {
+    const exits = this.getExits();
+    exits.forEach(exitPos => {
+      const potentialSpots = exitPos.openPositionsAtRange(2);
+      const realSpots = potentialSpots.filter(potentialSpot => {
+        let shouldBuild = true;
+        exits.forEach(exit => {
+          if (exit.getRangeTo(potentialSpot) < 2) {
+            shouldBuild = false;
+          }
+        });
+        return shouldBuild;
+      });
+      realSpots.forEach(realSpot => {
+        this.createBuildFlag(realSpot, STRUCTURE_WALL);
+      });
+    });
+  },
+
+  createBuildFlag(pos, structureType) {
+    this.createFlag(pos, `BUILD_${structureType}_x${pos.x}_y${pos.y}`);
   },
 
   getTowerFlags() {

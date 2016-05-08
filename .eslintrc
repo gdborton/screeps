@@ -25,6 +25,7 @@
     "TOUGH": true,
     "Energy": true,
     "COLOR_YELLOW": true,
+    "CONTROLLER_STRUCTURES": true,
     "FIND_CONSTRUCTION_SITES": true,
     "FIND_DROPPED_ENERGY": true,
     "FIND_EXIT": true,
@@ -46,6 +47,7 @@
     "STRUCTURE_STORAGE": true,
     "STRUCTURE_TERMINAL": true,
     "STRUCTURE_TOWER": true,
+    "STRUCTURE_WALL": true,
     "Memory": true,
   }
 }

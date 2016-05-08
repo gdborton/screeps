@@ -8,10 +8,11 @@ Object.assign(Flag.prototype, {
       const target = parts[1];
       let shouldBuild = false;
 
-      if (target && global.CONTROLLER_STRUCTURES[target]) {
-        const max = global.CONTROLLER_STRUCTURES[target][this.room.controller.level];
+      if (target && CONTROLLER_STRUCTURES[target]) {
+        const max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
         const current = this.room.find(target).length;
         shouldBuild = current < max;
+        shouldBuild = shouldBuild && !this.pos.hasStructure();
       }
 
       if (shouldBuild) {
