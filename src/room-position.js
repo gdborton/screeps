@@ -37,7 +37,15 @@ Object.assign(RoomPosition.prototype, {
   isOpen() {
     const terrain = this.lookFor('terrain');
     const validTerrain = terrain === 'swamp' || terrain === 'plain';
-    return validTerrain && !this.hasStructure();
+    return validTerrain && !this.hasStructure() && !this.hasConstructionSite();
+  },
+
+  hasConstructionSite() {
+    if (this._hasConstructionSiteCalced === undefined) {
+      this._hasConstructionSiteCalced = true;
+      this._hasConstructionSite = this.lookFor('constructionSite');
+    }
+    return !!this._hasConstructionSite;
   },
 
   hasStructure() {

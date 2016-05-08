@@ -12,7 +12,7 @@ Object.assign(Flag.prototype, {
         const max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
         const current = this.room.find(target).length;
         shouldBuild = current < max;
-        shouldBuild = shouldBuild && !this.pos.hasStructure();
+        shouldBuild = shouldBuild && this.pos.isOpen();
       }
 
       if (shouldBuild) {
