@@ -30,7 +30,7 @@
     "eslint-plugin-react": "^4.0.0",
     "screeps-globals": "0.0.1",
     "screeps-perf": "0.0.1",
-    "screeps-profiler": "^1.1.0",
+    "screeps-profiler": "^1.1.2",
     "webpack": "^1.12.13"
   }
 }
