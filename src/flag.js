@@ -5,15 +5,13 @@ Object.assign(Flag.prototype, {
   work() {
     if (this.name.toLowerCase().indexOf('build') !== -1 && this.room.getControllerOwned()) {
       const parts = this.name.split('_');
-      const target = parts[parts.length - 1];
+      const target = parts[1];
       let shouldBuild = false;
 
-      if (target === STRUCTURE_SPAWN) {
-        shouldBuild = true;
-      } else if (target === STRUCTURE_STORAGE && this.room.controller.level === 4) {
-        shouldBuild = true;
-      } else if (target === STRUCTURE_LINK && this.room.controller.level === 5) {
-        shouldBuild = true;
+      if (target && global.CONTROLLER_STRUCTURES[target]) {
+        const max = global.CONTROLLER_STRUCTURES[target][this.room.controller.level];
+        const current = this.room.find(target).length;
+        shouldBuild = current < max;
       }
 
       if (shouldBuild) {
