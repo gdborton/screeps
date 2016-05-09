@@ -42,6 +42,9 @@ Object.assign(Structure.prototype, {
     if (structureTypes[this.structureType]) {
       structureTypes[this.structureType].call(this);
     }
+    if (Game.time % 100 === 0) {
+      this.buildAccessRoads();
+    }
   },
 
   isControllerLink() {
@@ -77,5 +80,19 @@ Object.assign(Structure.prototype, {
     });
 
     return this.structureType === STRUCTURE_TOWER && sourcesNearby.length > 0;
+  },
+
+  buildAccessRoads() {
+    const top = new RoomPosition(this.pos.x, this.pos.y - 1, this.room.name);
+    const left = new RoomPosition(this.pos.x - 1, this.pos.y, this.room.name);
+    const right = new RoomPosition(this.pos.x + 1, this.pos.y, this.room.name);
+    const bottom = new RoomPosition(this.pos.x, this.pos.y + 1, this.room.name);
+    const positions = [top, left, right, bottom];
+    positions.forEach(position => {
+      const terrain = position.lookFor('terrain');
+      if (terrain === 'swamp' && position.isOpen()) {
+        this.room.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
+      }
+    });
   },
 });
