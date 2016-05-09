@@ -14,6 +14,8 @@ const roles = {
       this.deliverEnergyTo(this.getSpawn());
     } else {
       const storage = this.room.getStorage();
+      const towers = this.room.getTowers();
+      const closestTower = this.pos.findClosestByRange(towers);
       const links = this.room.getLinks();
       const closestLink = this.pos.findClosestByRange(links);
       const rangeToStore = storage ? this.pos.getRangeTo(storage) : 100;
@@ -24,6 +26,8 @@ const roles = {
         this.deliverEnergyTo(closestLink);
       } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
+      } else if (closestTower && this.pos.getRangeTo(closestTower) <= 2) {
+        this.deliverEnergyTo(closestTower);
       } else {
         this.drop(RESOURCE_ENERGY);
       }
@@ -44,11 +48,7 @@ const roles = {
   },
 
   courier() {
-    const potentialTargets = this.room.getMyStructures().filter(structure => {
-      const notALink = structure.structureType !== STRUCTURE_LINK;
-      return structure.energyCapacity && structure.energy < structure.energyCapacity && notALink;
-    });
-
+    const potentialTargets = this.room.getStructresNeedingEnergyDelivery();
     let dumpTarget = this.pos.findClosestByRange(potentialTargets);
 
     if (this.carry.energy === this.carryCapacity) {
@@ -394,6 +394,11 @@ Object.assign(Creep.prototype, {
     if (range > 1) {
       this.moveTo(target);
     }
+
+    if (target.structureType && target.structureType === STRUCTURE_TOWER) {
+      return target.transferEnergy(this);
+    }
+
     return target.transfer(this, RESOURCE_ENERGY);
   },
 

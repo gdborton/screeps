@@ -185,6 +185,15 @@ Object.assign(Room.prototype, {
     return this._storage;
   },
 
+  getTowers() {
+    if (!this._towers) {
+      this._towers = this.getMyStructures().filter(structure => {
+        return structure.structureType === STRUCTURE_TOWER;
+      });
+    }
+    return this._towers;
+  },
+
   getObserver() {
     if (!this._observerCalc) {
       this._observerCalc = true;
@@ -686,13 +695,31 @@ Object.assign(Room.prototype, {
     return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;
   },
 
+  getStructresNeedingEnergyDelivery() {
+    if (!this._structuresNeedingEnergyDelivery) {
+      this._structuresNeedingEnergyDelivery = this.getMyStructures().filter(structure => {
+        const notALink = structure.structureType !== STRUCTURE_LINK;
+        const isTower = structure.structureType === STRUCTURE_TOWER;
+        const notASourceTower = isTower ? !structure.isSourceTower() : true;
+        const notFull = structure.energyCapacity && structure.energy < structure.energyCapacity;
+        return notFull && notALink && notASourceTower;
+      });
+    }
+    return this._structuresNeedingEnergyDelivery;
+  },
+
   getEnergySourcesThatNeedsStocked() {
     if (this.getEnergyThatNeedsPickedUp().length) {
       return this.getEnergyThatNeedsPickedUp();
     } else if (this.getCreepsThatNeedOffloading().length) {
       return this.getCreepsThatNeedOffloading();
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
-      return [this.getStorage()];
+      return [this.getStorage];
+    } else if (this.getTowers().length) {
+      // All towers that aren't empty are a source of energy
+      return this.getTowers().filter(tower => {
+        return !tower.isEmpty();
+      });
     }
 
     return [];

@@ -26,6 +26,13 @@ const structureTypes = {
   [STRUCTURE_TOWER]() {
     if (this.room.hasHostileCreeps() && !this.isEmpty()) {
       this.attack(this.pos.findClosestByRange(this.room.getHostileCreeps()));
+    } else if (this.energy > this.energyCapacity / 2) {
+      const buildings = this.room.damagedBuildings().sort((buildingA, buildingB) => {
+        return buildingA.hits - buildingB.hits;
+      });
+      if (buildings.length) {
+        this.repair(buildings[0]);
+      }
     }
   },
 };
@@ -62,5 +69,13 @@ Object.assign(Structure.prototype, {
     }
 
     return true;
+  },
+
+  isSourceTower() {
+    const sourcesNearby = this.room.getSources().filter(source => {
+      return source.pos.getRangeTo(this) <= 2;
+    });
+
+    return this.structureType === STRUCTURE_TOWER && sourcesNearby.length > 0;
   },
 });

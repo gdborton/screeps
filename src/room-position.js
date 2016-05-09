@@ -43,9 +43,9 @@ Object.assign(RoomPosition.prototype, {
   hasConstructionSite() {
     if (this._hasConstructionSiteCalced === undefined) {
       this._hasConstructionSiteCalced = true;
-      this._hasConstructionSite = this.lookFor('constructionSite');
+      this._hasConstructionSite = this.lookFor('constructionSite').length > 0;
     }
-    return !!this._hasConstructionSite;
+    return this._hasConstructionSite;
   },
 
   hasStructure() {
