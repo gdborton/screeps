@@ -121,6 +121,7 @@ const roles = {
         }
       }
     }
+    this.attemptToUpgrade();
   },
 
   upgrader() {
@@ -311,6 +312,12 @@ Object.assign(Creep.prototype, {
     if (this.pos.getRangeTo(target) > 1) {
       this.moveTo(this.room.controller);
     } else {
+      this.attemptToUpgrade();
+    }
+  },
+
+  attemptToUpgrade() {
+    if (this.pos.getRangeTo(this.room.controller) <= 2) {
       this.upgradeController(this.room.controller);
     }
   },
