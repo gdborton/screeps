@@ -133,10 +133,27 @@ Object.assign(Room.prototype, {
       const positions = source.pos.openPositionsAtRange();
       positions.forEach(position => {
         if (!position.hasRoad()) {
-          this.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
+          this.buildRoadAt(position.x, position.y);
         }
       });
     });
+
+    const pathToObjects = [this.controller].concat(this.getSources);
+    const spawn = this.getSpawn();
+    pathToObjects.forEach(target => {
+      this.findPath(spawn.pos, target.pos).forEach(pos => {
+        this.buildRoadAt(pos.x, pos.y);
+      });
+    });
+  },
+
+  buildRoadAt(x, y) {
+    this._buildRoadAtCalls = this._buildRoadAtCalls || 0;
+    if (this._buildRoadAtCalls < 5 && this.getConstructionSites().length < 5) {
+      if (this.createConstructionSite(x, y, STRUCTURE_ROAD) === 0) {
+        this._buildRoadAtCalls++;
+      }
+    }
   },
 
   getHostileCreeps() {
