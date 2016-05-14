@@ -68,10 +68,10 @@ Object.assign(Room.prototype, {
     });
 
     if (this.getControllerOwned()) {
-      this.placeStructures();
-      // The logic for placing flags is expensive, and doesn't need to run every tick.
+      // The logic for placing flags/structures is expensive, and doesn't need to run every tick.
       if (Game.time % 10 === 0) {
         this.placeFlags();
+        this.placeStructures();
       }
     }
   },
@@ -116,6 +116,27 @@ Object.assign(Room.prototype, {
     if (this.needsTerminal()) {
       this.buildTerminal();
     }
+
+    if (Game.time % 100 === 0) {
+      this.buildRoads();
+    }
+  },
+
+  buildRoads() {
+    this.getMyStructures().forEach(structure => {
+      if (structure.buildAccessRoads) {
+        structure.buildAccessRoads();
+      }
+    });
+
+    this.getSources().forEach(source => {
+      const positions = source.pos.openPositionsAtRange();
+      positions.forEach(position => {
+        if (!position.hasRoad()) {
+          this.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
+        }
+      });
+    });
   },
 
   getHostileCreeps() {

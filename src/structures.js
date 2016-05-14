@@ -90,7 +90,7 @@ Object.assign(Structure.prototype, {
     const positions = [top, left, right, bottom];
     positions.forEach(position => {
       const terrain = position.lookFor('terrain');
-      if (terrain === 'swamp' && position.isOpen()) {
+      if (terrain === 'swamp' && position.isOpen() && !position.hasRoad()) {
         this.room.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
       }
     });

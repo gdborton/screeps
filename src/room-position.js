@@ -51,8 +51,16 @@ Object.assign(RoomPosition.prototype, {
   hasStructure() {
     if (this._hasStructureCalced === undefined) {
       this._hasStructureCalced = true;
-      this._hasStructure = this.lookFor('structure').length > 0;
+      this._hasStructure = this.lookFor('structure').filter(structure => {
+        return structure.structureType !== STRUCTURE_ROAD;
+      }).length > 0;
     }
     return this._hasStructure;
+  },
+
+  hasRoad() {
+    return this.lookFor('structure').filter(structure => {
+      return structure.structureType === STRUCTURE_ROAD;
+    }).length > 0;
   },
 });
