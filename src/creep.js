@@ -100,6 +100,7 @@ const roles = {
     }
 
     if (this.memory.task === 'work') {
+      this.attemptToUpgrade();
       const constructionSites = this.room.getConstructionSites();
       if (constructionSites.length) {
         const closestConstructionSite = this.pos.findClosestByRange(constructionSites);
@@ -121,7 +122,6 @@ const roles = {
         }
       }
     }
-    this.attemptToUpgrade();
   },
 
   upgrader() {
