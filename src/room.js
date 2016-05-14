@@ -138,7 +138,7 @@ Object.assign(Room.prototype, {
       });
     });
 
-    const pathToObjects = [this.controller].concat(this.getSources);
+    const pathToObjects = [this.controller].concat(this.getSources());
     const spawn = this.getSpawn();
     pathToObjects.forEach(target => {
       this.findPath(spawn.pos, target.pos).forEach(pos => {
@@ -274,27 +274,25 @@ Object.assign(Room.prototype, {
   placeFlags() {
     this.placeControllerDropFlag();
     this.placeConstructionFlags();
+    this.getSources().forEach(source => {
+      source.placeFlags();
+    });
   },
 
   placeConstructionFlags() {
-    this.placeTowerFlags();
     this.placeWallFlags();
   },
 
-  placeTowerFlags() {
-    if (this.getTowerFlags().length < 2) {
-      const sources = this.getSources();
-      sources.forEach(source => {
-        if (!source.hasTowerFlag()) {
-          const openPositions = source.pos.openPositionsAtRange(2);
-          const centerPosition = new RoomPosition(25, 25, this.name);
-          openPositions.sort((posA, posB) => {
-            return posA.getRangeTo(centerPosition) - posB.getRangeTo(centerPosition);
-          });
-          this.createBuildFlag(openPositions[0], STRUCTURE_TOWER);
-        }
-      });
-    }
+  placeStorageFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_STORAGE);
+  },
+
+  placeLinkFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_LINK);
+  },
+
+  placeTowerFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_TOWER);
   },
 
   placeWallFlags() {

@@ -16,6 +16,12 @@ Object.assign(RoomPosition.prototype, {
   },
 
   openPositionsAtRange(range = 1) {
+    return this.buildablePositionsAtRange(range).filter(position => {
+      return position.isOpen();
+    });
+  },
+
+  buildablePositionsAtRange(range = 1) {
     const room = Game.rooms[this.roomName];
     const openPositions = [];
     const top = Math.max(this.y - range, 0);
@@ -26,7 +32,7 @@ Object.assign(RoomPosition.prototype, {
     Object.keys(surroundings).forEach(x => {
       Object.keys(surroundings[x]).forEach(y => {
         const pos = new RoomPosition(+x, +y, this.roomName); // The + is for string -> number
-        if (pos.getRangeTo(this) === range && pos.isOpen()) {
+        if (pos.getRangeTo(this) === range && pos.isBuildable()) {
           openPositions.push(pos);
         }
       });
@@ -35,9 +41,12 @@ Object.assign(RoomPosition.prototype, {
   },
 
   isOpen() {
+    return this.isBuildable() && !this.hasStructure() && !this.hasConstructionSite();
+  },
+
+  isBuildable() {
     const terrain = this.lookFor('terrain');
-    const validTerrain = terrain === 'swamp' || terrain === 'plain';
-    return validTerrain && !this.hasStructure() && !this.hasConstructionSite();
+    return terrain === 'swamp' || terrain === 'plain';
   },
 
   hasConstructionSite() {
