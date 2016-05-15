@@ -203,8 +203,7 @@ Object.assign(Room.prototype, {
   },
 
   needsBuilders() {
-    return this.builderCount() < 1 &&
-      (this.getConstructionSites().length > 0 || this.damagedBuildings().length > 0);
+    return this.builderCount() < 1 && this.getConstructionSites().length > 0;
   },
 
   damagedBuildings() {
