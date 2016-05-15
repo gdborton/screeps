@@ -750,7 +750,7 @@ Object.assign(Room.prototype, {
     } else if (this.getCreepsThatNeedOffloading().length) {
       return this.getCreepsThatNeedOffloading();
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
-      return [this.getStorage];
+      return [this.getStorage()];
     } else if (this.getTowers().length) {
       // All towers that aren't empty are a source of energy
       return this.getTowers().filter(tower => {
