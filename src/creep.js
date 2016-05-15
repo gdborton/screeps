@@ -402,7 +402,7 @@ Object.assign(Creep.prototype, {
       this.moveTo(target);
     }
 
-    if (target.structureType && target.structureType === STRUCTURE_TOWER) {
+    if (!target.transfer || target.structureType && target.structureType === STRUCTURE_TOWER) { // eslint-disable-line
       return target.transferEnergy(this);
     }
 
