@@ -8,6 +8,7 @@ import './spawns';
 import './structures';
 import './room-position';
 import './flag';
+import './controller';
 import profiler from 'screeps-profiler';
 import { Room } from 'screeps-globals';
 

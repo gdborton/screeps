@@ -271,7 +271,9 @@ Object.assign(Room.prototype, {
   },
 
   placeFlags() {
-    this.placeControllerDropFlag();
+    if (this.controller) {
+      this.controller.placeFlags();
+    }
     this.placeConstructionFlags();
     this.getSources().forEach(source => {
       source.placeFlags();
@@ -314,23 +316,17 @@ Object.assign(Room.prototype, {
   },
 
   createBuildFlag(pos, structureType) {
-    this.createFlag(pos, `BUILD_${structureType}_x${pos.x}_y${pos.y}`);
+    this.createFlag(pos, `BUILD_${structureType}`);
+  },
+
+  placeFlag(pos, name) {
+    this.createFlag(pos, `${name}_${this.name}_x${pos.x}_y${pos.y}`);
   },
 
   getTowerFlags() {
     return this.getFlags().filter(flag => {
       return flag.name.indexOf(STRUCTURE_TOWER) !== -1;
     });
-  },
-
-  placeControllerDropFlag() {
-    if (!this.getControllerEnergyDropFlag()) {
-      const potentialSpots = this.controller.pos.openPositionsAtRange(2);
-      const bestSpot = potentialSpots.find(pos => {
-        return pos.x === this.controller.pos.x || pos.y === this.controller.pos.y;
-      });
-      this.createFlag(bestSpot || potentialSpots[0], `CONTROLLER_ENERGY_DROP_${Date.now()}`);
-    }
   },
 
   getLinks() {

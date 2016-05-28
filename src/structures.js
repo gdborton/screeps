@@ -19,7 +19,7 @@ const structureTypes = {
     const controllerLink = this.room.getControllerLink();
     const controllerLinkNeedsEnergy = controllerLink && controllerLink.energy < 100;
     if (shouldTransfer && controllerLinkNeedsEnergy) {
-      this.transfer(this.room.getControllerLink(), RESOURCE_ENERGY);
+      this.transferEnergy(this.room.getControllerLink());
     }
   },
 

@@ -3,7 +3,7 @@ import './room';
 import bodyCosts from './body-costs';
 import { Creep, Flag, Energy } from 'screeps-globals';
 
-const originalMoveTo = Creep.prototype.moveTo;
+// const originalMoveTo = Creep.prototype.moveTo;
 
 const roles = {
   harvester() {
@@ -262,43 +262,43 @@ Object.assign(Creep.prototype, {
     }
   },
 
-  moveTo(...myArgs) {
-    const args = [].map.call(myArgs, arg => { return arg; });
-    const whitelist = ['upgrader', 'claimer', 'scout'];
-    let potentialOptions;
-    if (typeof myArgs[0] === 'number') {
-      potentialOptions = args[2];
-    } else {
-      potentialOptions = args[1];
-    }
-    if (!potentialOptions) {
-      potentialOptions = {};
-      args.push(potentialOptions);
-    }
-
-    const whitelisted = whitelist.indexOf(this.memory.role) !== -1;
-    if (!whitelisted && this.room.controller && typeof potentialOptions === 'object') {
-      const coord = this.room.controller.pos;
-      const avoid = [];
-      for (let x = coord.x - 1; x <= coord.x + 1; x++) {
-        for (let y = coord.y - 1; y <= coord.y + 1; y++) {
-          avoid.push({ x, y });
-        }
-      }
-
-      if (potentialOptions.avoid) {
-        potentialOptions.avoid = potentialOptions.avoid.concat(avoid);
-      } else {
-        potentialOptions.avoid = avoid;
-      }
-    }
-
-    if (!potentialOptions.reusePath) {
-      potentialOptions.reusePath = 20;
-    }
-
-    return originalMoveTo.apply(this, args);
-  },
+  // moveTo(...myArgs) {
+  //   const args = [].map.call(myArgs, arg => { return arg; });
+  //   const whitelist = ['upgrader', 'claimer', 'scout'];
+  //   let potentialOptions;
+  //   if (typeof myArgs[0] === 'number') {
+  //     potentialOptions = args[2];
+  //   } else {
+  //     potentialOptions = args[1];
+  //   }
+  //   if (!potentialOptions) {
+  //     potentialOptions = {};
+  //     args.push(potentialOptions);
+  //   }
+  //
+  //   const whitelisted = whitelist.indexOf(this.memory.role) !== -1;
+  //   if (!whitelisted && this.room.controller && typeof potentialOptions === 'object') {
+  //     const coord = this.room.controller.pos;
+  //     const avoid = [];
+  //     for (let x = coord.x - 1; x <= coord.x + 1; x++) {
+  //       for (let y = coord.y - 1; y <= coord.y + 1; y++) {
+  //         avoid.push({ x, y });
+  //       }
+  //     }
+  //
+  //     if (potentialOptions.avoid) {
+  //       potentialOptions.avoid = potentialOptions.avoid.concat(avoid);
+  //     } else {
+  //       potentialOptions.avoid = avoid;
+  //     }
+  //   }
+  //
+  //   if (!potentialOptions.reusePath) {
+  //     potentialOptions.reusePath = 20;
+  //   }
+  //
+  //   return originalMoveTo.apply(this, args);
+  // },
 
   moveToAndHarvest(target) {
     if (this.pos.getRangeTo(target) > 1) {

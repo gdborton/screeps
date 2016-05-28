@@ -9,6 +9,7 @@
     "BODYPART_COST": true,
     "Game": true,
     "Creep": true,
+    "StructureController": true,
     "Room": true,
     "RoomPosition": true,
     "Source": true,
