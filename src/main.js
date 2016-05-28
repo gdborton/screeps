@@ -18,10 +18,8 @@ export function loop() {
   if (Room.prototype.work && Game.cpuLimit > 100) {
     profiler.wrap(() => {
       game.setup();
-      Object.keys(Game.rooms).forEach((roomName, index) => {
-        if (index === 1 || Game.cpuLimit > 50) {
-          Game.rooms[roomName].work();
-        }
+      Object.keys(Game.rooms).forEach(roomName => {
+        Game.rooms[roomName].work();
       });
     });
   }
