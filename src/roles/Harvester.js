@@ -17,11 +17,11 @@ export default class Harvester extends Base {
 
       if (storage && storage.store.energy < storage.storeCapacity * 0.3 && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
-      } else if (links.length && this.pos.getRangeTo(closestLink) === 1 && !closestLink.isFull()) {
+      } else if (links.length && this.pos.getRangeTo(closestLink) <= 2 && !closestLink.isFull()) {
         this.deliverEnergyTo(closestLink);
       } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
-      } else if (closestTower && this.pos.getRangeTo(closestTower) <= 2) {
+      } else if (closestTower && !closestTower.isFull() && this.pos.getRangeTo(closestTower) <= 2) {
         this.deliverEnergyTo(closestTower);
       } else {
         this.drop(RESOURCE_ENERGY);
