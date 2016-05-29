@@ -1,4 +1,4 @@
-import roleMap from './utils/role-map';
+import roleMap from '../utils/role-map';
 
 function convertCreeps() {
   return Object.keys(Game.creeps).map(creepName => {

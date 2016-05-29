@@ -1,4 +1,4 @@
-import structureMap from './utils/structure-map';
+import structureMap from '../utils/structure-map';
 
 function convertStructures() {
   return Object.keys(Game.structures).map(structureId => {

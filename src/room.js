@@ -1,7 +1,7 @@
 /* @flow */
 import { Room } from 'screeps-globals';
-import creepManager from './creep-manager';
-import structureManager from './structure-manager';
+import creepManager from './utils/creep-manager';
+import structureManager from './utils/structure-manager';
 
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
