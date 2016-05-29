@@ -15,6 +15,8 @@ export default class Base extends Creep {
       } else {
         this.moveTo(creepFlag);
       }
+    } else if (this.shouldBeRecycled()) {
+      this.recycle();
     } else {
       this.performRole();
     }
@@ -183,5 +185,18 @@ export default class Base extends Creep {
 
   cost() {
     return bodyCosts.calculateCosts(this.body);
+  }
+
+  shouldBeRecycled() {
+    return false;
+  }
+
+  recycle() {
+    const spawn = this.getSpawn();
+    if (this.pos.getRangeTo(spawn) > 1) {
+      this.moveTo(spawn);
+    } else {
+      spawn.recycleCreep(this);
+    }
   }
 }

@@ -40,4 +40,8 @@ export default class Builder extends Base {
       }
     }
   }
+
+  shouldBeRecycled() {
+    return this.room.getConstructionSites().length < 1;
+  }
 }
