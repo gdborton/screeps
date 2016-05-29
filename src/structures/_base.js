@@ -1,46 +1,15 @@
+// Because structures have an inheritance chain (Gparent > parent > child),
+// it is difficult to due proper class extensions.
+
 /* @flow */
 import { Structure } from 'screeps-globals';
 
 const TEN_MILLION = 10000000;
-const structureTypes = {
-  [STRUCTURE_EXTENSION]() {
-    if (Game.time % 10 === 0) {
-      if (this.room.canBuildExtension()) {
-        this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
-      }
-      if (this.room.canBuildExtension()) {
-        this.room.createConstructionSite(this.pos.x - 1, this.pos.y + 1, STRUCTURE_EXTENSION);
-      }
-    }
-  },
-
-  [STRUCTURE_LINK]() {
-    const shouldTransfer = !this.isControllerLink() && !this.cooldown;
-    const controllerLink = this.room.getControllerLink();
-    const controllerLinkNeedsEnergy = controllerLink && controllerLink.energy < 100;
-    if (shouldTransfer && controllerLinkNeedsEnergy) {
-      this.transferEnergy(this.room.getControllerLink());
-    }
-  },
-
-  [STRUCTURE_TOWER]() {
-    if (this.room.hasHostileCreeps() && !this.isEmpty()) {
-      this.attack(this.pos.findClosestByRange(this.room.getHostileCreeps()));
-    } else if (this.energy > this.energyCapacity / 2) {
-      const buildings = this.room.damagedBuildings().sort((buildingA, buildingB) => {
-        return buildingA.hits - buildingB.hits;
-      });
-      if (buildings.length) {
-        this.repair(buildings[0]);
-      }
-    }
-  },
-};
 
 Object.assign(Structure.prototype, {
   work() {
-    if (structureTypes[this.structureType]) {
-      structureTypes[this.structureType].call(this);
+    if (this.performRole) {
+      this.performRole();
     }
     if (Game.time % 100 === 0) {
       this.buildAccessRoads();

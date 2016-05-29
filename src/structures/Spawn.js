@@ -1,10 +1,7 @@
-/* @flow */
-import './source';
-import './room';
-import bodyCosts from './utils/body-costs';
-import { Spawn } from 'screeps-globals';
+import './_base';
+import bodyCosts from '../utils/body-costs';
 
-Object.assign(Spawn.prototype, {
+export default class Spawn extends StructureSpawn {
   buildHarvester(availableEnergy) {
     const sources = this.room.getSourcesNeedingHarvesters();
     const closestSource = this.pos.findClosestByRange(sources);
@@ -32,7 +29,7 @@ Object.assign(Spawn.prototype, {
       }
       this.createCreep(body, undefined, { role: 'harvester', source: sourceId });
     }
-  },
+  }
 
   buildScout(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
@@ -48,12 +45,12 @@ Object.assign(Spawn.prototype, {
       cost = bodyCosts.calculateCosts(body);
     }
     this.createCreep(body, undefined, { role: 'scout', spawn: this.name });
-  },
+  }
 
   buildScoutHarvester() {
     const body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
     this.createCreep(body, undefined, { role: 'scoutharvester' });
-  },
+  }
 
   buildMailman(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
@@ -70,7 +67,7 @@ Object.assign(Spawn.prototype, {
     }
 
     this.createCreep(body, undefined, { role: 'mailman' });
-  },
+  }
 
   buildCourier(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
@@ -90,12 +87,12 @@ Object.assign(Spawn.prototype, {
     }
 
     this.createCreep(body, undefined, { role: 'courier' });
-  },
+  }
 
   buildRoadWorker() {
     const body = [MOVE, WORK, WORK, CARRY];
     this.createCreep(body, undefined, { role: 'roadworker' });
-  },
+  }
 
   buildBuilder(availableEnergy) {
     const body = [MOVE, MOVE, WORK, CARRY];
@@ -114,12 +111,12 @@ Object.assign(Spawn.prototype, {
     }
 
     this.createCreep(body, undefined, { role: 'builder' });
-  },
+  }
 
   buildClaimer() {
     const body = [MOVE, CLAIM];
     this.createCreep(body, undefined, { role: 'claimer' });
-  },
+  }
 
   buildSourceTaker(availableEnergy) {
     const body = [];
@@ -144,7 +141,7 @@ Object.assign(Spawn.prototype, {
     }
 
     this.createCreep(body, undefined, { role: 'sourcetaker' });
-  },
+  }
 
   buildUpgrader(availableEnergy) {
     const body = [MOVE, WORK, WORK, CARRY];
@@ -169,7 +166,7 @@ Object.assign(Spawn.prototype, {
     }
 
     this.createCreep(body, undefined, { role: 'upgrader' });
-  },
+  }
 
   work() {
     if (this.spawning) {
@@ -208,23 +205,23 @@ Object.assign(Spawn.prototype, {
     } else {
       this.extend();
     }
-  },
+  }
 
   maxEnergy() {
     return this.room.energyCapacityAvailable;
-  },
+  }
 
   needsRepaired() {
     return this.hits < this.hitsMax;
-  },
+  }
 
   availableEnergy() {
     return this.room.energyAvailable;
-  },
+  }
 
   extend() {
     if (this.room.canBuildExtension()) {
       this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
     }
-  },
-});
+  }
+}

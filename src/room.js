@@ -1,6 +1,7 @@
 /* @flow */
 import { Room } from 'screeps-globals';
 import creepManager from './creep-manager';
+import structureManager from './structure-manager';
 
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
@@ -428,7 +429,8 @@ Object.assign(Room.prototype, {
 
   getMyStructures() {
     if (!this._myStructures) {
-      this._myStructures = this.find(FIND_MY_STRUCTURES);
+      const structures = structureManager.structures();
+      this._myStructures = structures.filter(structure => structure.room === this);
     }
 
     return this._myStructures;

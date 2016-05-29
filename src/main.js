@@ -3,8 +3,8 @@
 import 'screeps-perf';
 import game from './game';
 import './source';
-import './spawns';
-import './structures';
+import './room';
+import './structures/_base';
 import './room-position';
 import './flag';
 import './controller';
