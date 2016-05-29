@@ -4,8 +4,6 @@
 /* @flow */
 import { Structure } from 'screeps-globals';
 
-const TEN_MILLION = 10000000;
-
 Object.assign(Structure.prototype, {
   work() {
     if (this.performRole) {
@@ -30,7 +28,13 @@ Object.assign(Structure.prototype, {
   },
 
   needsRepaired() {
-    return this.hits / this.hitsMax < 0.9 && this.hits < TEN_MILLION;
+    return this.hits / this.hitsMax < 1;
+  },
+
+  // Towers are great for repairing things quickly, but aren't effecient for energy.
+  // Individual structures can override this to prevent waste. See walls.
+  needsTowerRepaired() {
+    return this.hits / this.hitsMax < 1;
   },
 
   isEmpty() {

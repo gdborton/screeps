@@ -1,8 +1,13 @@
 import structureMap from '../utils/structure-map';
 
 function convertStructures() {
-  return Object.keys(Game.structures).map(structureId => {
-    const structure = Game.structures[structureId];
+  const normalStructures = [];
+  Object.keys(Game.rooms).forEach(roomName => {
+    const room = Game.rooms[roomName];
+    Array.prototype.push.apply(normalStructures, room.find(FIND_STRUCTURES));
+  });
+
+  return normalStructures.map(structure => {
     const Constructor = structureMap[structure.structureType];
     if (Constructor) {
       return new Constructor(structure.id);

@@ -14,6 +14,7 @@
     "StructureLink": true,
     "StructureSpawn": true,
     "StructureTower": true,
+    "StructureWall": true,
     "Room": true,
     "RoomPosition": true,
     "Source": true,

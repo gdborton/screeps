@@ -373,9 +373,19 @@ Object.assign(Room.prototype, {
     return this.getSources().length;
   },
 
+  getMyStructures() {
+    if (!this._myStructures) {
+      const structures = this.getStructures();
+      this._myStructures = structures.filter(structure => structure.my);
+    }
+
+    return this._myStructures;
+  },
+
   getStructures() {
     if (!this._structures) {
-      this._structures = this.find(FIND_STRUCTURES);
+      const structures = structureManager.structures();
+      this._structures = structures.filter(structure => structure.room === this);
     }
     return this._structures;
   },
@@ -425,15 +435,6 @@ Object.assign(Room.prototype, {
     }
 
     return this.courierCount() < 1;
-  },
-
-  getMyStructures() {
-    if (!this._myStructures) {
-      const structures = structureManager.structures();
-      this._myStructures = structures.filter(structure => structure.room === this);
-    }
-
-    return this._myStructures;
   },
 
   getHarvesters() {
