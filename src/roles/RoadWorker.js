@@ -19,4 +19,8 @@ export default class RoadWorker extends Base {
       }
     }
   }
+
+  shouldBeRecycled() {
+    return this.room.getDamagedRoads().length < 1;
+  }
 }
