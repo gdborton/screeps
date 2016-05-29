@@ -1,5 +1,4 @@
 /* @flow */
-import settings from './settings';
 import { Room } from 'screeps-globals';
 import creepManager from './creep-manager';
 
@@ -637,7 +636,7 @@ Object.assign(Room.prototype, {
 
   canBuildExtension() {
     if (this._canBuildExtensions === undefined) {
-      const maxExtensions = settings.buildingCount[this.controller.level].extensions || 0;
+      const maxExtensions = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][this.controller.level] || 0;
       this._canBuildExtensions = this.getExtensions().length < maxExtensions;
     }
     return this._canBuildExtensions;
