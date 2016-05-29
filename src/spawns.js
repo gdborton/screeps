@@ -1,7 +1,7 @@
 /* @flow */
 import './source';
 import './room';
-import bodyCosts from './body-costs';
+import bodyCosts from './utils/body-costs';
 import { Spawn } from 'screeps-globals';
 
 Object.assign(Spawn.prototype, {

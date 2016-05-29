@@ -1,6 +1,7 @@
 /* @flow */
 import settings from './settings';
 import { Room } from 'screeps-globals';
+import creepManager from './creep-manager';
 
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
@@ -541,7 +542,7 @@ Object.assign(Room.prototype, {
 
   myCreeps() {
     if (!this._myCreeps) {
-      this._myCreeps = this.find(FIND_MY_CREEPS);
+      this._myCreeps = creepManager.creeps().filter(creep => creep.room === this);
     }
 
     return this._myCreeps;

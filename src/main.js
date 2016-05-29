@@ -2,7 +2,6 @@
 // Order here is important. These modify global prototypes.
 import 'screeps-perf';
 import game from './game';
-import './creep';
 import './source';
 import './spawns';
 import './structures';
