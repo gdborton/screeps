@@ -7,6 +7,7 @@
   },
   "globals": {
     "BODYPART_COST": true,
+    "CREEP_LIFE_TIME": true,
     "Game": true,
     "Creep": true,
     "LOOK_CREEPS": true,

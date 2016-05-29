@@ -7,6 +7,9 @@ export default class Base extends Creep {
   }
 
   work() {
+    if (this.needsRenewed()) {
+      this.attemptRenew();
+    }
     const creepFlag = Game.flags[this.name];
     // move to creep flag if it is defined.
     if (creepFlag !== undefined) {
@@ -19,6 +22,17 @@ export default class Base extends Creep {
       this.recycle();
     } else {
       this.performRole();
+    }
+  }
+
+  needsRenewed() {
+    return !this.shouldBeRecycled() && this.ticksToLive / CREEP_LIFE_TIME < 0.5;
+  }
+
+  attemptRenew() {
+    const spawn = this.getSpawn();
+    if (this.needsRenewed() && this.pos.getRangeTo(spawn) === 1 && !spawn.spawning) {
+      spawn.renewCreep(this);
     }
   }
 
