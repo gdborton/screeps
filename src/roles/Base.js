@@ -154,20 +154,39 @@ export default class Base extends Creep {
   }
 
   deliverEnergyTo(target) {
-    const range = this.pos.getRangeTo(target);
-    if (target instanceof Flag) {
-      if (range === 0) {
-        this.drop(RESOURCE_ENERGY);
-      } else {
-        this.moveTo(target);
-      }
+    const targetIsFlag = target instanceof Flag;
+    if (targetIsFlag) {
+      this.deliverEnergyToFlag(target);
     } else {
+      const range = this.pos.getRangeTo(target);
       if (range <= 1) {
         this.transfer(target, RESOURCE_ENERGY);
       } else {
         this.moveTo(target);
       }
     }
+  }
+
+  deliverEnergyToFlag(flag) {
+    const range = this.pos.getRangeTo(flag);
+    if (range === 0) {
+      this.drop(RESOURCE_ENERGY);
+    } else {
+      const blockingCreep = flag.pos.creep();
+      if (range === 1 && blockingCreep) {
+        blockingCreep.unblockFlag();
+      }
+      this.moveTo(flag);
+    }
+  }
+
+  unblockFlag() {
+    this.moveInRandomDirection();
+  }
+
+  moveInRandomDirection() {
+    const directions = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
+    this.move(Math.floor(Math.random(directions.length) * directions.length));
   }
 
   needsOffloaded() {

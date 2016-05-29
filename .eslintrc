@@ -9,6 +9,7 @@
     "BODYPART_COST": true,
     "Game": true,
     "Creep": true,
+    "LOOK_CREEPS": true,
     "StructureController": true,
     "StructureExtension": true,
     "StructureLink": true,
@@ -55,5 +56,13 @@
     "STRUCTURE_TOWER": true,
     "STRUCTURE_WALL": true,
     "Memory": true,
+    "TOP": true,
+    "TOP_RIGHT": true,
+    "RIGHT": true,
+    "BOTTOM_RIGHT": true,
+    "BOTTOM": true,
+    "BOTTOM_LEFT": true,
+    "LEFT": true,
+    "TOP_LEFT": true
   }
 }

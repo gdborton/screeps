@@ -1,5 +1,6 @@
 /* @flow */
 import { RoomPosition } from 'screeps-globals';
+import creepManager from './utils/creep-manager';
 
 Object.assign(RoomPosition.prototype, {
   identifier() {
@@ -65,6 +66,15 @@ Object.assign(RoomPosition.prototype, {
       }).length > 0;
     }
     return this._hasStructure;
+  },
+
+  creep() {
+    const creep = this.lookFor(LOOK_CREEPS)[0];
+    // Found creep will not be enhanced.
+    if (creep) {
+      return creepManager.enhanceCreep(creep);
+    }
+    return creep;
   },
 
   hasRoad() {
