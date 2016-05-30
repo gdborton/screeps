@@ -317,7 +317,7 @@ Object.assign(Room.prototype, {
   },
 
   createBuildFlag(pos, structureType) {
-    this.createFlag(pos, `BUILD_${structureType}`);
+    this.placeFlag(pos, `BUILD_${structureType}`);
   },
 
   placeFlag(pos, name) {

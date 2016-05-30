@@ -7,6 +7,10 @@ Object.assign(RoomPosition.prototype, {
     return `${this.roomName}x${this.x}y${this.y}`;
   },
 
+  actualDistanceTo(pos) {
+    return Math.sqrt(Math.pow(this.x - pos.x, 2) + Math.pow(this.y - pos.y, 2));
+  },
+
   freeEdges() {
     if (!(Memory.freeEdges && Memory.freeEdges[this.identifier()])) {
       Memory.freeEdges = Memory.freeEdges || {};

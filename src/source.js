@@ -43,22 +43,20 @@ Object.assign(Source.prototype, {
   },
 
   placeFlags() {
-    const buildablePositions = this.getBuildablePositions();
-    const storageFlagPosition = buildablePositions[1];
-    const linkFlagPosition = buildablePositions[1];
-    const towerFlagPosition = buildablePositions[2];
+    const buildablePositions = this.getBuildablePositions().sort((positionA, positionB) => {
+      return this.pos.actualDistanceTo(positionA) - this.pos.actualDistanceTo(positionB);
+    });
+    buildablePositions.pop(); // leave the last position as a walkway.
 
-    if (storageFlagPosition && this.isNearestToController()) {
-      this.room.placeStorageFlag(storageFlagPosition);
-    }
-
-    if (linkFlagPosition && !this.isNearestToController()) {
-      this.room.placeLinkFlag(linkFlagPosition);
-    }
-
-    if (towerFlagPosition) {
-      this.room.placeTowerFlag(towerFlagPosition);
-    }
+    buildablePositions.forEach((position, index) => {
+      if (index === 0) {
+        this.room.placeLinkFlag(position);
+      } else if (index === 1 && this.isNearestToController()) {
+        this.room.placeStorageFlag(position);
+      } else {
+        this.room.placeTowerFlag(position);
+      }
+    });
   },
 
   isNearestToController() {
