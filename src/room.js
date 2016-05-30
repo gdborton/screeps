@@ -683,8 +683,13 @@ Object.assign(Room.prototype, {
 
     return this.getDroppedEnergy().filter(energy => {
       const targeted = targets.indexOf(energy.id) !== -1;
-      return !targeted && energy.pos.getRangeTo(dumpFlag) !== 0;
+      const inRange = energy.pos.getRangeTo(this.getCenterPosition()) < 23;
+      return !targeted && inRange && energy.pos.getRangeTo(dumpFlag) !== 0;
     });
+  },
+
+  getCenterPosition() {
+    return new RoomPosition(25, 25, this.name);
   },
 
   getControllerOwned() {
