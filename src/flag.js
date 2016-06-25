@@ -33,10 +33,39 @@ Object.assign(Flag.prototype, {
           this.remove();
         }
       }
+    } else if (this.isReserveFlag()) {
+      this.performReserveFlagRole();
     }
   },
 
   isReserveFlag() {
     return this.name.indexOf('reserve') === 0;
+  },
+
+  performReserveFlagRole() {
+    const rate = 5;
+    if (Game.time % rate === 0) {
+      const room = Game.roomArray().find(potentialRoom => potentialRoom.name === this.pos.roomName);
+      if (room) {
+        const reservation = room.controller.reservation;
+        const reservationTime = reservation && reservation.ticksToEnd || 0;
+        this.memory.reservationTime = reservationTime;
+        this.memory.sources = room.getSources().map(source => source.id);
+      }
+    } else {
+      this.memory.reservationTime = Math.max(this.memory.reservationTime - rate, 0);
+    }
+  },
+
+  reservationTime() {
+    if (this.memory.reservationTime === undefined) {
+      this.memory.reservationTime = 0;
+    }
+
+    return this.memory.reservationTime;
+  },
+
+  needsReserver() {
+    return this.isReserveFlag() && this.memory.reservationTime < 4500;
   },
 });

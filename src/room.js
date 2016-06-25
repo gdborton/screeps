@@ -475,11 +475,14 @@ Object.assign(Room.prototype, {
     });
   },
 
-  needsReservers() {
-    let needsReserver = this.controller.level >= MIN_RESERVE_LEVEL;
-    needsReserver = needsReserver && this.getReserveFlags().length;
+  getReserveFlagsNeedingReservers() {
+    return this.getReserveFlags().filter(flag => flag.needsReserver());
+  },
 
-    return needsReserver && this.getReserverCount() < 1;
+  needsReservers() {
+    const meetsLevel = this.controller.level >= MIN_RESERVE_LEVEL;
+    const flagsNeedingReservers = this.getReserveFlagsNeedingReservers();
+    return meetsLevel && flagsNeedingReservers.length && this.getReserverCount() < 1;
   },
 
   needsCouriers() {
