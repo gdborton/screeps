@@ -418,6 +418,39 @@ Object.assign(Room.prototype, {
     return this.getDamagedRoads().length > 0;
   },
 
+  placeReserveFlag() {
+    this.placeFlag(this.getCenterPosition(), 'reserve');
+  },
+
+  attemptReserve() {
+    if (this.shouldReserve()) {
+      this.placeReserveFlag();
+    }
+  },
+
+  parentRoom() {
+
+  },
+
+  childRooms() {
+
+  },
+
+  shouldReserve() {
+    const owner = Game.myRooms().find(room => {
+      const isNextTo = room.distanceToRoom(this.name) === 1;
+      return isNextTo &&
+        room.ableToReserve() &&
+        this.getCenterPosition().findPathTo(room.getCenterPosition()).length < 60;
+    });
+
+    return !!owner;
+  },
+
+  ableToReserve() {
+    return this.getControllerOwned() && this.controller.level >= 6;
+  },
+
   needsRoadWorkers() {
     if (Game.time % 30 !== 0) {
       return false;

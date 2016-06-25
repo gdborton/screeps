@@ -15,6 +15,14 @@ const enhancedGame = {
     });
   },
 
+  roomArray() {
+    return Object.keys(Game.rooms).map(roomName => Game.rooms[roomName]);
+  },
+
+  myRooms() {
+    return Game.roomArray().filter(room => room.getControllerOwned());
+  },
+
   clearScoutFlags() {
     Game.getScoutFlags().forEach(flag => {
       flag.remove();

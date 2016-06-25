@@ -12,6 +12,7 @@ export default class Wanderer extends Base {
 
   aquireTarget() {
     if (!this.memory.targetExit || this.memory.targetExit.room !== this.room.name) {
+      this.room.attemptReserve(); // we're in a new room, attempt to reserve.
       const targetExit = [...this.room.getUniqueExitPoints()].sort(() => { // return a random exit.
         return Math.floor(Math.random() * 3) - 1;
       })[0];
