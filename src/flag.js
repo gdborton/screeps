@@ -2,14 +2,20 @@
 import { Flag } from 'screeps-globals';
 import creepManager from './utils/creep-manager';
 
+const neutralStructures = [
+  STRUCTURE_ROAD,
+  STRUCTURE_CONTAINER,
+];
+
 Object.assign(Flag.prototype, {
   work() {
-    if (this.name.toLowerCase().indexOf('build') !== -1 && this.room.getControllerOwned()) {
+    if (this.name.toLowerCase().indexOf('build') !== -1) {
       const parts = this.name.split('_');
       const target = parts[1];
       let shouldBuild = false;
-
-      if (target && CONTROLLER_STRUCTURES[target]) {
+      const ownedRoom = this.room.getControllerOwned();
+      const neutralStructure = neutralStructures.indexOf(target) !== -1;
+      if (target && CONTROLLER_STRUCTURES[target] && (ownedRoom || neutralStructure)) {
         const max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
         const current = this.room.find(target).length;
         shouldBuild = current < max;

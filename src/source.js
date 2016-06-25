@@ -20,8 +20,6 @@ Object.assign(Source.prototype, {
       }
     });
 
-    console.log(this.id, workParts);
-
     return workParts < 5 && myHarvesters < this.freeEdges();
   },
 

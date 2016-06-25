@@ -12,7 +12,25 @@ export default class RemoteHarvester extends Base {
       }
       if (!this.isFull()) {
         this.moveToAndHarvest(this.targetSource());
+      } else {
+        this.handleFull();
       }
+    }
+  }
+
+  handleFull() {
+    const inRange = thing => this.pos.getRangeTo(thing) < 4;
+    const constructionSites = this.room.getConstructionSites().filter(inRange);
+    const container = this.room.getContainers().find(inRange);
+
+    if (constructionSites.length) {
+      this.moveToAndBuild(constructionSites[0]);
+    } else if (container) {
+      this.moveToAndRepair(container); // repair if needed.
+      this.deliverEnergyTo(container);
+    } else {
+      const buildPosition = this.pos.buildablePositionsAtRange(1)[0];
+      this.room.placeContainerFlag(buildPosition);
     }
   }
 

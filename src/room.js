@@ -227,6 +227,15 @@ Object.assign(Room.prototype, {
     return this._towers;
   },
 
+  getContainers() {
+    if (!this._containers) {
+      this._containers = this.getMyStructures().filter(structure => {
+        return structure.structureType === STRUCTURE_CONTAINER;
+      });
+    }
+    return this._containers;
+  },
+
   getObserver() {
     if (!this._observerCalc) {
       this._observerCalc = true;
@@ -290,6 +299,10 @@ Object.assign(Room.prototype, {
 
   placeTowerFlag(pos) {
     this.createBuildFlag(pos, STRUCTURE_TOWER);
+  },
+
+  placeContainerFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_CONTAINER);
   },
 
   placeWallFlags() {

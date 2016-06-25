@@ -47,6 +47,7 @@
     "FIND_SOURCES": true,
     "FIND_STRUCTURES": true,
     "RESOURCE_ENERGY": true,
+    "STRUCTURE_CONTAINER": true,
     "STRUCTURE_EXTENSION": true,
     "STRUCTURE_EXTRACTOR": true,
     "STRUCTURE_LINK": true,
