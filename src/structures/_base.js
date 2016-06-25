@@ -1,5 +1,5 @@
 // Because structures have an inheritance chain (Gparent > parent > child),
-// it is difficult to due proper class extensions.
+// it is difficult to properly extend their classes.
 
 /* @flow */
 import { Structure } from 'screeps-globals';
