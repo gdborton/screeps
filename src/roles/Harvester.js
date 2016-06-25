@@ -9,7 +9,7 @@ export default class Harvester extends Base {
       this.deliverEnergyTo(this.getSpawn());
     } else {
       const storage = this.room.getStorage();
-      const towers = this.room.getTowers();
+      const towers = this.room.getTowers().filter(tower => !tower.isFull());
       const closestTower = this.pos.findClosestByRange(towers);
       const links = this.room.getLinks();
       const closestLink = this.pos.findClosestByRange(links);
@@ -21,7 +21,7 @@ export default class Harvester extends Base {
         this.deliverEnergyTo(closestLink);
       } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
         this.deliverEnergyTo(storage);
-      } else if (closestTower && !closestTower.isFull() && this.pos.getRangeTo(closestTower) <= 2) {
+      } else if (closestTower && this.pos.getRangeTo(closestTower) <= 2) {
         this.deliverEnergyTo(closestTower);
       } else {
         this.drop(RESOURCE_ENERGY);
