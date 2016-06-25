@@ -13,10 +13,11 @@ function convertCreeps() {
 
 class CreepManager {
   creeps() {
-    if (!this._creeps) {
-      this._creeps = convertCreeps();
-    }
-    return this._creeps;
+    return convertCreeps();
+  }
+
+  creepsWithRole(role) {
+    return this.creeps().filter(creep => creep.memory.role === role);
   }
 
   // Occasionally we find a creep that is not enhanced... so we enhance it.

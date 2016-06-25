@@ -47,6 +47,19 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'scout', spawn: this.name });
   }
 
+  buildRemoteHarvester() {
+    const target = this.room.getReserveFlagsNeedingRemoteHarvesters()[0];
+    const body = [
+      MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+      WORK, WORK, WORK, WORK, WORK, CARRY, CARRY,
+    ];
+    this.createCreep(body, undefined, {
+      role: 'remoteharvester',
+      spawn: this.name,
+      flag: target.name,
+    });
+  }
+
   buildScoutHarvester() {
     const body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
     this.createCreep(body, undefined, { role: 'scoutharvester' });
@@ -87,7 +100,7 @@ export default class Spawn extends StructureSpawn {
       cost = bodyCosts.calculateCosts(body);
     }
 
-    this.createCreep(body, undefined, { role: 'reserver', room: this.room.name });
+    this.createCreep(body, undefined, { role: 'reserver', room: this.room.name, spawn: this.name });
   }
 
   buildCourier(availableEnergy) {
@@ -224,6 +237,8 @@ export default class Spawn extends StructureSpawn {
         this.buildWanderer();
       } else if (this.room.needsReservers()) {
         this.buildReserver(availableEnergy);
+      } else if (this.room.needsRemoteHarvesters()) {
+        this.buildRemoteHarvester();
       } else {
         this.extend();
       }

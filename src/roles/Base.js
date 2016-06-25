@@ -51,11 +51,11 @@ export default class Base extends Creep {
   }
 
   getSpawn() {
-    const validSpawns = Object.keys(Game.spawns).filter(spawnName => {
-      const spawn = Game.spawns[spawnName];
+    const spawns = Object.keys(Game.spawns).map(spawnName => Game.spawns[spawnName]);
+    const validSpawn = spawns.find(spawn => {
       return spawn.room === this.room;
     });
-    return validSpawns.length ? Game.spawns[validSpawns[0]] : Game.spawns[this.memory.spawn];
+    return validSpawn || Game.spawns[this.memory.spawn];
   }
 
   moveToThenDrop(target) {
@@ -145,6 +145,14 @@ export default class Base extends Creep {
     }
     if (range <= 3) {
       this.repair(target);
+    }
+  }
+
+  moveToAndHarvest(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      this.moveTo(target);
+    } else {
+      this.harvest(target);
     }
   }
 

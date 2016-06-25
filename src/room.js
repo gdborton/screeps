@@ -5,12 +5,8 @@ import structureManager from './utils/structure-manager';
 
 const MIN_RESERVE_LEVEL = 6;
 
-function getAllCreepsWithRole(role) {
-  creepManager.creeps().filter(creep => creep.memory.role === role);
-}
-
 function getAllClaimers() {
-  return getAllCreepsWithRole('claimer');
+  return creepManager.creepsWithRole('claimer');
 }
 
 function getAllScoutHarvesters() {
@@ -20,15 +16,15 @@ function getAllScoutHarvesters() {
 }
 
 function getAllScouts() {
-  return getAllCreepsWithRole('scout');
+  return creepManager.creepsWithRole('scout');
 }
 
 function getAllAttackers() {
-  return getAllCreepsWithRole('attacker');
+  return creepManager.creepsWithRole('attacker');
 }
 
 function getAllWanderers() {
-  return getAllCreepsWithRole('wanderer');
+  return creepManager.creepsWithRole('wanderer');
 }
 
 const cardinality = {
@@ -436,7 +432,7 @@ Object.assign(Room.prototype, {
   },
 
   getReservers() {
-    return getAllCreepsWithRole('reserver').filter(creep => creep.memory.room === this.name);
+    return creepManager.creepsWithRole('reserver').filter(creep => creep.memory.room === this.name);
   },
 
   getReserverCount() {
@@ -463,6 +459,14 @@ Object.assign(Room.prototype, {
 
   getReserveFlagsNeedingReservers() {
     return this.getReserveFlags().filter(flag => flag.needsReserver());
+  },
+
+  getReserveFlagsNeedingRemoteHarvesters() {
+    return this.getReserveFlags().filter(flag => flag.needsRemoteHarvesters());
+  },
+
+  needsRemoteHarvesters() {
+    return this.getReserveFlagsNeedingRemoteHarvesters().length > 0;
   },
 
   needsReservers() {

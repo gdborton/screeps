@@ -8,7 +8,7 @@ Object.assign(Source.prototype, {
   },
 
   needsHarvesters() {
-    const harvesters = this.room.getHarvesters();
+    const harvesters = this.room.myCreeps();
     let myHarvesters = 0;
     let workParts = 0;
     harvesters.forEach(harvester => {
@@ -19,6 +19,8 @@ Object.assign(Source.prototype, {
         }).length;
       }
     });
+
+    console.log(this.id, workParts);
 
     return workParts < 5 && myHarvesters < this.freeEdges();
   },

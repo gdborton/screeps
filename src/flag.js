@@ -1,5 +1,6 @@
 /* @flow */
 import { Flag } from 'screeps-globals';
+import creepManager from './utils/creep-manager';
 
 Object.assign(Flag.prototype, {
   work() {
@@ -55,6 +56,12 @@ Object.assign(Flag.prototype, {
     } else {
       this.memory.reservationTime = Math.max(this.memory.reservationTime - rate, 0);
     }
+
+    if (this.reservationTime() >= 4999) {
+      this.memory.needsReserver = false;
+    } else if (this.reservationTime() < 500) {
+      this.memory.needsReserver = true;
+    }
   },
 
   reservationTime() {
@@ -66,6 +73,14 @@ Object.assign(Flag.prototype, {
   },
 
   needsReserver() {
-    return this.isReserveFlag() && this.memory.reservationTime < 4500;
+    return this.isReserveFlag() && this.memory.needsReserver;
+  },
+
+  needsRemoteHarvesters() {
+    const remoteHarvesters = creepManager.creepsWithRole('remoteharvester').filter(creep => {
+      return creep.memory.flag === this.name;
+    });
+
+    return remoteHarvesters.length < this.memory.sources.length;
   },
 });
