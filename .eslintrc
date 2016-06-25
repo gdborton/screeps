@@ -14,6 +14,7 @@
     "StructureController": true,
     "StructureExtension": true,
     "StructureLink": true,
+    "STRUCTURE_RAMPART": true,
     "StructureSpawn": true,
     "StructureTower": true,
     "StructureWall": true,

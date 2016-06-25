@@ -21,6 +21,18 @@ Object.assign(Flag.prototype, {
           this.remove();
         }
       }
+    } else if (this.name.toLowerCase() === 'rampart') {
+      if (!this.pos.isOpen()) {
+        const structure = this.pos.lookFor('structure')[0];
+        if (structure) {
+          structure.destroy();
+        }
+      } else {
+        const result = this.room.createConstructionSite(this.pos.x, this.pos.y, STRUCTURE_RAMPART);
+        if (result === 0) {
+          this.remove();
+        }
+      }
     }
   },
 });
