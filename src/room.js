@@ -32,6 +32,10 @@ function getAllAttackers() {
   return getAllCreepsWithRole('attacker');
 }
 
+function getAllWanderers() {
+  return getAllCreepsWithRole('wanderer');
+}
+
 const cardinality = {
   N: -1,
   S: 1,
@@ -499,7 +503,7 @@ Object.assign(Room.prototype, {
       });
     }
 
-    return this._uniqueExitPoints();
+    return this._uniqueExitPoints;
   },
 
   hasOutdatedCreeps() {
@@ -693,7 +697,7 @@ Object.assign(Room.prototype, {
   },
 
   getControllerOwned() {
-    return this.controller.my;
+    return this.controller && this.controller.my;
   },
 
   getDismantleFlag() {
@@ -720,6 +724,10 @@ Object.assign(Room.prototype, {
       desiredValue = 4;
     }
     return this.hasScoutFlag() && getAllScouts().length < desiredValue;
+  },
+
+  needsWanderers() {
+    return getAllWanderers().length < 1;
   },
 
   needsClaimers() {

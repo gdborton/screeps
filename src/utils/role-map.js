@@ -7,6 +7,7 @@ import RoadWorker from '../roles/RoadWorker';
 import Scout from '../roles/Scout';
 import ScoutHarvester from '../roles/ScoutHarvester';
 import Upgrader from '../roles/Upgrader';
+import Wanderer from '../roles/Wanderer';
 
 const roleMap = {
   builder: Builder,
@@ -18,6 +19,7 @@ const roleMap = {
   scout: Scout,
   scoutharvester: ScoutHarvester,
   upgrader: Upgrader,
+  wanderer: Wanderer,
 };
 
 export default roleMap;

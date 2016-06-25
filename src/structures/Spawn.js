@@ -52,6 +52,10 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'scoutharvester' });
   }
 
+  buildWanderer() {
+    this.createCreep([MOVE], undefined, { role: 'wanderer' });
+  }
+
   buildMailman(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
     let cost = bodyCosts.calculateCosts(body);
@@ -199,6 +203,8 @@ export default class Spawn extends StructureSpawn {
         this.buildScoutHarvester(availableEnergy);
       } else if (this.room.needsClaimers()) {
         this.buildClaimer(availableEnergy);
+      } else if (this.room.needsWanderers()) {
+        this.buildWanderer();
       } else {
         this.extend();
       }
