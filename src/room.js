@@ -439,14 +439,15 @@ Object.assign(Room.prototype, {
   },
 
   shouldReserve() {
-    const owner = Game.myRooms().find(room => {
+    const hasController = this.controller;
+    const ownNearbyRoom = Game.myRooms().find(room => {
       const isNextTo = room.distanceToRoom(this.name) === 1;
       return isNextTo &&
         room.ableToReserve() &&
         this.getCenterPosition().findPathTo(room.getCenterPosition()).length < 60;
     });
 
-    return !!owner;
+    return hasController && !!ownNearbyRoom;
   },
 
   getReservers() {
