@@ -26,8 +26,11 @@ export default class RemoteHarvester extends Base {
     if (constructionSites.length) {
       this.moveToAndBuild(constructionSites[0]);
     } else if (container) {
-      this.moveToAndRepair(container); // repair if needed.
-      this.deliverEnergyTo(container);
+      if (container.needsRepaired) {
+        this.moveToAndRepair(container); // repair if needed.
+      } else {
+        this.deliverEnergyTo(container);
+      }
     } else {
       const buildPosition = this.pos.buildablePositionsAtRange(1)[0];
       this.room.placeContainerFlag(buildPosition);

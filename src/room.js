@@ -72,6 +72,42 @@ Object.assign(Room.prototype, {
     }
   },
 
+  hasDirectExitTo(roomName) {
+    const targetX = xValueFromRoomName(roomName);
+    const targetY = yValueFromRoomName(roomName);
+    const x = this.getXCoord();
+    const y = this.getYCoord();
+    if (this.distanceToRoom(roomName) > 1) {
+      return null;
+    }
+
+    if (x < targetX) {
+      return this.hasEastExit();
+    } else if (x > targetX) {
+      return this.hasWestExit();
+    } else if (y < targetY) {
+      return this.hasSouthExit();
+    }
+
+    return this.hasNorthExit();
+  },
+
+  hasEastExit() {
+    return !!this.getUniqueExitPoints().find(exitPos => exitPos.x === 49);
+  },
+
+  hasWestExit() {
+    return !!this.getUniqueExitPoints().find(exitPos => exitPos.x === 0);
+  },
+
+  hasNorthExit() {
+    return !!this.getUniqueExitPoints().find(exitPos => exitPos.y === 0);
+  },
+
+  hasSouthExit() {
+    return !!this.getUniqueExitPoints().find(exitPos => exitPos.y === 49);
+  },
+
   hasHostileCreeps() {
     return this.getHostileCreeps().length > 0;
   },
@@ -438,7 +474,7 @@ Object.assign(Room.prototype, {
       const isNextTo = room.distanceToRoom(this.name) === 1;
       return isNextTo &&
         room.ableToReserve() &&
-        this.getCenterPosition().findPathTo(room.getCenterPosition()).length < 60;
+        this.hasDirectExitTo(room.name);
     });
 
     return hasController && !!ownNearbyRoom;
