@@ -5,25 +5,18 @@ import structureManager from './utils/structure-manager';
 
 const MIN_RESERVE_LEVEL = 6;
 
+function getAllCreepsWithRole(role) {
+  creepManager.creeps().filter(creep => creep.memory.role === role);
+}
+
 function getAllClaimers() {
-  return Object.keys(Game.creeps).filter((creepName) => {
-    const creep = Game.creeps[creepName];
-    return creep.memory.role === 'claimer';
-  });
+  return getAllCreepsWithRole('claimer');
 }
 
 function getAllScoutHarvesters() {
-  return Object.keys(Game.creeps).filter(creepName => {
-    const creep = Game.creeps[creepName];
+  return creepManager.creeps().filter(creep => {
     return creep.memory.role === 'scoutharvester' || creep.memory.oldRole === 'scoutharvester';
   });
-}
-
-function getAllCreepsWithRole(role) {
-  return Object.keys(Game.creeps).filter(creepName => {
-    const creep = Game.creeps[creepName];
-    return creep.memory.role === role;
-  }).map(creepName => Game.creeps[creepName]);
 }
 
 function getAllScouts() {
@@ -428,14 +421,6 @@ Object.assign(Room.prototype, {
     if (this.shouldReserve()) {
       this.placeReserveFlag();
     }
-  },
-
-  parentRoom() {
-
-  },
-
-  childRooms() {
-
   },
 
   shouldReserve() {

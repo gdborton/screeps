@@ -13,7 +13,10 @@ function convertCreeps() {
 
 class CreepManager {
   creeps() {
-    return convertCreeps();
+    if (!this._creeps) {
+      this._creeps = convertCreeps();
+    }
+    return this._creeps;
   }
 
   // Occasionally we find a creep that is not enhanced... so we enhance it.
