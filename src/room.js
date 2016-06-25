@@ -265,7 +265,7 @@ Object.assign(Room.prototype, {
 
   getContainers() {
     if (!this._containers) {
-      this._containers = this.getMyStructures().filter(structure => {
+      this._containers = this.getStructures().filter(structure => {
         return structure.structureType === STRUCTURE_CONTAINER;
       });
     }

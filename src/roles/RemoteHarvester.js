@@ -26,7 +26,7 @@ export default class RemoteHarvester extends Base {
     if (constructionSites.length) {
       this.moveToAndBuild(constructionSites[0]);
     } else if (container) {
-      if (container.needsRepaired) {
+      if (container.needsRepaired()) {
         this.moveToAndRepair(container); // repair if needed.
       } else {
         this.deliverEnergyTo(container);
