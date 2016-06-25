@@ -35,4 +35,8 @@ Object.assign(Flag.prototype, {
       }
     }
   },
+
+  isReserveFlag() {
+    return this.name.indexOf('reserve') === 0;
+  },
 });

@@ -3,6 +3,8 @@ import { Room } from 'screeps-globals';
 import creepManager from './utils/creep-manager';
 import structureManager from './utils/structure-manager';
 
+const MIN_RESERVE_LEVEL = 6;
+
 function getAllClaimers() {
   return Object.keys(Game.creeps).filter((creepName) => {
     const creep = Game.creeps[creepName];
@@ -21,7 +23,7 @@ function getAllCreepsWithRole(role) {
   return Object.keys(Game.creeps).filter(creepName => {
     const creep = Game.creeps[creepName];
     return creep.memory.role === role;
-  });
+  }).map(creepName => Game.creeps[creepName]);
 }
 
 function getAllScouts() {
@@ -447,8 +449,16 @@ Object.assign(Room.prototype, {
     return !!owner;
   },
 
+  getReservers() {
+    return getAllCreepsWithRole('reserver').filter(creep => creep.memory.room === this.name);
+  },
+
+  getReserverCount() {
+    return this.getReservers().length;
+  },
+
   ableToReserve() {
-    return this.getControllerOwned() && this.controller.level >= 6;
+    return this.getControllerOwned() && this.controller.level >= MIN_RESERVE_LEVEL;
   },
 
   needsRoadWorkers() {
@@ -457,6 +467,19 @@ Object.assign(Room.prototype, {
     }
 
     return this.roadWorkerCount() < 1 && this.hasDamagedRoads();
+  },
+
+  getReserveFlags() {
+    return Game.flagArray().filter(flag => {
+      return flag.isReserveFlag() && this.distanceToRoom(flag.pos.roomName) === 1;
+    });
+  },
+
+  needsReservers() {
+    let needsReserver = this.controller.level >= MIN_RESERVE_LEVEL;
+    needsReserver = needsReserver && this.getReserveFlags().length;
+
+    return needsReserver && this.getReserverCount() < 1;
   },
 
   needsCouriers() {

@@ -3,6 +3,7 @@ import Claimer from '../roles/Claimer';
 import Courier from '../roles/Courier';
 import Harvester from '../roles/Harvester';
 import Mailman from '../roles/Mailman';
+import Reserver from '../roles/Reserver';
 import RoadWorker from '../roles/RoadWorker';
 import Scout from '../roles/Scout';
 import ScoutHarvester from '../roles/ScoutHarvester';
@@ -15,6 +16,7 @@ const roleMap = {
   courier: Courier,
   harvester: Harvester,
   mailman: Mailman,
+  reserver: Reserver,
   roadworker: RoadWorker,
   scout: Scout,
   scoutharvester: ScoutHarvester,
