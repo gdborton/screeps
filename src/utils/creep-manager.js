@@ -28,4 +28,8 @@ class CreepManager {
 
 const creepManager = new CreepManager();
 
+Creep.prototype.enhance = function enhance() {
+  return creepManager.enhanceCreep(this);
+};
+
 export default creepManager;
