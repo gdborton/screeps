@@ -55,7 +55,11 @@ export default class Base extends Creep {
     const validSpawn = spawns.find(spawn => {
       return spawn.room === this.room;
     });
-    return validSpawn || Game.spawns[this.memory.spawn];
+    const spawn = validSpawn || Game.spawns[this.memory.spawn];
+    if (spawn) {
+      return spawn.enhance();
+    }
+    return spawn;
   }
 
   moveToThenDrop(target) {

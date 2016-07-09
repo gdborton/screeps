@@ -3,6 +3,7 @@
 
 /* @flow */
 import { Structure } from 'screeps-globals';
+import structureManager from '../utils/structure-manager';
 
 Object.assign(Structure.prototype, {
   work() {
@@ -12,6 +13,10 @@ Object.assign(Structure.prototype, {
     if (Game.time % 100 === 0) {
       this.buildAccessRoads();
     }
+  },
+
+  enhance() {
+    return structureManager.enhanceStructure(this);
   },
 
   isControllerLink() {
