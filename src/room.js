@@ -510,12 +510,20 @@ Object.assign(Room.prototype, {
     return this.getReserveFlags().filter(flag => flag.needsReserver());
   },
 
+  getReserveFlagsNeedingRemoteCouriers() {
+    return this.getReserveFlags().filter(flag => flag.needsRemoteCouriers());
+  },
+
   getReserveFlagsNeedingRemoteHarvesters() {
     return this.getReserveFlags().filter(flag => flag.needsRemoteHarvesters());
   },
 
   needsRemoteHarvesters() {
     return this.getReserveFlagsNeedingRemoteHarvesters().length > 0;
+  },
+
+  needsRemoteCouriers() {
+    return this.getReserveFlagsNeedingRemoteCouriers().length > 0;
   },
 
   needsReservers() {
@@ -865,6 +873,8 @@ Object.assign(Room.prototype, {
       return this.getTowers().filter(tower => {
         return !tower.isEmpty();
       });
+    } else if (this.getContainers().length) {
+      return this.getContainers().filter(container => !container.isEmpty());
     }
 
     return [];

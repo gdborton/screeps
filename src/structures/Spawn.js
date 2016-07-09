@@ -47,6 +47,20 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'scout', spawn: this.name });
   }
 
+  buildRemoteCourier() {
+    const target = this.room.getReserveFlagsNeedingRemoteCouriers()[0];
+    const body = [];
+    while (body.length < 20) {
+      body.push(MOVE);
+      body.push(CARRY);
+    }
+    this.createCreep(body, undefined, {
+      role: 'remotecourier',
+      flag: target.name,
+      spawn: this.name,
+    });
+  }
+
   buildRemoteHarvester() {
     const target = this.room.getReserveFlagsNeedingRemoteHarvesters()[0];
     const body = [
@@ -239,6 +253,8 @@ export default class Spawn extends StructureSpawn {
         this.buildReserver(availableEnergy);
       } else if (this.room.needsRemoteHarvesters()) {
         this.buildRemoteHarvester();
+      } else if (this.room.needsRemoteCouriers()) {
+        this.buildRemoteCourier();
       } else {
         this.extend();
       }

@@ -82,6 +82,14 @@ Object.assign(Flag.prototype, {
     return this.isReserveFlag() && this.memory.needsReserver;
   },
 
+  needsRemoteCouriers() {
+    const couriers = creepManager.creepsWithRole('remotecourier').filter(creep => {
+      return creep.memory.flag === this.name;
+    });
+
+    return couriers.length < this.memory.sources.length;
+  },
+
   needsRemoteHarvesters() {
     const remoteHarvesters = creepManager.creepsWithRole('remoteharvester').filter(creep => {
       return creep.memory.flag === this.name;
