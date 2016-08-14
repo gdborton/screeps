@@ -33,12 +33,9 @@ Object.assign(Source.prototype, {
     const range2Positions = this.pos.buildablePositionsAtRange(2);
     const range1Positions = this.pos.buildablePositionsAtRange();
     return range2Positions.filter(position => {
-      for (let index = 0; index <= range1Positions.length; index++) {
-        if (range1Positions[index].getRangeTo(position) === 1) {
-          return true;
-        }
-      }
-      return false;
+      return !!range1Positions.find(range1Position => {
+        return range1Position.getRangeTo(position) === 1;
+      });
     });
   },
 

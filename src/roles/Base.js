@@ -1,7 +1,8 @@
 import bodyCosts from '../utils/body-costs';
 import { Creep, Flag, Energy } from 'screeps-globals';
+import profiler from 'screeps-profiler';
 
-export default class Base extends Creep {
+class Base extends Creep {
   constructor(creep) {
     super(creep.id);
   }
@@ -245,3 +246,7 @@ export default class Base extends Creep {
     }
   }
 }
+
+profiler.registerClass(Base, 'CreepBase');
+
+export default Base;

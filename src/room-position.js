@@ -50,7 +50,7 @@ Object.assign(RoomPosition.prototype, {
   },
 
   isBuildable() {
-    const terrain = this.lookFor('terrain');
+    const terrain = this.lookFor('terrain')[0];
     return terrain === 'swamp' || terrain === 'plain';
   },
 
