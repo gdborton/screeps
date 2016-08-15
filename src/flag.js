@@ -11,6 +11,7 @@ Object.assign(Flag.prototype, {
   work() {
     if (this.name.toLowerCase().indexOf('build') !== -1) {
       const parts = this.name.split('_');
+      if (parts.length < 2) return; // we're not going to find a target, just bail.
       const target = parts[1];
       let shouldBuild = false;
       const ownedRoom = this.room.getControllerOwned();
@@ -47,6 +48,10 @@ Object.assign(Flag.prototype, {
 
   isReserveFlag() {
     return this.name.indexOf('reserve') === 0;
+  },
+
+  isNoBuildFlag() {
+    return this.name.indexOf('nobuild') !== -1;
   },
 
   performReserveFlagRole() {

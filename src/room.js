@@ -254,6 +254,10 @@ Object.assign(Room.prototype, {
     return this._storage;
   },
 
+  hasTowers() {
+    return this.getTowers().length > 0;
+  },
+
   getTowers() {
     if (!this._towers) {
       this._towers = this.getMyStructures().filter(structure => {
@@ -342,22 +346,24 @@ Object.assign(Room.prototype, {
   },
 
   placeWallFlags() {
-    const exits = this.getExits();
-    exits.forEach(exitPos => {
-      const potentialSpots = exitPos.openPositionsAtRange(2);
-      const realSpots = potentialSpots.filter(potentialSpot => {
-        let shouldBuild = true;
-        exits.forEach(exit => {
-          if (exit.getRangeTo(potentialSpot) < 2) {
-            shouldBuild = false;
-          }
+    if (this.hasTowers()) {
+      const exits = this.getExits();
+      exits.forEach(exitPos => {
+        const potentialSpots = exitPos.openPositionsAtRange(2);
+        const realSpots = potentialSpots.filter(potentialSpot => {
+          let shouldBuild = true;
+          exits.forEach(exit => {
+            if (exit.getRangeTo(potentialSpot) < 2) {
+              shouldBuild = false;
+            }
+          });
+          return shouldBuild;
         });
-        return shouldBuild;
+        realSpots.forEach(realSpot => {
+          this.createBuildFlag(realSpot, STRUCTURE_WALL);
+        });
       });
-      realSpots.forEach(realSpot => {
-        this.createBuildFlag(realSpot, STRUCTURE_WALL);
-      });
-    });
+    }
   },
 
   createBuildFlag(pos, structureType) {
@@ -868,7 +874,7 @@ Object.assign(Room.prototype, {
       return this.getCreepsThatNeedOffloading();
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
       return [this.getStorage()];
-    } else if (this.getTowers().length) {
+    } else if (this.hasTowers()) {
       // All towers that aren't empty are a source of energy
       return this.getTowers().filter(tower => {
         return !tower.isEmpty();
