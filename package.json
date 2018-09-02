@@ -20,7 +20,7 @@
   "devDependencies": {
     "babel-core": "^6.5.2",
     "babel-eslint": "^6.0.2",
-    "babel-loader": "^6.2.3",
+    "babel-loader": "^7.1.5",
     "babel-preset-es2015": "^6.5.0",
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-2": "^6.5.0",
@@ -31,6 +31,6 @@
     "screeps-globals": "0.0.1",
     "screeps-perf": "0.0.1",
     "screeps-profiler": "^1.1.2",
-    "webpack": "^1.12.13"
+    "webpack": "^4.17.1"
   }
 }

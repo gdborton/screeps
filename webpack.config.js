@@ -1,16 +1,18 @@
+const path = require('path');
+
 module.exports = {
   entry: './src/main',
   output: {
-    path: 'dist/',
+    path: path.resolve('dist/'),
     filename: 'main.js',
     libraryTarget: 'commonjs2',
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        query: {
+        options: {
           presets: [
             require.resolve('babel-preset-react'), // React preset is needed only for flow support.
             require.resolve('babel-preset-es2015'),
@@ -20,4 +22,5 @@ module.exports = {
       },
     ],
   },
+  mode: 'none',
 };
