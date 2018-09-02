@@ -724,7 +724,7 @@ Object.assign(Room.prototype, {
   droppedControllerEnergy() {
     if (!this._droppedControllerEnergy) {
       const dumpFlag = this.getControllerEnergyDropFlag();
-      this._droppedControllerEnergy = this.find(FIND_DROPPED_ENERGY).filter(energy => {
+      this._droppedControllerEnergy = this.find(FIND_DROPPED_RESOURCES).filter(energy => {
         return energy.pos.getRangeTo(dumpFlag) === 0;
       })[0];
     }
@@ -788,7 +788,7 @@ Object.assign(Room.prototype, {
   },
 
   getDroppedEnergy() {
-    return this.find(FIND_DROPPED_ENERGY).sort((energyA, energyB) => {
+    return this.find(FIND_DROPPED_RESOURCES).sort((energyA, energyB) => {
       return energyB.energy - energyA.energy;
     });
   },
