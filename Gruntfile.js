@@ -1,5 +1,4 @@
 module.exports = function(grunt) {
-
   grunt.loadNpmTasks('grunt-screeps');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
@@ -7,7 +6,7 @@ module.exports = function(grunt) {
     screeps: {
       options: {
         accountAlias: 'Hatyr',
-        token: require('./token.json'),
+        token: process.env.SCREEPS_TOKEN || require('./token.json'),
         branch: 'default',
         ptr: false
       },
