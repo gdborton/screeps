@@ -92,7 +92,11 @@ Object.assign(Flag.prototype, {
       return creep.memory.flag === this.name;
     });
 
-    return couriers.length < this.memory.sources.length;
+    if (this.memory.sources) {
+      return couriers.length < this.memory.sources.length;
+    }
+
+    return false;
   },
 
   needsRemoteHarvesters() {
@@ -100,6 +104,10 @@ Object.assign(Flag.prototype, {
       return creep.memory.flag === this.name;
     });
 
-    return remoteHarvesters.length < this.memory.sources.length;
+    if (this.memory.sources) {
+      return remoteHarvesters.length < this.memory.sources.length;
+    }
+
+    return false;
   },
 });
