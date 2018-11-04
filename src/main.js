@@ -10,15 +10,18 @@ import './flag';
 import './controller';
 import profiler from 'screeps-profiler';
 import { Room } from 'screeps-globals';
+import { playground } from './playground';
 
 profiler.enable();
 
 export function loop() {
   if (Room.prototype.work && Game.cpuLimit > 100) {
     profiler.wrap(() => {
-      game.setup();
-      Object.keys(Game.rooms).forEach(roomName => {
-        Game.rooms[roomName].work();
+      playground(() => {
+        game.setup();
+        Object.keys(Game.rooms).forEach(roomName => {
+          Game.rooms[roomName].work();
+        });
       });
     });
   }
