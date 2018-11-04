@@ -173,7 +173,7 @@ class Base extends Creep {
       this.moveTo(target);
     }
 
-    if (!target.transfer || target.structureType && target.structureType === STRUCTURE_TOWER) { // eslint-disable-line
+    if (!target.transfer || target.structureType) { // eslint-disable-line
       return this.withdraw(target, RESOURCE_ENERGY);
     }
 
