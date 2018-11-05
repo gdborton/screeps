@@ -7,13 +7,24 @@ export default class Builder extends Base {
     } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
       this.memory.target = null;
       this.memory.task = 'stockup';
-      if (this.room.droppedControllerEnergy()) {
-        this.takeEnergyFrom(this.room.droppedControllerEnergy());
-      } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
-        this.takeEnergyFrom(this.room.getControllerLink());
-      } else if (this.room.getStorage() && !this.room.getStorage().isEmpty()) {
-        this.takeEnergyFrom(this.room.getStorage());
+      this.room.getEnergySource
+      const sources = [
+        ...this.room.getDroppedEnergy(),
+        ...[this.room.getControllerLink() && !this.room.getControllerLink().isEmpty() && this.room.getControllerLink()],
+        ...[this.room.getStorage() && !this.room.getStorage().isEmpty()],
+      ].filter(Boolean);
+
+      if (sources.length) {
+        this.takeEnergyFrom(this.pos.findClosestByRange(sources));
       }
+
+      // if (.length) {
+      //   this.takeEnergyFrom(this.room.getDroppedEnergy()[0]);
+      // } else if (this.room.getControllerLink() && !this.room.getControllerLink().isEmpty()) {
+      //   this.takeEnergyFrom();
+      // } else if (this.room.getStorage() && !this.room.getStorage().isEmpty()) {
+      //   this.takeEnergyFrom(this.room.getStorage());
+      // }
     }
 
     if (this.memory.task === 'work') {

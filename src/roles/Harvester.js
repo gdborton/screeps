@@ -14,15 +14,11 @@ export default class Harvester extends Base {
       const links = this.room.getLinks();
       const closestLink = this.pos.findClosestByRange(links);
       const rangeToStore = storage ? this.pos.getRangeTo(storage) : 100;
+      const constructionSites = this.room.getConstructionSites();
+      const closestConstructionSite = this.pos.findClosestByRange(constructionSites);
 
-      if (storage && storage.store.energy < storage.storeCapacity * 0.3 && rangeToStore === 1) {
-        this.deliverEnergyTo(storage);
-      } else if (links.length && this.pos.getRangeTo(closestLink) <= 2 && !closestLink.isFull()) {
-        this.deliverEnergyTo(closestLink);
-      } else if (storage && storage.store.energy < storage.storeCapacity && rangeToStore === 1) {
-        this.deliverEnergyTo(storage);
-      } else if (closestTower && this.pos.getRangeTo(closestTower) <= 2) {
-        this.deliverEnergyTo(closestTower);
+      if (closestConstructionSite && this.pos.getRangeTo(closestConstructionSite) <= 3) {
+        this.moveToAndBuild(closestConstructionSite);
       } else {
         this.drop(RESOURCE_ENERGY);
       }

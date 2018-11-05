@@ -20,7 +20,7 @@ Object.assign(Structure.prototype, {
   },
 
   isControllerLink() {
-    return this.structureType === STRUCTURE_LINK && this.pos.getRangeTo(this.room.controller) < 5;
+    return this.structureType === STRUCTURE_LINK && this.pos.getRangeTo(this.room.controller) <= 5;
   },
 
   isFull() {
@@ -72,5 +72,21 @@ Object.assign(Structure.prototype, {
         this.room.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
       }
     });
+  },
+
+  needsEnergy() {
+    if (!(this.store || this.energyCapacity)) return false;
+    if (this.structureType === STRUCTURE_TERMINAL) return false;
+    if (this.structureType === STRUCTURE_CONTAINER) return false;
+    if (this.structureType === STRUCTURE_TOWER) return false;
+
+    if (this.structureType === STRUCTURE_STORAGE) {
+      return this.room.energyAvailable === this.room.energyCapacityAvailable;
+    };
+    if (this.store) {
+      return this.store[RESOURCE_ENERGY] < this.storeCapacity;
+    }
+
+    return this.energy < this.energyCapacity;
   },
 });

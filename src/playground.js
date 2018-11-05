@@ -11,25 +11,7 @@ const HARVEST = 'HARVEST';
 const UPGRADE_CONTROLLER = 'UPGRADE_CONTROLLER';
 const DROP = 'DROP';
 const TRANSFER = 'TRANSFER';
-
-// const constants = {
-//   TOP: 1,
-//   TOP_RIGHT: 2,
-//   RIGHT: 3,
-//   BOTTOM_RIGHT: 4,
-//   BOTTOM: 5,
-//   BOTTOM_LEFT: 6,
-//   LEFT: 7,
-//   TOP_LEFT: 8,
-//   MOVE: "move",
-//   WORK: "work",
-//   CARRY: "carry",
-//   ATTACK: "attack",
-//   RANGED_ATTACK: "ranged_attack",
-//   TOUGH: "tough",
-//   HEAL: "heal",
-//   CLAIM: "claim",
-// };
+const REPAIR = 'REPAIR';
 
 function serializeRoom() {
   return {
@@ -191,6 +173,17 @@ function predictGameObjects(gameObjects, intent) {
         },
       };
     }
+    case REPAIR: {
+      return {
+        ...gameObjects,
+        [intent.objectId]: {
+          ...gameObjects[intent.objectId],
+          carry: {
+            energy: actor.carry.energy - 1,
+          },
+        },
+      };
+    }
     case TRANSFER: {
       return {
         ...gameObjects,
@@ -320,6 +313,17 @@ function extendPrototypes() {
           resourceType,
         });
       }
+      return result;
+    }
+
+    const originalRepair = Creep.prototype.repair;
+    Creep.prototype.repair = function repair(target) {
+      const result = originalRepair.apply(this, arguments);
+      addIntent({
+        type: REPAIR,
+        objectId: this.id,
+        targetId: target.id,
+      });
       return result;
     }
 

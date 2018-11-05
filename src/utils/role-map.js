@@ -1,6 +1,8 @@
+import Base from '../roles/Base';
 import Builder from '../roles/Builder';
 import Claimer from '../roles/Claimer';
 import Courier from '../roles/Courier';
+import Gatherer from '../roles/Gatherer';
 import Harvester from '../roles/Harvester';
 import Mailman from '../roles/Mailman';
 import RemoteCourier from '../roles/RemoteCourier';
@@ -11,21 +13,31 @@ import Scout from '../roles/Scout';
 import ScoutHarvester from '../roles/ScoutHarvester';
 import Upgrader from '../roles/Upgrader';
 import Wanderer from '../roles/Wanderer';
+import Miner from '../roles/Miner';
 
+/**
+ * These are run in order of importance. The first creep that says yes, gets
+ * built. Generally emergency type Roles should be placed higher on the list.
+ *
+ * Setup in an object for legacy purposes, needs a refactor.
+ */
 const roleMap = {
-  builder: Builder,
-  claimer: Claimer,
-  courier: Courier,
   harvester: Harvester,
+  courier: Courier,
+  builder: Builder,
+  upgrader: Upgrader,
   mailman: Mailman,
+  miner: Miner,
+  gatherer: Gatherer,
   remotecourier: RemoteCourier,
   remoteharvester: RemoteHarvester,
   reserver: Reserver,
-  roadworker: RoadWorker,
   scout: Scout,
   scoutharvester: ScoutHarvester,
-  upgrader: Upgrader,
+  claimer: Claimer,
+  roadworker: RoadWorker,
   wanderer: Wanderer,
+  base: Base,
 };
 
 export default roleMap;

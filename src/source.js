@@ -23,6 +23,10 @@ Object.assign(Source.prototype, {
     return workParts < 5 && myHarvesters < this.freeEdges();
   },
 
+  hasContainer() {
+    return !!this.room.getContainers().find(container => container.pos.getRangeTo(this) === 1);
+  },
+
   hasTowerFlag() {
     return !!this.room.getTowerFlags().find(flag => {
       return flag.pos.getRangeTo(this.pos) < 3;

@@ -35,6 +35,7 @@ fetchTestCases().then((testCaseMap) => {
             };
           });
         console.log('intents upon', JSON.stringify(upon, null, 2));
+        process.exit();
       }
     });
   });

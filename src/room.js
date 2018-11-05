@@ -2,9 +2,11 @@
 import { Room } from 'screeps-globals';
 import creepManager from './utils/creep-manager';
 import structureManager from './utils/structure-manager';
+import { LOOK_STRUCTURES, STRUCTURE_LINK } from './utils/constants';
 
 const MIN_RESERVE_LEVEL = 6;
 
+//#region Old way of writing roles
 function getAllClaimers() {
   return creepManager.creepsWithRole('claimer');
 }
@@ -26,6 +28,7 @@ function getAllAttackers() {
 function getAllWanderers() {
   return creepManager.creepsWithRole('wanderer');
 }
+//#endregion
 
 const cardinality = {
   N: -1,
@@ -65,11 +68,13 @@ Object.assign(Room.prototype, {
 
     if (this.getControllerOwned()) {
       // The logic for placing flags/structures is expensive, and doesn't need to run every tick.
-      if (Game.time % 10 === 0) {
-        this.placeFlags();
-        this.placeStructures();
-      }
+      // if (Game.time % 10 === 0) {
+      //   this.placeFlags();
+      //   this.placeStructures();
+      // }
     }
+
+    // console.log(JSON.stringify(this.determineBuildSites()));
   },
 
   hasDirectExitTo(roomName) {
@@ -486,6 +491,10 @@ Object.assign(Room.prototype, {
     return hasController && !!ownNearbyRoom;
   },
 
+  getCreepsWithRole(role) {
+    return creepManager.creepsWithRole(role).filter(creep => creep.room === this);
+  },
+
   getReservers() {
     return creepManager.creepsWithRole('reserver').filter(creep => creep.memory.room === this.name);
   },
@@ -753,6 +762,10 @@ Object.assign(Room.prototype, {
     return spawns;
   },
 
+  getSpawns() {
+    return [this.getSpawn()];
+  },
+
   canBuildExtension() {
     if (this._canBuildExtensions === undefined) {
       const maxExtensions = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][this.controller.level] || 0;
@@ -854,14 +867,10 @@ Object.assign(Room.prototype, {
     return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;
   },
 
-  getStructresNeedingEnergyDelivery() {
+  getStructuresNeedingEnergy() {
     if (!this._structuresNeedingEnergyDelivery) {
       this._structuresNeedingEnergyDelivery = this.getMyStructures().filter(structure => {
-        const notALink = structure.structureType !== STRUCTURE_LINK;
-        const isTower = structure.structureType === STRUCTURE_TOWER;
-        const notASourceTower = isTower ? !structure.isSourceTower() : true;
-        const notFull = structure.energyCapacity && structure.energy < structure.energyCapacity;
-        return notFull && notALink && notASourceTower;
+        return structure.needsEnergy();
       });
     }
     return this._structuresNeedingEnergyDelivery;
@@ -870,6 +879,8 @@ Object.assign(Room.prototype, {
   getEnergySourcesThatNeedsStocked() {
     if (this.getEnergyThatNeedsPickedUp().length) {
       return this.getEnergyThatNeedsPickedUp();
+    } else if (this.getContainers().length) {
+      return this.getContainers().filter(container => !container.isEmpty());
     } else if (this.getCreepsThatNeedOffloading().length) {
       return this.getCreepsThatNeedOffloading();
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
@@ -879,10 +890,101 @@ Object.assign(Room.prototype, {
       return this.getTowers().filter(tower => {
         return !tower.isEmpty();
       });
-    } else if (this.getContainers().length) {
-      return this.getContainers().filter(container => !container.isEmpty());
     }
 
     return [];
+  },
+
+  determineBuildSites() {
+    const containerSites = this.determineContainerSites();
+
+    return {
+      containerSites,
+      linkSites: this.determineLinkSites(),
+      towerSites: this.determineTowerSites(),
+      storageSite: this.determineStorageSite(),
+    };
+  },
+
+  determineContainerSites() {
+    if (!this._containerSites) {
+      this._containerSites = this.getSources().map((source) => {
+        return this.findPositionsInPathToNearestSpawn(source, true)[0];
+      });
+    }
+
+    return this._containerSites;
+  },
+
+  findPositionsInPathToNearestSpawn(target, onlyTerrain) {
+    return this.findPathToNearestSpawn(target, onlyTerrain).map(pathPos => {
+      return new RoomPosition(pathPos.x, pathPos.y, this.name);
+    });
+  },
+
+  hasLinksConfigured() {
+    // should have one link per source, and one for the controller/storage.
+    return this.determineLinkSites().every((position) => {
+      return position.look().find((thing) => {
+        if (thing.type === LOOK_STRUCTURES) {
+          return thing.structure.structureType === STRUCTURE_LINK;
+        }
+      });
+    });
+  },
+
+  findPathToNearestSpawn(target, onlyTerrain) {
+    let nearestPath;
+    this.getSpawns().forEach((spawn) => {
+      const findOpts = onlyTerrain ? {
+        ignoreCreeps: true,
+        ignoreRoads: true,
+        ignoreDestructibleStructures: true
+      } : undefined;
+
+      const path = this.findPath(target.pos, spawn.pos, findOpts);
+      if (!nearestPath || nearestPath.length > path.length) {
+        nearestPath = path;
+      }
+    });
+
+    return nearestPath;
+  },
+
+  determineTransferPostions() {
+
+  },
+
+  determineStorageSite() {
+    if (!this.controller) return undefined;
+    const controllerPathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
+    const transferPosition = controllerPathPositions[2];
+    return transferPosition.buildablePositionsAtRange(1).filter((position) => {
+      return !controllerPathPositions.find(pathPos => pathPos.isEqualTo(position));
+    })[0];
+  },
+
+  determineLinkSites() {
+    return this.getSources().map((source) => {
+      const pathPositions = this.findPositionsInPathToNearestSpawn(source, true);
+      const transferLocation = pathPositions[1];
+      return transferLocation.buildablePositionsAtRange(1).filter(position => {
+        return !pathPositions.find(pathPos => pathPos.isEqualTo(position));
+      })[0];
+    });
+  },
+
+  determineTowerSites() {
+    return this.getSources().map((source) => {
+      const pathPositions = this.findPositionsInPathToNearestSpawn(source, true);
+      const transferLocation = pathPositions[1];
+      return transferLocation.buildablePositionsAtRange(1).filter(position => {
+        return !pathPositions.find(pathPos => pathPos.isEqualTo(position));
+      })[1];
+    });
+  },
+
+  determineRoadSites() {
+
   },
 });

@@ -1,5 +1,11 @@
 import './_base';
 import bodyCosts from '../utils/body-costs';
+import roleMap from '../utils/role-map';
+
+const minerBody = [
+  MOVE, MOVE, MOVE,
+  WORK, WORK, WORK, WORK, WORK,
+];
 
 export default class Spawn extends StructureSpawn {
   buildHarvester(availableEnergy) {
@@ -7,8 +13,9 @@ export default class Spawn extends StructureSpawn {
     const closestSource = this.pos.findClosestByRange(sources);
 
     if (closestSource) {
-      const sourceId = closestSource.id;
-      const body = [MOVE, WORK, WORK, CARRY];
+      let role = 'harvester';
+      const source = closestSource.id;
+      let body = [MOVE, WORK, WORK, CARRY];
       let cost = bodyCosts.calculateCosts(body);
       let forcedReturn = false;
       while (cost <= availableEnergy && !forcedReturn) {
@@ -27,7 +34,12 @@ export default class Spawn extends StructureSpawn {
         body.pop();
         cost = bodyCosts.calculateCosts(body);
       }
-      this.createCreep(body, undefined, { role: 'harvester', source: sourceId });
+
+      if (closestSource.hasContainer() && availableEnergy > bodyCosts.calculateCosts(minerBody)) {
+        body = minerBody;
+        role = 'miner';
+      }
+      this.createCreep(body, undefined, { role, source });
     }
   }
 
@@ -220,6 +232,22 @@ export default class Spawn extends StructureSpawn {
     if (this.spawning) {
       return;
     }
+
+    let creepToBuild = undefined;
+    Object.entries(roleMap).forEach(([roleName, RoleClass]) => {
+      if (creepToBuild) return undefined;
+      creepToBuild = RoleClass.createCreepFor(this);
+    });
+
+    if (creepToBuild) {
+      if (bodyCosts.calculateCosts(creepToBuild.body) <= this.availableEnergy()) {
+        return this.createCreep(creepToBuild.body, creepToBuild.name, creepToBuild.memory);
+      } else {
+        console.log('cannot afford', JSON.stringify(creepToBuild.memory), 'returning early');
+        return false;
+      }
+    }
+
     const harvesterCount = this.room.harvesterCount();
     const availableEnergy = this.availableEnergy();
     if (availableEnergy >= 300 && availableEnergy < this.maxEnergy()) {

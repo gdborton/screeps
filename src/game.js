@@ -1,5 +1,7 @@
 /* @flow */
 
+import bodyCosts from './utils/body-costs';
+
 function getFlagsOfType(type) {
   return Game.flagArray().filter(flag => {
     return flag.name.toLowerCase().indexOf(type) !== -1;
@@ -68,6 +70,8 @@ const enhancedGame = {
       room.clearConstructionSites();
     });
   },
+
+  bodyCosts,
 };
 
 export default {

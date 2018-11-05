@@ -180,6 +180,36 @@ class Base extends Creep {
     return target.transfer(this, RESOURCE_ENERGY);
   }
 
+  /**
+   * Determine whether or not the supplied spawn should build this role. If it
+   * should, generate and return the desired body, name and memory otherwise
+   * return undefined.
+   *
+   * @param {Spawn} spawn The spawn that the role should generate a body for.
+   */
+  static createCreepFor(spawn) {
+    /**
+     * This is the
+     * This is currently defaulting to undefined to allow for incremental
+     * implementation, eventually this should be marked as deprecated to enforce
+     * the new role pattern.
+     */
+  }
+
+  isFull() {
+    return this.totalCarryLoad() === this.carryCapacity;
+  }
+
+  availableSpace() {
+    return this.carryCapacity - this.totalCarryLoad();
+  }
+
+  totalCarryLoad() {
+    return Object.entries(this.carry).reduce((acc, [key, val]) => {
+      return acc + val;
+    }, 0);
+  }
+
   deliverEnergyTo(target) {
     const targetIsFlag = target instanceof Flag;
     if (targetIsFlag) {
