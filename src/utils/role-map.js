@@ -2,6 +2,7 @@ import Base from '../roles/Base';
 import Builder from '../roles/Builder';
 import Claimer from '../roles/Claimer';
 import Courier from '../roles/Courier';
+import Distributor from '../roles/Distributor';
 import Gatherer from '../roles/Gatherer';
 import Harvester from '../roles/Harvester';
 import Mailman from '../roles/Mailman';
@@ -23,6 +24,7 @@ import Miner from '../roles/Miner';
  */
 const roleMap = {
   harvester: Harvester,
+  distributor: Distributor,
   courier: Courier,
   builder: Builder,
   upgrader: Upgrader,

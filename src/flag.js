@@ -17,7 +17,12 @@ Object.assign(Flag.prototype, {
       const ownedRoom = this.room.getControllerOwned();
       const neutralStructure = neutralStructures.indexOf(target) !== -1;
       if (target && CONTROLLER_STRUCTURES[target] && (ownedRoom || neutralStructure)) {
-        const max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
+        let max;
+        try {
+          max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
+        } catch(e) {
+          console.log(ownedRoom, this.name);
+        }
         const current = this.room.find(target).length;
         shouldBuild = current < max;
         shouldBuild = shouldBuild && this.pos.isOpen();

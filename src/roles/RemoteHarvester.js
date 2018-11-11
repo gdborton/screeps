@@ -3,6 +3,9 @@ import Base from './Base';
 export default class RemoteHarvester extends Base {
   performRole() {
     const flag = Game.flags[this.memory.flag];
+    if (!flag) {
+      this.suicide();
+    }
     const targetRoomName = flag.pos.roomName;
     if (this.room.name !== targetRoomName) {
       this.moveTo(flag);
@@ -31,9 +34,6 @@ export default class RemoteHarvester extends Base {
       } else {
         this.deliverEnergyTo(container);
       }
-    } else {
-      const buildPosition = this.pos.buildablePositionsAtRange(1)[0];
-      this.room.placeContainerFlag(buildPosition);
     }
   }
 

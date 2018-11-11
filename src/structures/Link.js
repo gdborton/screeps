@@ -10,6 +10,16 @@ class Link extends StructureLink {
     }
   }
 
+  isSourceLink() {
+    return !this.isControllerLink();
+  }
+
+  isControllerLink() {
+    const storage = this.room.getStorage();
+    if (!storage) return false;
+    return this.pos.inRangeTo(storage, 2);
+  }
+
   needsEnergy() {
     const closestContainer = this.pos.findClosestByRange(this.room.getContainers());
     if (this.pos.getRangeTo(closestContainer) > 2) {

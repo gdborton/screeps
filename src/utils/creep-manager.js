@@ -1,14 +1,18 @@
 import roleMap from '../utils/role-map';
 
 function enhanceCreep(creep) {
+  // console.log(JSON.stringify(creep.memory));
   return new roleMap[creep.memory.role](creep);
 }
 
 function convertCreeps() {
   return Object.keys(Game.creeps).map(creepName => {
     const creep = Game.creeps[creepName];
-    return enhanceCreep(creep);
-  });
+
+    if (creep) {
+      return enhanceCreep(creep);
+    }
+  }).filter(Boolean);
 }
 
 class CreepManager {
@@ -17,7 +21,7 @@ class CreepManager {
   }
 
   creepsWithRole(role) {
-    return this.creeps().filter(creep => creep.memory.role === role);
+    return this.creeps().filter(creep => creep && creep.memory.role === role);
   }
 
   // Occasionally we find a creep that is not enhanced... so we enhance it.

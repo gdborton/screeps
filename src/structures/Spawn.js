@@ -112,23 +112,6 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'mailman' });
   }
 
-  buildReserver(availableEnergy) {
-    const body = [];
-    let cost = bodyCosts.calculateCosts(body);
-    while (cost < availableEnergy) {
-      body.push(CLAIM);
-      body.push(MOVE);
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    while (cost > availableEnergy) {
-      body.pop();
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    this.createCreep(body, undefined, { role: 'reserver', room: this.room.name, spawn: this.name });
-  }
-
   buildCourier(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
     let cost = bodyCosts.calculateCosts(body);
@@ -277,8 +260,6 @@ export default class Spawn extends StructureSpawn {
         this.buildClaimer(availableEnergy);
       } else if (this.room.needsWanderers()) {
         this.buildWanderer();
-      } else if (this.room.needsReservers()) {
-        this.buildReserver(availableEnergy);
       } else if (this.room.needsRemoteHarvesters()) {
         this.buildRemoteHarvester();
       } else if (this.room.needsRemoteCouriers()) {

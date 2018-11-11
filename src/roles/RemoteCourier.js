@@ -28,6 +28,7 @@ export default class RemoteCourier extends Base {
   }
 
   performPickup() {
+    if (!this.flag()) return this.suicide();
     if (this.room.name !== this.flag().pos.roomName) {
       this.moveTo(this.flag());
     } else {
@@ -40,7 +41,10 @@ export default class RemoteCourier extends Base {
     if (this.room !== this.getSpawn().room) {
       this.moveTo(this.getSpawn());
     } else {
-      this.deliverEnergyTo(this.room.getControllerEnergyDropFlag());
+      const storage = this.room.getStorage();
+      if (storage) {
+        this.deliverEnergyTo(storage);
+      }
     }
   }
 }

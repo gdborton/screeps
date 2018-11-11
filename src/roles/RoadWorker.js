@@ -8,7 +8,10 @@ export default class RoadWorker extends Base {
         this.takeEnergyFrom(closestEnergySource);
       }
     } else {
-      const roads = this.room.getRoads().filter(road => {
+      const roads = [
+        ...this.room.getRoads(),
+        ...this.room.getContainers(),
+      ].filter(road => {
         return road.hits < road.hitsMax;
       });
       if (roads.length) {

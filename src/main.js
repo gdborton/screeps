@@ -14,6 +14,7 @@ import { playground } from './playground';
 import reporter from './utils/reporter';
 
 profiler.enable();
+console.log('Detected a reset');
 
 export function loop() {
   if (Room.prototype.work && Game.cpuLimit > 100) {

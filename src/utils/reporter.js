@@ -37,8 +37,7 @@ function updateReport() {
       }, 0);
     }, 0) / CREEP_LIFE_TIME;
     eventLog.forEach(({ event, data }) => {
-      if (!data) console.log(JSON.stringify(arguments));
-      const { amount, energySpent } = data;
+      const { amount, energySpent } = data || {};
       if (event === EVENT_HARVEST) {
         energyHarvested += amount;
       } else if (event === EVENT_REPAIR) {
@@ -46,7 +45,6 @@ function updateReport() {
       } else if (event === EVENT_UPGRADE_CONTROLLER) {
         energyOnUpgrade += energySpent;
       } else if (event === EVENT_BUILD) {
-        console.log(amount, energySpent)
         energyOnBuild += energySpent;
       }
     });
@@ -75,10 +73,14 @@ function updateReport() {
 
 function report() {
   initializeReporter();
-
   updateReport();
 
-  return function generateReport() {
+  return function generateReport(reset) {
+    if (reset) {
+      Memory.reporter = undefined;
+      initializeReporter();
+      updateReport();
+    }
     Object.entries(Memory.reporter.rooms).forEach(([roomName, roomValues]) => {
       const runningFor = (Game.time - Memory.reporter.runningSince + 1);
       console.log(`== ${roomName} == ${runningFor} ticks`);

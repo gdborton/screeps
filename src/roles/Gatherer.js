@@ -6,13 +6,23 @@ export default class Gatherer extends Base {
 
   performRole() {
     if (!this.isFull()) {
-      const targetContainer = this.room.getContainers().reduce((prev, container) => {
-        if (!prev || container.store[RESOURCE_ENERGY] > prev.store[RESOURCE_ENERGY]) return container;
-        return prev;
-      }, undefined);
+      let currentTarget = Game.getObjectById(this.memory.target);
+      if (!currentTarget || currentTarget.isEmpty()) {
+        const targetContainer = this.room.getContainers().reduce((prev, container) => {
+          if (!prev || container.totalUtilizedCapacity() > prev.totalUtilizedCapacity()) {
+            return container;
+          }
+          return prev;
+        }, undefined);
 
-      if (targetContainer) {
-        this.takeEnergyFrom(targetContainer);
+        this.memory.target = targetContainer.id;
+        currentTarget = targetContainer;
+      }
+      return this.takeEnergyFrom(currentTarget);
+    } else {
+      const sourceLinks = this.room.getLinks().filter(link => link.needsEnergy());
+      if (sourceLinks.length) {
+        return this.deliverEnergyTo(this.pos.findClosestByRange(sourceLinks));
       }
     }
   }
@@ -23,7 +33,7 @@ export default class Gatherer extends Base {
         memory: {
           role: this.role,
         },
-        body: [MOVE, CARRY]
+        body: [MOVE, CARRY],
       };
     }
     return undefined;

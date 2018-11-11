@@ -31,10 +31,11 @@ class Base extends Creep {
   }
 
   attemptRenew() {
-    const spawn = this.getSpawn();
-    if (this.needsRenewed() && this.pos.getRangeTo(spawn) === 1 && !spawn.spawning) {
-      spawn.renewCreep(this);
-    }
+    this.room.getSpawns().forEach(spawn => {
+      if (this.needsRenewed() && this.pos.getRangeTo(spawn) === 1 && !spawn.spawning) {
+        spawn.renewCreep(this);
+      }
+    });
   }
 
   performRole() {
@@ -198,6 +199,10 @@ class Base extends Creep {
 
   isFull() {
     return this.totalCarryLoad() === this.carryCapacity;
+  }
+
+  isEmpty() {
+    return this.totalCarryLoad() === 0;
   }
 
   availableSpace() {

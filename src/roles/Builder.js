@@ -7,16 +7,21 @@ export default class Builder extends Base {
     } else if (this.carry.energy === 0 || this.memory.task === 'stockup') {
       this.memory.target = null;
       this.memory.task = 'stockup';
-      this.room.getEnergySource
+      const constrollerLink = this.room.getControllerLink();
+      const storage = this.room.getStorage();
       const sources = [
-        ...this.room.getDroppedEnergy(),
-        ...[this.room.getControllerLink() && !this.room.getControllerLink().isEmpty() && this.room.getControllerLink()],
-        ...[this.room.getStorage() && !this.room.getStorage().isEmpty()],
+        ...[constrollerLink && !constrollerLink.isEmpty() ? constrollerLink : undefined],
+        ...[storage && !storage.isEmpty() ? storage : undefined],
       ].filter(Boolean);
 
       if (sources.length) {
-        this.takeEnergyFrom(this.pos.findClosestByRange(sources));
+        return this.takeEnergyFrom(this.pos.findClosestByRange(sources));
       }
+
+      const targetContainer = this.room.getContainers().reduce((prev, container) => {
+        if (!prev || prev.totalUtilizedCapacity() <= container.totalUtilizedCapacity()) return container;
+        return prev;
+      }, undefined);
 
       // if (.length) {
       //   this.takeEnergyFrom(this.room.getDroppedEnergy()[0]);

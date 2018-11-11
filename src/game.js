@@ -53,6 +53,14 @@ const enhancedGame = {
     return getFlagsOfType('claim');
   },
 
+  activeRoom(roomName) {
+    if(roomName) {
+      Memory.activeRoom = roomName;
+    }
+
+    return Game.rooms[Memory.activeRoom];
+  },
+
   getClosestOwnedRoomTo(targetRoomName) {
     if (!roomDistanceMap[targetRoomName]) {
       roomDistanceMap[targetRoomName] = Object.keys(Game.rooms).sort((roomNameA, roomNameB) => {
