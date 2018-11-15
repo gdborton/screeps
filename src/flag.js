@@ -17,11 +17,11 @@ Object.assign(Flag.prototype, {
       const ownedRoom = this.room.getControllerOwned();
       const neutralStructure = neutralStructures.indexOf(target) !== -1;
       if (target && CONTROLLER_STRUCTURES[target] && (ownedRoom || neutralStructure)) {
-        let max;
-        try {
+        let max = 0;
+        if (ownedRoom) {
           max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
-        } catch(e) {
-          console.log(ownedRoom, this.name);
+        } else if (target === STRUCTURE_CONTAINER) {
+          max = 5;
         }
         const current = this.room.find(target).length;
         shouldBuild = current < max;
@@ -61,6 +61,7 @@ Object.assign(Flag.prototype, {
 
   performReserveFlagRole() {
     const rate = 5;
+    if (this.room && this.room.controller.my && this.room.getSpawns().length) return this.remove();
     if (Game.time % rate === 0) {
       const room = Game.roomArray().find(potentialRoom => potentialRoom.name === this.pos.roomName);
       if (room) {

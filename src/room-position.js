@@ -87,4 +87,14 @@ Object.assign(RoomPosition.prototype, {
       return structure.structureType === STRUCTURE_ROAD;
     }).length > 0;
   },
+
+  findOptimalPathTo(target) {
+    const optimalPathOpts = {
+      ignoreCreeps: true,
+      ignoreRoads: true,
+      ignoreDestructibleStructures: true,
+      swampCost: 1,
+    };
+    return this.findPathTo(target, optimalPathOpts);
+  }
 });

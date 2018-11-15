@@ -8,6 +8,7 @@ export default class Reserver extends Base {
   static createCreepFor(spawn) {
     return spawn.room.getReserveFlags().reduce((prev, flag) => {
       if (prev) return prev;
+      if (flag.room && flag.room.controller && flag.room.controller.my) return prev;
       const creepForFlag = creepManager.creepsWithRole(this.role).find((creep) => {
         return creep.memory.targetFlag === flag.name;
       });

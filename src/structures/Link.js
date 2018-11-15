@@ -2,12 +2,13 @@ import './_base';
 
 class Link extends StructureLink {
   performRole() {
-    const shouldTransfer = !this.isControllerLink() && !this.cooldown;
-    const controllerLink = this.room.getControllerLink();
-    const controllerLinkNeedsEnergy = controllerLink && controllerLink.energy < 700;
-    if (shouldTransfer && controllerLinkNeedsEnergy) {
-      this.transferEnergy(this.room.getControllerLink());
-    }
+    if (this.isControllerLink() || this.cooldown) return;
+    this.room.getControllerLinks().find((controllerLink) => {
+      if (controllerLink.energy < 700) {
+        this.transferEnergy(controllerLink);
+        return true;
+      }
+    });
   }
 
   isSourceLink() {
@@ -15,9 +16,9 @@ class Link extends StructureLink {
   }
 
   isControllerLink() {
-    const storage = this.room.getStorage();
-    if (!storage) return false;
-    return this.pos.inRangeTo(storage, 2);
+    return this.room.determineControllerLinkLocations().find(pos => {
+      return pos.isEqualTo(this.pos);
+    });
   }
 
   needsEnergy() {

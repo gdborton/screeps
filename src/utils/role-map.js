@@ -24,12 +24,12 @@ import Miner from '../roles/Miner';
  */
 const roleMap = {
   harvester: Harvester,
+  miner: Miner,
   distributor: Distributor,
   courier: Courier,
   builder: Builder,
   upgrader: Upgrader,
   mailman: Mailman,
-  miner: Miner,
   gatherer: Gatherer,
   remotecourier: RemoteCourier,
   remoteharvester: RemoteHarvester,
@@ -41,5 +41,25 @@ const roleMap = {
   wanderer: Wanderer,
   base: Base,
 };
+
+export const roleList = [
+  Harvester,
+  Miner,
+  Distributor,
+  Courier,
+  Builder,
+  Upgrader,
+  Mailman,
+  Gatherer,
+  RemoteCourier,
+  RemoteHarvester,
+  Reserver,
+  Scout,
+  ScoutHarvester,
+  Claimer,
+  RoadWorker,
+  Wanderer,
+  Base,
+];
 
 export default roleMap;

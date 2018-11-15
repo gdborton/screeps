@@ -7,7 +7,7 @@ export default class Gatherer extends Base {
   performRole() {
     if (!this.isFull()) {
       let currentTarget = Game.getObjectById(this.memory.target);
-      if (!currentTarget || currentTarget.isEmpty()) {
+      if (!currentTarget || currentTarget.totalUtilizedCapacity() < this.availableSpace()) {
         const targetContainer = this.room.getContainers().reduce((prev, container) => {
           if (!prev || container.totalUtilizedCapacity() > prev.totalUtilizedCapacity()) {
             return container;

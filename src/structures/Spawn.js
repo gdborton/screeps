@@ -1,6 +1,6 @@
 import './_base';
 import bodyCosts from '../utils/body-costs';
-import roleMap from '../utils/role-map';
+import { roleList } from '../utils/role-map';
 
 const minerBody = [
   MOVE, MOVE, MOVE,
@@ -76,8 +76,8 @@ export default class Spawn extends StructureSpawn {
   buildRemoteHarvester() {
     const target = this.room.getReserveFlagsNeedingRemoteHarvesters()[0];
     const body = [
-      MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-      WORK, WORK, WORK, WORK, WORK, CARRY, CARRY,
+      MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+      WORK, WORK, WORK, WORK, WORK, CARRY,
     ];
     this.createCreep(body, undefined, {
       role: 'remoteharvester',
@@ -110,26 +110,6 @@ export default class Spawn extends StructureSpawn {
     }
 
     this.createCreep(body, undefined, { role: 'mailman' });
-  }
-
-  buildCourier(availableEnergy) {
-    const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
-    let cost = bodyCosts.calculateCosts(body);
-    const maxCarryParts = this.room.getStorage() && this.room.getLinks().length > 1 ? 10 : 100;
-    let carryParts = 3;
-    while (cost < availableEnergy && carryParts < maxCarryParts) {
-      body.push(MOVE);
-      body.push(CARRY);
-      carryParts++;
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    while (cost > availableEnergy) {
-      body.pop();
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    this.createCreep(body, undefined, { role: 'courier' });
   }
 
   buildRoadWorker() {
@@ -186,39 +166,14 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'sourcetaker' });
   }
 
-  buildUpgrader(availableEnergy) {
-    const body = [MOVE, WORK, WORK, CARRY];
-    let workParts = 2;
-    let cost = bodyCosts.calculateCosts(body);
-    let workPartsNeeded = this.room.maxEnergyProducedPerTick() - this.room.upgraderWorkParts();
-    if (this.room.controller.level === 8) {
-      workPartsNeeded = Math.min(15, workPartsNeeded);
-    }
-    if (this.room.controller.pos.freeEdges() > 1) {
-      workPartsNeeded = Math.min(workPartsNeeded, this.room.maxEnergyProducedPerTick() / 2);
-    }
-    while (cost < availableEnergy && workParts < workPartsNeeded) {
-      body.push(WORK);
-      workParts++;
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    while (cost > availableEnergy) {
-      body.pop();
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    this.createCreep(body, undefined, { role: 'upgrader' });
-  }
-
   work() {
     if (this.spawning) {
       return;
     }
 
     let creepToBuild = undefined;
-    Object.entries(roleMap).forEach(([roleName, RoleClass]) => {
-      if (creepToBuild) return undefined;
+    roleList.forEach((RoleClass) => {
+      if (creepToBuild) return false;
       creepToBuild = RoleClass.createCreepFor(this);
     });
 
@@ -226,7 +181,6 @@ export default class Spawn extends StructureSpawn {
       if (bodyCosts.calculateCosts(creepToBuild.body) <= this.availableEnergy()) {
         return this.createCreep(creepToBuild.body, creepToBuild.name, creepToBuild.memory);
       } else {
-        console.log('cannot afford', JSON.stringify(creepToBuild.memory), 'returning early');
         return false;
       }
     }
@@ -236,18 +190,12 @@ export default class Spawn extends StructureSpawn {
     if (availableEnergy >= 300 && availableEnergy < this.maxEnergy()) {
       if (harvesterCount < 1) {
         this.buildHarvester(availableEnergy);
-      } else if (this.room.needsCouriers()) {
-        this.buildCourier(availableEnergy);
       } else if (this.room.needsRoadWorkers()) {
         this.buildRoadWorker(availableEnergy);
       }
     } else if (availableEnergy === this.maxEnergy()) {
       if (this.room.needsHarvesters()) {
         this.buildHarvester(availableEnergy);
-      } else if (this.room.needsCouriers()) {
-        this.buildCourier(availableEnergy);
-      } else if (this.room.needsUpgraders()) {
-        this.buildUpgrader(availableEnergy);
       } else if (this.room.mailmanCount() < 2 && this.maxEnergy() < 600) {
         this.buildMailman(availableEnergy);
       } else if (this.room.needsBuilders()) {
@@ -262,8 +210,6 @@ export default class Spawn extends StructureSpawn {
         this.buildWanderer();
       } else if (this.room.needsRemoteHarvesters()) {
         this.buildRemoteHarvester();
-      } else if (this.room.needsRemoteCouriers()) {
-        this.buildRemoteCourier();
       } else {
         this.extend();
       }
@@ -287,6 +233,7 @@ export default class Spawn extends StructureSpawn {
   extend() {
     if (this.room.canBuildExtension()) {
       this.room.createConstructionSite(this.pos.x - 1, this.pos.y - 1, STRUCTURE_EXTENSION);
+      this.room.createConstructionSite(this.pos.x - 1, this.pos.y + 1, STRUCTURE_EXTENSION);
     }
   }
 }

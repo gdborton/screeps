@@ -37,6 +37,13 @@ Object.assign(Structure.prototype, {
     if (this.energy) return this.energy;
   },
 
+  availableEnergy() {
+    if (this.store) {
+      return this.store[RESOURCE_ENERGY];
+    }
+    return this.energy || 0;
+  },
+
   needsRepaired() {
     return this.hits / this.hitsMax < 1;
   },

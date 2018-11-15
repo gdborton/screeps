@@ -1,38 +1,49 @@
 import Base from './Base';
 
 export default class RemoteHarvester extends Base {
+  static role = 'remoteharvester'
+
   performRole() {
     const flag = Game.flags[this.memory.flag];
     if (!flag) {
-      this.suicide();
+      this.memory.role = 'harvester';
+      return;
     }
     const targetRoomName = flag.pos.roomName;
     if (this.room.name !== targetRoomName) {
-      this.moveTo(flag);
+      return this.moveTo(flag);
     } else {
       if (!this.memory.source) {
         this.acquireTarget();
       }
-      if (!this.isFull()) {
-        this.moveToAndHarvest(this.targetSource());
+      const inRange = thing => this.pos.getRangeTo(thing) < 4;
+      const constructionSites = this.room.getConstructionSites().filter(inRange);
+      const buildAbility = this.body.reduce((prev, { type }) => {
+        if (type === WORK) return prev + 5;
+        return prev;
+      }, 0);
+
+      if (constructionSites.length && this.carry[RESOURCE_ENERGY] > buildAbility) {
+        this.moveToAndBuild(constructionSites[0]);
+      } else if (!this.isFull()) {
+        return this.moveToAndHarvest(this.targetSource());
       } else {
-        this.handleFull();
+        return this.handleFull();
       }
     }
   }
 
   handleFull() {
     const inRange = thing => this.pos.getRangeTo(thing) < 4;
-    const constructionSites = this.room.getConstructionSites().filter(inRange);
     const container = this.room.getContainers().find(inRange);
-
-    if (constructionSites.length) {
-      this.moveToAndBuild(constructionSites[0]);
-    } else if (container) {
+    if (container) {
       if (container.needsRepaired()) {
         this.moveToAndRepair(container); // repair if needed.
       } else {
-        this.deliverEnergyTo(container);
+        if (!container.isFull()) {
+          return this.deliverEnergyTo(container);
+        }
+        return this.drop(RESOURCE_ENERGY);
       }
     }
   }

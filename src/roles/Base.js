@@ -8,9 +8,6 @@ class Base extends Creep {
   }
 
   work() {
-    if (this.needsRenewed()) {
-      this.attemptRenew();
-    }
     const creepFlag = Game.flags[this.name];
     // move to creep flag if it is defined.
     if (creepFlag !== undefined) {
@@ -23,6 +20,30 @@ class Base extends Creep {
       this.recycle();
     } else {
       this.performRole();
+    }
+  }
+
+  // prioritized list of places you can pull resources from.
+  energySources() {
+    return [
+      ...this.room.getLinks(),
+      ...this.room.getStorage(),
+      ...this.room.getDroppedEnergy(),
+      ...this.room.getContainers(),
+    ];
+  }
+
+  gatherEnergy() {
+    const validEnergySources = this.energySources().filter(thing => {
+      try {
+        return thing && thing.availableEnergy() > this.availableSpace();
+      } catch(e) {
+        console.log(thing, 'does not have an availableEnergy function');
+        throw e;
+      }
+    });
+    if (validEnergySources.length) {
+      return this.takeEnergyFrom(this.pos.findClosestByRange(validEnergySources));
     }
   }
 
@@ -202,7 +223,7 @@ class Base extends Creep {
   }
 
   isEmpty() {
-    return this.totalCarryLoad() === 0;
+    return !this.isFull() && this.totalCarryLoad() === 0;
   }
 
   availableSpace() {

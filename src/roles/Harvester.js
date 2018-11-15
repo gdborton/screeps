@@ -6,7 +6,7 @@ export default class Harvester extends Base {
       const source = this.targetSource();
       this.moveToAndHarvest(source);
     } else if (this.room.courierCount() === 0 && this.room.energyAvailable < 300) {
-      this.deliverEnergyTo(this.pos.findClosestByRange(this.getSpawns()));
+      this.deliverEnergyTo(this.pos.findClosestByRange(this.room.getSpawns()));
     } else {
       const storage = this.room.getStorage();
       const towers = this.room.getTowers().filter(tower => !tower.isFull());
