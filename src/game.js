@@ -1,6 +1,7 @@
 /* @flow */
 
 import bodyCosts from './utils/body-costs';
+import RoomPlanner from './RoomPlanner';
 
 function getFlagsOfType(type) {
   return Game.flagArray().filter(flag => {
@@ -11,6 +12,10 @@ function getFlagsOfType(type) {
 let scoutFlags;
 const roomDistanceMap = {};
 const enhancedGame = {
+  roomPlanner() {
+    return RoomPlanner;
+  },
+
   flagArray() {
     return Object.keys(Game.flags).map(flagName => {
       return Game.flags[flagName];

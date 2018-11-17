@@ -1,6 +1,22 @@
 import Base from './Base';
 
 export default class RoadWorker extends Base {
+  static role = 'roadworker'
+
+  static createCreepFor(spawn) {
+    if (spawn.room.hasDamagedRoads() && spawn.room.getCreepsWithRole(this.role)) {
+      return {
+        memory: {
+          role: this.role,
+        },
+        body: [
+          MOVE, CARRY, WORK
+        ],
+      };
+    }
+    return undefined;
+  }
+
   performRole() {
     if (this.carry.energy === 0) {
       const closestEnergySource = this.pos.findClosestByRange(this.room.getEnergyStockSources());

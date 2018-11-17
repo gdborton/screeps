@@ -1,47 +1,10 @@
 import './_base';
+import { STRUCTURE_SPAWN } from '../utils/constants';
 import bodyCosts from '../utils/body-costs';
 import { roleList } from '../utils/role-map';
 
-const minerBody = [
-  MOVE, MOVE, MOVE,
-  WORK, WORK, WORK, WORK, WORK,
-];
-
 export default class Spawn extends StructureSpawn {
-  buildHarvester(availableEnergy) {
-    const sources = this.room.getSourcesNeedingHarvesters();
-    const closestSource = this.pos.findClosestByRange(sources);
-
-    if (closestSource) {
-      let role = 'harvester';
-      const source = closestSource.id;
-      let body = [MOVE, WORK, WORK, CARRY];
-      let cost = bodyCosts.calculateCosts(body);
-      let forcedReturn = false;
-      while (cost <= availableEnergy && !forcedReturn) {
-        if (body.filter(part => { return part === WORK; }).length < 5) {
-          body.push(WORK);
-        } else if (body.filter(part => { return part === CARRY; }).length < 10) {
-          body.push(CARRY);
-        } else {
-          body.push(WORK);
-          forcedReturn = true;
-        }
-        cost = bodyCosts.calculateCosts(body);
-      }
-
-      while (cost > availableEnergy) {
-        body.pop();
-        cost = bodyCosts.calculateCosts(body);
-      }
-
-      if (closestSource.hasContainer() && availableEnergy > bodyCosts.calculateCosts(minerBody)) {
-        body = minerBody;
-        role = 'miner';
-      }
-      this.createCreep(body, undefined, { role, source });
-    }
-  }
+  static structureType = STRUCTURE_SPAWN;
 
   buildScout(availableEnergy) {
     const body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
@@ -91,32 +54,6 @@ export default class Spawn extends StructureSpawn {
     this.createCreep(body, undefined, { role: 'scoutharvester' });
   }
 
-  buildWanderer() {
-    this.createCreep([MOVE], undefined, { role: 'wanderer' });
-  }
-
-  buildMailman(availableEnergy) {
-    const body = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY];
-    let cost = bodyCosts.calculateCosts(body);
-    while (cost < availableEnergy) {
-      body.push(MOVE);
-      body.push(CARRY);
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    while (cost > availableEnergy) {
-      body.pop();
-      cost = bodyCosts.calculateCosts(body);
-    }
-
-    this.createCreep(body, undefined, { role: 'mailman' });
-  }
-
-  buildRoadWorker() {
-    const body = [MOVE, WORK, WORK, CARRY];
-    this.createCreep(body, undefined, { role: 'roadworker' });
-  }
-
   buildBuilder(availableEnergy) {
     const body = [MOVE, MOVE, WORK, CARRY];
     let cost = bodyCosts.calculateCosts(body);
@@ -134,11 +71,6 @@ export default class Spawn extends StructureSpawn {
     }
 
     this.createCreep(body, undefined, { role: 'builder' });
-  }
-
-  buildClaimer() {
-    const body = [MOVE, CLAIM];
-    this.createCreep(body, undefined, { role: 'claimer' });
   }
 
   buildSourceTaker(availableEnergy) {
@@ -185,29 +117,14 @@ export default class Spawn extends StructureSpawn {
       }
     }
 
-    const harvesterCount = this.room.harvesterCount();
     const availableEnergy = this.availableEnergy();
-    if (availableEnergy >= 300 && availableEnergy < this.maxEnergy()) {
-      if (harvesterCount < 1) {
-        this.buildHarvester(availableEnergy);
-      } else if (this.room.needsRoadWorkers()) {
-        this.buildRoadWorker(availableEnergy);
-      }
-    } else if (availableEnergy === this.maxEnergy()) {
-      if (this.room.needsHarvesters()) {
-        this.buildHarvester(availableEnergy);
-      } else if (this.room.mailmanCount() < 2 && this.maxEnergy() < 600) {
-        this.buildMailman(availableEnergy);
-      } else if (this.room.needsBuilders()) {
+    if (availableEnergy === this.maxEnergy()) {
+      if (this.room.needsBuilders()) {
         this.buildBuilder(availableEnergy);
       } else if (this.room.needsScouts()) {
         this.buildScout(availableEnergy);
       } else if (this.room.needsScoutHarvesters()) {
         this.buildScoutHarvester(availableEnergy);
-      } else if (this.room.needsClaimers()) {
-        this.buildClaimer(availableEnergy);
-      } else if (this.room.needsWanderers()) {
-        this.buildWanderer();
       } else if (this.room.needsRemoteHarvesters()) {
         this.buildRemoteHarvester();
       } else {

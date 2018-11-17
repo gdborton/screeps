@@ -1,20 +1,12 @@
 import Base from './Base';
 
 export default class extends Base {
-  static role = 'miner'
+  static role = 'miner';
 
-  performRole() {
-    this.say(this.name);
-    const source = this.targetSource();
-    const container = this.room.getContainers().find((container) => {
-      return container.pos.getRangeTo(source) === 1;
-    });
-
-    if (container && this.pos.getRangeTo(container) > 0) {
-      return this.moveTo(container);
-    }
-    return this.moveToAndHarvest(source);
-  }
+  static body = [
+    MOVE, MOVE, MOVE,
+    WORK, WORK, WORK, WORK, WORK,
+  ];
 
   static createCreepFor(spawn) {
     const creeps = spawn.room.myCreeps();
@@ -33,12 +25,21 @@ export default class extends Base {
           role: this.role,
           source: source.id,
         },
-        body: [
-          MOVE, MOVE, MOVE,
-          WORK, WORK, WORK, WORK, WORK,
-        ]
+        body: this.body,
       };
     }
     return undefined;
+  }
+
+  performRole() {
+    const source = this.targetSource();
+    const container = this.room.getContainers().find((container) => {
+      return container.pos.getRangeTo(source) === 1;
+    });
+
+    if (container && this.pos.getRangeTo(container) > 0) {
+      return this.moveTo(container);
+    }
+    return this.moveToAndHarvest(source);
   }
 }

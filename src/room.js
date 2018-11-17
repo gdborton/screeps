@@ -7,10 +7,6 @@ import { LOOK_STRUCTURES, STRUCTURE_LINK } from './utils/constants';
 const MIN_RESERVE_LEVEL = 6;
 
 //#region Old way of writing roles
-function getAllClaimers() {
-  return creepManager.creepsWithRole('claimer');
-}
-
 function getAllScoutHarvesters() {
   return creepManager.creeps().filter(creep => {
     return creep.memory.role === 'scoutharvester' || creep.memory.oldRole === 'scoutharvester';
@@ -23,10 +19,6 @@ function getAllScouts() {
 
 function getAllAttackers() {
   return creepManager.creepsWithRole('attacker');
-}
-
-function getAllWanderers() {
-  return creepManager.creepsWithRole('wanderer');
 }
 //#endregion
 
@@ -360,18 +352,21 @@ Object.assign(Room.prototype, {
   },
 
   createBuildFlag(pos, structureType) {
-    const existingThing = [
+    const existingStructures = [
       ...pos.lookFor(LOOK_STRUCTURES),
       ...pos.lookFor(LOOK_CONSTRUCTION_SITES)
-    ][0];
+    ];
+    const alreadyHasStructure = existingStructures.find(structure => {
+      return structure.structureType === structureType || structureType === STRUCTURE_ROAD;
+    });
 
-    if (existingThing && existingThing.structureType !== STRUCTURE_ROAD) {
-      if (existingThing.structureType === structureType) {
-        return false;
-      }
-      return this.placeFlag(pos, `here?_${structureType}`);
+    if (alreadyHasStructure) {
+      return undefined;
+    } else if (existingStructures.length === 0 || (existingStructures.length === 1 && existingStructures[0].structureType === STRUCTURE_ROAD)) {
+      return this.placeFlag(pos, `BUILD_${structureType}`);
     }
-    this.placeFlag(pos, `BUILD_${structureType}`);
+
+    return this.placeFlag(pos, `here?_${structureType}`);
   },
 
   placeFlag(pos, name) {
@@ -474,7 +469,7 @@ Object.assign(Room.prototype, {
 
   shouldClaim() {
     const claimFlags = this.getClaimFlags();
-    return claimFlags.length === 0 && this.controller && !this.controller.owner && this.getSpawns().length < 1;
+    return claimFlags.length === 0 && this.controller && !this.controller.owner && !this.controller.reservation && this.getSpawns().length < 1;
   },
 
   placeClaimFlag() {
@@ -502,14 +497,7 @@ Object.assign(Room.prototype, {
   },
 
   getCreepsWithRole(role) {
-    return creepManager.creepsWithRole(role).filter(creep => {
-      try {
-        return creep.room === this;
-      } catch(e) {
-        console.log('caught error');
-        console.log(JSON.stringify(creep));
-      }
-    });
+    return creepManager.creepsWithRole(role).filter(creep => creep.room === this);
   },
 
   getReservers() {
@@ -522,14 +510,6 @@ Object.assign(Room.prototype, {
 
   ableToReserve() {
     return this.getControllerOwned() && this.controller.level >= MIN_RESERVE_LEVEL;
-  },
-
-  needsRoadWorkers() {
-    if (Game.time % 30 !== 0) {
-      return false;
-    }
-
-    return this.roadWorkerCount() < 1 && this.hasDamagedRoads();
   },
 
   getReserveFlags() {
@@ -580,47 +560,6 @@ Object.assign(Room.prototype, {
     return this.courierCount() < 1;
   },
 
-  getHarvesters() {
-    if (!this._harvesters) {
-      this._harvesters = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'harvester';
-      });
-    }
-    return this._harvesters;
-  },
-
-  getRoadWorkers() {
-    if (!this._roadWorkers) {
-      this._roadWorkers = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'roadworker';
-      });
-    }
-
-    return this._roadWorkers;
-  },
-
-  roadWorkerCount() {
-    return this.getRoadWorkers().length;
-  },
-
-  harvesterCount() {
-    return this.getHarvesters().length;
-  },
-
-  getMailmen() {
-    if (!this._mailmen) {
-      this._mailmen = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'mailman';
-      });
-    }
-
-    return this._mailmen;
-  },
-
-  mailmanCount() {
-    return this.getMailmen().length;
-  },
-
   getExits() {
     if (!this._exits) {
       this._exits = this.find(FIND_EXIT);
@@ -655,10 +594,6 @@ Object.assign(Room.prototype, {
     return this.getFlags().filter(flag => {
       return flag.name.indexOf('CONTROLLER_ENERGY_DROP') !== -1;
     })[0];
-  },
-
-  workerCount() {
-    return this.harvesterCount() + this.builderCount() + this.mailmanCount();
   },
 
   courierCount() {
@@ -722,16 +657,6 @@ Object.assign(Room.prototype, {
     return this._sources;
   },
 
-  getSourcesNeedingHarvesters() {
-    return this.getSources().filter(source => {
-      return source.needsHarvesters();
-    });
-  },
-
-  needsHarvesters() {
-    return this.getSourcesNeedingHarvesters().length > 0;
-  },
-
   getEnergySourceStructures() {
     return this.getMyStructures().filter(structure => {
       return structure.energy;
@@ -783,19 +708,15 @@ Object.assign(Room.prototype, {
     return this._extensions;
   },
 
+  getHostileStructures() {
+    return this.getStructures().filter(structure => structure.owner && !structure.my);
+  },
+
   courierTargets() {
     return this.getCouriers().filter(creep => {
       return creep.memory.role === 'courier' && !!creep.memory.target;
     }).map(courier => {
       return courier.memory.target;
-    });
-  },
-
-  getCreepsThatNeedOffloading() {
-    const targets = this.courierTargets();
-    return this.getHarvesters().filter(harvester => {
-      const targeted = targets.indexOf(harvester.id) !== -1;
-      return harvester.needsOffloaded() && !targeted;
     });
   },
 
@@ -850,14 +771,6 @@ Object.assign(Room.prototype, {
     return this.hasScoutFlag() && getAllScouts().length < desiredValue;
   },
 
-  needsWanderers() {
-    return getAllWanderers().length < 1;
-  },
-
-  needsClaimers() {
-    return this.hasScoutFlag() && Game.claimFlags().length > 0 && getAllClaimers().length < 1;
-  },
-
   needsScoutHarvesters() {
     let desiredValue = 2;
     if (Game.dismantleFlags().length > 0) {
@@ -887,8 +800,6 @@ Object.assign(Room.prototype, {
       return this.getEnergyThatNeedsPickedUp();
     } else if (this.getContainers().length) {
       return this.getContainers().filter(container => !container.isEmpty());
-    } else if (this.getCreepsThatNeedOffloading().length) {
-      return this.getCreepsThatNeedOffloading();
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
       return [this.getStorage()];
     } else if (this.hasTowers()) {
@@ -980,7 +891,11 @@ Object.assign(Room.prototype, {
   determineControllerLinkLocations() {
     if (!this.controller) return [];
     const pathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
-    return [pathPositions[3]];
+    if (pathPositions.length > 3) {
+      return [pathPositions[3]];
+    }
+    console.log('could not place controller link', this.name);
+    return [];
   },
 
   getControllerLinks() {
@@ -1047,18 +962,18 @@ Object.assign(Room.prototype, {
 
   determineRoadSites() {
     if (this.controller && this.controller.my) {
-      const closestSpawn = this.controller.pos.findClosestByRange(this.getSpawns());
+      const closestSource = this.controller.pos.findClosestByRange(this.getSources());
+      const pathToClosestSource = this.controller.pos.findOptimalPathTo(closestSource);
       const path = [
         ...this.getSources().reduce((acc, source) => {
-          const closestSpawnToSource = source.pos.findClosestByRange(this.getSpawns());
+          const optimalPath = source.pos.findOptimalPathTo(closestSource);
           return [
             ...acc,
-            ...source.pos.findOptimalPathTo(closestSpawnToSource),
+            ...optimalPath.slice(0, optimalPath.length - 1),
           ];
         }, []),
-        ...this.controller.pos.findOptimalPathTo(closestSpawn),
+        ...pathToClosestSource.slice(0, pathToClosestSource.length - 1),
       ];
-      console.log(JSON.stringify(path));
       return this.mapPathToPosition(path);
     }
 

@@ -1,7 +1,6 @@
 import roleMap from '../utils/role-map';
 
 function enhanceCreep(creep) {
-  // console.log(JSON.stringify(creep.memory));
   return new roleMap[creep.memory.role](creep);
 }
 
@@ -21,7 +20,13 @@ class CreepManager {
   }
 
   creepsWithRole(role) {
-    return this.creeps().filter(creep => creep && creep.memory.role === role);
+    return this.creeps().filter(creep => {
+      try {
+        return creep && creep.memory.role === role;
+      } catch(e) {
+        return false;
+      }
+    });
   }
 
   // Occasionally we find a creep that is not enhanced... so we enhance it.

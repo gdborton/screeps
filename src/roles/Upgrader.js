@@ -1,5 +1,4 @@
 import Base from './Base';
-import Distributor from './Distributor';
 
 import { MOVE, CARRY, WORK } from '../utils/constants';
 
@@ -8,10 +7,13 @@ export default class Upgrader extends Base {
 
   static createCreepFor(spawn) {
     if (spawn.room.getConstructionSites().length) return undefined;
-    const workParts = spawn.room.getCreepsWithRole(this.role).reduce((prev, creep) => {
-      return prev + creep.body.filter((part) => part.type === WORK).length;
-    }, 0);
-    if (spawn.room.maxEnergyProducedPerTick() > workParts) {
+    const creepsWithRole = spawn.room.getCreepsWithRole(this.role);
+    let target = spawn.room.maxEnergyProducedPerTick() / 5;
+    const storage = spawn.room.getStorage();
+    if (storage && storage.availableEnergy() < 100000) {
+      target = 1;
+    }
+    if (creepsWithRole < target) {
       return {
         memory: {
           role: this.role,

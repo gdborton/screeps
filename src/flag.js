@@ -48,6 +48,8 @@ Object.assign(Flag.prototype, {
       }
     } else if (this.isReserveFlag()) {
       this.performReserveFlagRole();
+    } else if (this.isClaimFlag()) {
+      this.performClaimFlagRole();
     }
   },
 
@@ -57,6 +59,16 @@ Object.assign(Flag.prototype, {
 
   isNoBuildFlag() {
     return this.name.indexOf('nobuild') !== -1;
+  },
+
+  isClaimFlag() {
+    return this.name.indexOf('claim') === 0;
+  },
+
+  performClaimFlagRole() {
+    if (!this.room.controller || this.room.controller.my || this.room.controller.owner || this.room.controller.reservation) {
+      return this.remove();
+    }
   },
 
   performReserveFlagRole() {

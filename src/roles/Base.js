@@ -33,6 +33,7 @@ class Base extends Creep {
     ];
   }
 
+
   gatherEnergy() {
     const validEnergySources = this.energySources().filter(thing => {
       try {
@@ -47,6 +48,30 @@ class Base extends Creep {
     }
   }
 
+  rankedEnergySpendTargets() {
+    const targets = [
+      this.room.getExtensions(),
+      this.room.getSpawns(),
+    ];
+    if (this.room.controller && this.room.controller.my) {
+      targets.push([this.room.controller]);
+    }
+    return targets;
+  }
+
+  spendResources() {
+    const spendTarget = this.rankedEnergySpendTargets().reduce((target, potentialTargets) => {
+      if (target) return target;
+      return this.pos.findClosestByRange(potentialTargets.filter(potentialTarget => {
+        return potentialTarget.needsEnergy();
+      }));
+    }, undefined);
+
+    if (spendTarget) {
+      return this.moveToAndSpendEnergyOn(spendTarget);
+    }
+  }
+
   needsRenewed() {
     return !this.shouldBeRecycled() && this.ticksToLive / CREEP_LIFE_TIME < 0.5;
   }
@@ -57,6 +82,17 @@ class Base extends Creep {
         spawn.renewCreep(this);
       }
     });
+  }
+
+  moveToAndSpendEnergyOn(target) {
+    if (target instanceof ConstructionSite) {
+      return this.moveToAndBuild(target);
+    } else if (target instanceof Structure || target instanceof Creep) {
+      return this.deliverEnergyTo(target);
+    } else if (target instanceof Source) {
+      return this.deliverEnergyTo(target);
+    }
+    console.trace('unkown target');
   }
 
   performRole() {
@@ -99,6 +135,13 @@ class Base extends Creep {
     } else {
       this.attemptToUpgrade();
     }
+  }
+
+  moveToAndClaim(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      return this.moveTo(target);
+    }
+    return this.claimController(target);
   }
 
   attemptToUpgrade() {
@@ -270,19 +313,6 @@ class Base extends Creep {
   moveInRandomDirection() {
     const directions = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
     this.move(Math.floor(Math.random(directions.length) * directions.length));
-  }
-
-  needsOffloaded() {
-    return this.carry.energy / this.carryCapacity > 0.6;
-  }
-
-  needsEnergyDelivered() {
-    const blacklist = ['harvester', 'courier', 'mailman'];
-    if (blacklist.indexOf(this.memory.role) !== -1) {
-      return false;
-    }
-
-    return this.carry.energy / this.carryCapacity < 0.6;
   }
 
   cost() {

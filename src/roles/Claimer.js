@@ -1,27 +1,30 @@
 import Base from './Base';
+import creepManager from '../utils/creep-manager';
 
 export default class Claimer extends Base {
-  performRole() {
-    if (this.findUnvisitedScoutFlags().length > 0) {
-      this.scout();
-    } else if (!this.room.getControllerOwned()) {
-      this.moveToAndClaimController(this.room.controller);
-    }
-  }
+  static role = 'claimer'
 
-  moveToAndClaimController(controller) {
-    if (this.pos.getRangeTo(controller) > 1) {
-      this.moveTo(controller);
-    } else {
-      if (this.claimController(controller) === 0) {
-        const claimFlag = Game.claimFlags().filter(flag => {
-          return flag.pos.getRangeTo(controller) === 0;
-        })[0];
-
-        if (claimFlag) {
-          claimFlag.remove();
-        }
+  static createCreepFor(spawn) {
+    const creepsWithRole = creepManager.creepsWithRole(this.role).length;
+    const claimFlags = Game.claimFlags();
+    if (!creepsWithRole && claimFlags.length && spawn.room.energyCapacityAvailable >= 650) {
+      return {
+        memory: {
+          role: this.role,
+        },
+        body: [MOVE, CLAIM],
       }
     }
+
+    return undefined;
+  }
+
+  performRole() {
+    if (!Game.claimFlags().length) this.suicide();
+    const claimFlag = Game.claimFlags()[0];
+    if (claimFlag.pos.roomName !== this.pos.roomName) {
+      return this.moveTo(claimFlag);
+    }
+    return this.moveToAndClaim(this.room.controller);
   }
 }
