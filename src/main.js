@@ -7,6 +7,7 @@ import './room';
 import './structures/_base';
 import './room-position';
 import './flag';
+import './constructionSiteEnhancer';
 import './Resource';
 import './controller';
 import profiler from 'screeps-profiler';

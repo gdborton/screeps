@@ -50,8 +50,8 @@ class Base extends Creep {
 
   rankedEnergySpendTargets() {
     const targets = [
-      this.room.getExtensions(),
-      this.room.getSpawns(),
+      [...this.room.getExtensions(), ...this.room.getSpawns()],
+      this.room.getConstructionSites(),
     ];
     if (this.room.controller && this.room.controller.my) {
       targets.push([this.room.controller]);

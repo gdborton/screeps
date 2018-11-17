@@ -469,7 +469,7 @@ Object.assign(Room.prototype, {
 
   shouldClaim() {
     const claimFlags = this.getClaimFlags();
-    return claimFlags.length === 0 && this.controller && !this.controller.owner && !this.controller.reservation && this.getSpawns().length < 1;
+    return claimFlags.length === 0 && this.controller && !this.controller.owner && !this.controller.reservation;
   },
 
   placeClaimFlag() {
