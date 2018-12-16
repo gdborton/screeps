@@ -4,7 +4,7 @@ export default class extends Base {
   static role = 'miner';
 
   static body = [
-    MOVE, MOVE, MOVE,
+    MOVE,
     WORK, WORK, WORK, WORK, WORK,
   ];
 

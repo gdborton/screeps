@@ -27,7 +27,7 @@ class Base extends Creep {
   energySources() {
     return [
       ...this.room.getLinks(),
-      ...this.room.getStorage(),
+      ...[this.room.getStorage()],
       ...this.room.getDroppedEnergy(),
       ...this.room.getContainers(),
     ];

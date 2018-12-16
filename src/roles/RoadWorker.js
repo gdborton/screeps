@@ -4,7 +4,7 @@ export default class RoadWorker extends Base {
   static role = 'roadworker'
 
   static createCreepFor(spawn) {
-    if (spawn.room.hasDamagedRoads() && spawn.room.getCreepsWithRole(this.role)) {
+    if (spawn.room.hasDamagedRoads() && !spawn.room.getCreepsWithRole(this.role).length) {
       return {
         memory: {
           role: this.role,

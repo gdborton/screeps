@@ -1,6 +1,7 @@
 import Base from './Base';
 import { MOVE, CARRY } from '../utils/constants';
 import Upgrader from './Upgrader';
+import Miner from './Miner';
 import Builder from './Builder';
 
 export default class Distributor extends Base {
@@ -64,13 +65,13 @@ export default class Distributor extends Base {
     const body = [MOVE, CARRY, MOVE, CARRY, MOVE, CARRY];
     if (spawn.room.hasLinksConfigured() && spawn.room.getStorage()) {
       target = 1;
-    } else if (spawn.room.controller) {
+    } else if (spawn.room.controller && spawn.room.getCreepsWithRole(Miner.role).length) {
       const walkDistance = spawn.room.getSources().reduce((prev, source) => {
         return prev + spawn.room.controller.pos.findOptimalPathTo(source).length;
       }, 0);
 
       const transitRate = 150 / walkDistance;
-      target = spawn.room.maxEnergyProducedPerTick() / transitRate;
+      target = Math.min(spawn.room.maxEnergyProducedPerTick() / transitRate, 5);
     }
 
     if (creepsWithRole.length < target) {

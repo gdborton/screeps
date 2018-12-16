@@ -7,8 +7,8 @@ export default class Upgrader extends Base {
 
   static createCreepFor(spawn) {
     if (spawn.room.getConstructionSites().length) return undefined;
-    const creepsWithRole = spawn.room.getCreepsWithRole(this.role);
-    let target = spawn.room.maxEnergyProducedPerTick() / 5;
+    const creepsWithRole = spawn.room.getCreepsWithRole(this.role).length;
+    let target = spawn.room.maxEnergyProducedPerTick() / 4;
     const storage = spawn.room.getStorage();
     if (storage && storage.availableEnergy() < 100000) {
       target = 1;
@@ -21,7 +21,7 @@ export default class Upgrader extends Base {
         body: [
           MOVE,
           CARRY,
-          WORK, WORK, WORK, WORK, WORK
+          WORK, WORK, WORK, WORK
         ],
       };
     }

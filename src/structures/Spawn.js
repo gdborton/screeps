@@ -113,6 +113,7 @@ export default class Spawn extends StructureSpawn {
       if (bodyCosts.calculateCosts(creepToBuild.body) <= this.availableEnergy()) {
         return this.createCreep(creepToBuild.body, creepToBuild.name, creepToBuild.memory);
       } else {
+        this.extend();
         return false;
       }
     }
@@ -121,12 +122,6 @@ export default class Spawn extends StructureSpawn {
     if (availableEnergy === this.maxEnergy()) {
       if (this.room.needsBuilders()) {
         this.buildBuilder(availableEnergy);
-      } else if (this.room.needsScouts()) {
-        this.buildScout(availableEnergy);
-      } else if (this.room.needsScoutHarvesters()) {
-        this.buildScoutHarvester(availableEnergy);
-      } else if (this.room.needsRemoteHarvesters()) {
-        this.buildRemoteHarvester();
       } else {
         this.extend();
       }

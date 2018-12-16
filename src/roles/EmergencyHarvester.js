@@ -9,9 +9,15 @@ export default class EmergencyHarvester extends Base {
   ];
 
   static createCreepFor(spawn) {
+    const miners = spawn.room.getCreepsWithRole(Miner.role).length;
+    const emergencyHarvesters = spawn.room.getCreepsWithRole(this.role).length;
     const minerCost = bodyCosts.calculateCosts(Miner.body);
     const canAffordMiner = spawn.room.energyAvailable > minerCost;
-    if (!spawn.room.myCreeps().length && !canAffordMiner) {
+    let target = 1;
+    if (spawn.room.energyCapacityAvailable < minerCost) {
+      target = spawn.pos.findClosestByRange(spawn.room.getSources()).freeEdges();
+    }
+    if (emergencyHarvesters < target && ((miners < 1 && !canAffordMiner) || !spawn.room.hasContainersConfigured())) {
       return {
         memory: {
           role: this.role,

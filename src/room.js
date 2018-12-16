@@ -58,14 +58,6 @@ Object.assign(Room.prototype, {
       flag.work();
     });
 
-    if (this.getControllerOwned()) {
-      // The logic for placing flags/structures is expensive, and doesn't need to run every tick.
-      // if (Game.time % 10 === 0) {
-      //   this.placeFlags();
-      //   this.placeStructures();
-      // }
-    }
-
     this.determineSourceLinkSites().forEach(this.placeLinkFlag, this);
     this.determineSourceSpawnLocations().forEach(this.placeSpawnFlag, this);
     this.determineContainerSites().forEach(this.placeContainerFlag, this);
@@ -75,7 +67,6 @@ Object.assign(Room.prototype, {
       this.determineRoadSites().forEach(this.placeRoadFlag, this);
       this.determineControllerLinkLocations().forEach(this.placeLinkFlag, this);
     }
-
   },
 
   hasDirectExitTo(roomName) {
@@ -497,7 +488,14 @@ Object.assign(Room.prototype, {
   },
 
   getCreepsWithRole(role) {
-    return creepManager.creepsWithRole(role).filter(creep => creep.room === this);
+    if (!this._creepsWithRole) {
+      this._creepsWithRole = this.myCreeps().reduce((acc, creep) => {
+        if (!acc[creep.memory.role]) acc[creep.memory.role] = [];
+        acc[creep.memory.role].push(creep);
+        return acc;
+      }, {});
+    }
+    return this._creepsWithRole[role] || [];
   },
 
   getReservers() {
@@ -889,13 +887,16 @@ Object.assign(Room.prototype, {
   },
 
   determineControllerLinkLocations() {
-    if (!this.controller) return [];
-    const pathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
-    if (pathPositions.length > 3) {
-      return [pathPositions[3]];
+    if (!this._locations) {
+      this._locations = [];
+      if (this.controller) {
+        const pathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
+        if (pathPositions.length > 3) {
+          this._locations = [pathPositions[3]];
+        }
+      }
     }
-    console.log('could not place controller link', this.name);
-    return [];
+    return this._locations;
   },
 
   getControllerLinks() {
