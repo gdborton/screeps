@@ -1,28 +1,44 @@
 import Base from './Base';
+import creepManager from '../utils/creep-manager';
+import { MOVE, CLAIM } from '../utils/constants';
 
 export default class Reserver extends Base {
-  performRole() {
-    if (!this.memory.targetFlag) {
-      this.aquireTarget();
-    }
+  static role = 'reserver'
 
-    const flag = Game.flags[this.memory.targetFlag];
-    if (flag.reservationTime() >= 4999) {
-      this.aquireTarget();
-    } else {
-      if (this.room.name !== flag.pos.roomName) {
-        this.moveTo(flag);
-      } else {
-        this.moveToAndReserve(this.room.controller);
+  static createCreepFor(spawn) {
+    return spawn.room.getReserveFlags().reduce((prev, flag) => {
+      if (prev) return prev;
+      if (flag.room && flag.room.controller && flag.room.controller.my) return prev;
+      const creepForFlag = creepManager.creepsWithRole(this.role).find((creep) => {
+        return creep.memory.targetFlag === flag.name;
+      });
+
+      if (!creepForFlag) {
+        return {
+          memory: {
+            role: this.role,
+            targetFlag: flag.name,
+          },
+          body: [MOVE, CLAIM]
+        }
       }
-    }
+    }, undefined);
   }
 
-  aquireTarget() {
-    const flag = this.room.getReserveFlagsNeedingReservers()[0];
-    if (flag) {
-      this.memory.targetFlag = flag.name;
+  performRole() {
+    const flag = Game.flags[this.memory.targetFlag];
+    if (!flag) {
+      return this.suicide();
     }
+    if (this.room.name !== flag.pos.roomName) {
+      return this.moveTo(flag);
+    }
+    const myRooms = Object.entries(Game.rooms).filter(([_, room]) => room.controller && room.controller.my);
+    const shouldClaim = myRooms.length < Game.gcl.level;
+    if (shouldClaim) {
+      return this.moveToAndClaim(this.room.controller);
+    }
+    return this.moveToAndReserve(this.room.controller);
   }
 
   moveToAndReserve(controller) {
@@ -33,7 +49,11 @@ export default class Reserver extends Base {
     }
   }
 
-  shouldBeRecycled() {
-    return Game.rooms[this.memory.room].getReserveFlagsNeedingReservers().length === 0;
+  moveToAndClaim(controller) {
+    if (this.pos.getRangeTo(controller) > 1) {
+      this.moveTo(controller);
+    } else {
+      this.claimController(controller);
+    }
   }
 }

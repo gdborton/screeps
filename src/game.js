@@ -1,5 +1,8 @@
 /* @flow */
 
+import bodyCosts from './utils/body-costs';
+import RoomPlanner from './RoomPlanner';
+
 function getFlagsOfType(type) {
   return Game.flagArray().filter(flag => {
     return flag.name.toLowerCase().indexOf(type) !== -1;
@@ -9,6 +12,10 @@ function getFlagsOfType(type) {
 let scoutFlags;
 const roomDistanceMap = {};
 const enhancedGame = {
+  roomPlanner() {
+    return RoomPlanner;
+  },
+
   flagArray() {
     return Object.keys(Game.flags).map(flagName => {
       return Game.flags[flagName];
@@ -51,6 +58,14 @@ const enhancedGame = {
     return getFlagsOfType('claim');
   },
 
+  activeRoom(roomName) {
+    if(roomName) {
+      Memory.activeRoom = roomName;
+    }
+
+    return Game.rooms[Memory.activeRoom];
+  },
+
   getClosestOwnedRoomTo(targetRoomName) {
     if (!roomDistanceMap[targetRoomName]) {
       roomDistanceMap[targetRoomName] = Object.keys(Game.rooms).sort((roomNameA, roomNameB) => {
@@ -68,6 +83,8 @@ const enhancedGame = {
       room.clearConstructionSites();
     });
   },
+
+  bodyCosts,
 };
 
 export default {

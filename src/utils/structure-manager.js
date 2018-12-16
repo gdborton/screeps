@@ -9,13 +9,12 @@ function enhanceStructure(structure) {
 }
 
 function convertStructures() {
-  const normalStructures = [];
-  Object.keys(Game.rooms).forEach(roomName => {
-    const room = Game.rooms[roomName];
-    Array.prototype.push.apply(normalStructures, room.find(FIND_STRUCTURES));
-  });
-
-  return normalStructures.map(enhanceStructure);
+  return Object.entries(Game.rooms).reduce((prevStructures, [roomName, room]) => {
+    return [
+      ...prevStructures,
+      ...room.find(FIND_STRUCTURES).map(enhanceStructure),
+    ];
+  }, []);
 }
 
 class StructureManager {

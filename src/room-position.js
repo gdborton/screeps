@@ -51,7 +51,8 @@ Object.assign(RoomPosition.prototype, {
 
   isBuildable() {
     const terrain = this.lookFor('terrain')[0];
-    return terrain === 'swamp' || terrain === 'plain';
+    const noBuildFlag = this.lookFor('flag').find(flag => flag.isNoBuildFlag());
+    return (terrain === 'swamp' || terrain === 'plain') && !noBuildFlag;
   },
 
   hasConstructionSite() {
@@ -86,4 +87,14 @@ Object.assign(RoomPosition.prototype, {
       return structure.structureType === STRUCTURE_ROAD;
     }).length > 0;
   },
+
+  findOptimalPathTo(target) {
+    const optimalPathOpts = {
+      ignoreCreeps: true,
+      ignoreRoads: true,
+      ignoreDestructibleStructures: true,
+      swampCost: 1,
+    };
+    return this.findPathTo(target, optimalPathOpts);
+  }
 });

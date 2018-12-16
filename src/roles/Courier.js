@@ -2,7 +2,7 @@ import Base from './Base';
 
 export default class Courier extends Base {
   performRole() {
-    const potentialTargets = this.room.getStructresNeedingEnergyDelivery();
+    const potentialTargets = this.room.getStructuresNeedingEnergy();
     let dumpTarget = this.pos.findClosestByRange(potentialTargets);
 
     if (this.carry.energy === this.carryCapacity) {

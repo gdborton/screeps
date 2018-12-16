@@ -36,7 +36,7 @@
     "COLOR_YELLOW": true,
     "CONTROLLER_STRUCTURES": true,
     "FIND_CONSTRUCTION_SITES": true,
-    "FIND_DROPPED_ENERGY": true,
+    "FIND_DROPPED_Resources": true,
     "FIND_EXIT": true,
     "FIND_FLAGS": true,
     "FIND_HOSTILE_CREEPS": true,

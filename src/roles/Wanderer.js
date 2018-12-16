@@ -1,7 +1,22 @@
 import Base from './Base';
+import creepManager from '../utils/creep-manager';
 
 // Wanderer wanders aimlessly in an attempt to generate a value for each room in the world.
 export default class Wanderer extends Base {
+  static role = 'wanderer'
+
+  static createCreepFor(spawn) {
+    if (creepManager.creepsWithRole(this.role).length < 1) {
+      return {
+        memory: {
+          role: this.role,
+        },
+        body: [MOVE],
+      }
+    }
+    return creepManager.creepsWithRole(this.role).length < 1;
+  }
+
   performRole() {
     const target = this.aquireTarget();
     const result = this.moveTo(target);

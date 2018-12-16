@@ -8,9 +8,6 @@ class Base extends Creep {
   }
 
   work() {
-    if (this.needsRenewed()) {
-      this.attemptRenew();
-    }
     const creepFlag = Game.flags[this.name];
     // move to creep flag if it is defined.
     if (creepFlag !== undefined) {
@@ -26,15 +23,76 @@ class Base extends Creep {
     }
   }
 
+  // prioritized list of places you can pull resources from.
+  energySources() {
+    return [
+      ...this.room.getLinks(),
+      ...[this.room.getStorage()],
+      ...this.room.getDroppedEnergy(),
+      ...this.room.getContainers(),
+    ];
+  }
+
+
+  gatherEnergy() {
+    const validEnergySources = this.energySources().filter(thing => {
+      try {
+        return thing && thing.availableEnergy() > this.availableSpace();
+      } catch(e) {
+        console.log(thing, 'does not have an availableEnergy function');
+        throw e;
+      }
+    });
+    if (validEnergySources.length) {
+      return this.takeEnergyFrom(this.pos.findClosestByRange(validEnergySources));
+    }
+  }
+
+  rankedEnergySpendTargets() {
+    const targets = [
+      [...this.room.getExtensions(), ...this.room.getSpawns()],
+      this.room.getConstructionSites(),
+    ];
+    if (this.room.controller && this.room.controller.my) {
+      targets.push([this.room.controller]);
+    }
+    return targets;
+  }
+
+  spendResources() {
+    const spendTarget = this.rankedEnergySpendTargets().reduce((target, potentialTargets) => {
+      if (target) return target;
+      return this.pos.findClosestByRange(potentialTargets.filter(potentialTarget => {
+        return potentialTarget.needsEnergy();
+      }));
+    }, undefined);
+
+    if (spendTarget) {
+      return this.moveToAndSpendEnergyOn(spendTarget);
+    }
+  }
+
   needsRenewed() {
     return !this.shouldBeRecycled() && this.ticksToLive / CREEP_LIFE_TIME < 0.5;
   }
 
   attemptRenew() {
-    const spawn = this.getSpawn();
-    if (this.needsRenewed() && this.pos.getRangeTo(spawn) === 1 && !spawn.spawning) {
-      spawn.renewCreep(this);
+    this.room.getSpawns().forEach(spawn => {
+      if (this.needsRenewed() && this.pos.getRangeTo(spawn) === 1 && !spawn.spawning) {
+        spawn.renewCreep(this);
+      }
+    });
+  }
+
+  moveToAndSpendEnergyOn(target) {
+    if (target instanceof ConstructionSite) {
+      return this.moveToAndBuild(target);
+    } else if (target instanceof Structure || target instanceof Creep) {
+      return this.deliverEnergyTo(target);
+    } else if (target instanceof Source) {
+      return this.deliverEnergyTo(target);
     }
+    console.trace('unkown target');
   }
 
   performRole() {
@@ -77,6 +135,13 @@ class Base extends Creep {
     } else {
       this.attemptToUpgrade();
     }
+  }
+
+  moveToAndClaim(target) {
+    if (this.pos.getRangeTo(target) > 1) {
+      return this.moveTo(target);
+    }
+    return this.claimController(target);
   }
 
   attemptToUpgrade() {
@@ -173,11 +238,45 @@ class Base extends Creep {
       this.moveTo(target);
     }
 
-    if (!target.transfer || target.structureType && target.structureType === STRUCTURE_TOWER) { // eslint-disable-line
-      return target.transferEnergy(this);
+    if (!target.transfer || target.structureType) { // eslint-disable-line
+      return this.withdraw(target, RESOURCE_ENERGY);
     }
 
     return target.transfer(this, RESOURCE_ENERGY);
+  }
+
+  /**
+   * Determine whether or not the supplied spawn should build this role. If it
+   * should, generate and return the desired body, name and memory otherwise
+   * return undefined.
+   *
+   * @param {Spawn} spawn The spawn that the role should generate a body for.
+   */
+  static createCreepFor(spawn) {
+    /**
+     * This is the
+     * This is currently defaulting to undefined to allow for incremental
+     * implementation, eventually this should be marked as deprecated to enforce
+     * the new role pattern.
+     */
+  }
+
+  isFull() {
+    return this.totalCarryLoad() === this.carryCapacity;
+  }
+
+  isEmpty() {
+    return !this.isFull() && this.totalCarryLoad() === 0;
+  }
+
+  availableSpace() {
+    return this.carryCapacity - this.totalCarryLoad();
+  }
+
+  totalCarryLoad() {
+    return Object.entries(this.carry).reduce((acc, [key, val]) => {
+      return acc + val;
+    }, 0);
   }
 
   deliverEnergyTo(target) {
@@ -214,19 +313,6 @@ class Base extends Creep {
   moveInRandomDirection() {
     const directions = [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT];
     this.move(Math.floor(Math.random(directions.length) * directions.length));
-  }
-
-  needsOffloaded() {
-    return this.carry.energy / this.carryCapacity > 0.6;
-  }
-
-  needsEnergyDelivered() {
-    const blacklist = ['harvester', 'courier', 'mailman'];
-    if (blacklist.indexOf(this.memory.role) !== -1) {
-      return false;
-    }
-
-    return this.carry.energy / this.carryCapacity < 0.6;
   }
 
   cost() {

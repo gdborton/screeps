@@ -2,13 +2,11 @@
 import { Room } from 'screeps-globals';
 import creepManager from './utils/creep-manager';
 import structureManager from './utils/structure-manager';
+import { LOOK_STRUCTURES, STRUCTURE_LINK } from './utils/constants';
 
 const MIN_RESERVE_LEVEL = 6;
 
-function getAllClaimers() {
-  return creepManager.creepsWithRole('claimer');
-}
-
+//#region Old way of writing roles
 function getAllScoutHarvesters() {
   return creepManager.creeps().filter(creep => {
     return creep.memory.role === 'scoutharvester' || creep.memory.oldRole === 'scoutharvester';
@@ -22,10 +20,7 @@ function getAllScouts() {
 function getAllAttackers() {
   return creepManager.creepsWithRole('attacker');
 }
-
-function getAllWanderers() {
-  return creepManager.creepsWithRole('wanderer');
-}
+//#endregion
 
 const cardinality = {
   N: -1,
@@ -63,12 +58,14 @@ Object.assign(Room.prototype, {
       flag.work();
     });
 
-    if (this.getControllerOwned()) {
-      // The logic for placing flags/structures is expensive, and doesn't need to run every tick.
-      if (Game.time % 10 === 0) {
-        this.placeFlags();
-        this.placeStructures();
-      }
+    this.determineSourceLinkSites().forEach(this.placeLinkFlag, this);
+    this.determineSourceSpawnLocations().forEach(this.placeSpawnFlag, this);
+    this.determineContainerSites().forEach(this.placeContainerFlag, this);
+    this.determineTowerSites().forEach(this.placeTowerFlag, this);
+
+    if (this.getSpawns().length) {
+      this.determineRoadSites().forEach(this.placeRoadFlag, this);
+      this.determineControllerLinkLocations().forEach(this.placeLinkFlag, this);
     }
   },
 
@@ -148,35 +145,6 @@ Object.assign(Room.prototype, {
     if (this.needsTerminal()) {
       this.buildTerminal();
     }
-
-    if (Game.time % 100 === 0) {
-      this.buildRoads();
-    }
-  },
-
-  buildRoads() {
-    this.getMyStructures().forEach(structure => {
-      if (structure.buildAccessRoads) {
-        structure.buildAccessRoads();
-      }
-    });
-
-    this.getSources().forEach(source => {
-      const positions = source.pos.openPositionsAtRange();
-      positions.forEach(position => {
-        if (!position.hasRoad()) {
-          this.buildRoadAt(position.x, position.y);
-        }
-      });
-    });
-
-    const pathToObjects = [this.controller].concat(this.getSources());
-    const spawn = this.getSpawn();
-    pathToObjects.forEach(target => {
-      this.findPath(spawn.pos, target.pos).forEach(pos => {
-        this.buildRoadAt(pos.x, pos.y);
-      });
-    });
   },
 
   buildRoadAt(x, y) {
@@ -205,9 +173,10 @@ Object.assign(Room.prototype, {
   },
 
   buildObserver() {
-    const x = this.getSpawn().pos.x + 1;
-    const y = this.getSpawn().pos.y + 1;
-    this.createConstructionSite(x, y, STRUCTURE_OBSERVER);
+    const spawn = this.getSpawns()[0];
+    if (spawn) {
+      this.createConstructionSite(spawn.pos.x + 1, spawn.pos.y + 1, STRUCTURE_OBSERVER);
+    }
   },
 
   buildExtractor() {
@@ -217,13 +186,15 @@ Object.assign(Room.prototype, {
   },
 
   buildTerminal() {
-    const spawnPos = this.getSpawn().pos;
-    this.createConstructionSite(spawnPos.x - 2, spawnPos.y + 2, STRUCTURE_TERMINAL);
+    const spawn = this.getSpawns[0];
+    if (spawn) {
+      this.createConstructionSite(spawn.pos.x - 2, spawn.pos.y + 2, STRUCTURE_TERMINAL);
+    }
   },
 
   needsUpgraders() {
     const hasFreeEdges = this.upgraderCount() < this.controller.pos.freeEdges();
-    return hasFreeEdges && !!this.droppedControllerEnergy() &&
+    return hasFreeEdges &&
       this.upgraderWorkParts() < this.maxEnergyProducedPerTick() &&
       !this.getConstructionSites().length;
   },
@@ -252,6 +223,10 @@ Object.assign(Room.prototype, {
       })[0];
     }
     return this._storage;
+  },
+
+  hasTowers() {
+    return this.getTowers().length > 0;
   },
 
   getTowers() {
@@ -316,9 +291,6 @@ Object.assign(Room.prototype, {
       this.controller.placeFlags();
     }
     this.placeConstructionFlags();
-    this.getSources().forEach(source => {
-      source.placeFlags();
-    });
   },
 
   placeConstructionFlags() {
@@ -333,6 +305,14 @@ Object.assign(Room.prototype, {
     this.createBuildFlag(pos, STRUCTURE_LINK);
   },
 
+  placeRoadFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_ROAD);
+  },
+
+  placeSpawnFlag(pos) {
+    this.createBuildFlag(pos, STRUCTURE_SPAWN);
+  },
+
   placeTowerFlag(pos) {
     this.createBuildFlag(pos, STRUCTURE_TOWER);
   },
@@ -342,26 +322,42 @@ Object.assign(Room.prototype, {
   },
 
   placeWallFlags() {
-    const exits = this.getExits();
-    exits.forEach(exitPos => {
-      const potentialSpots = exitPos.openPositionsAtRange(2);
-      const realSpots = potentialSpots.filter(potentialSpot => {
-        let shouldBuild = true;
-        exits.forEach(exit => {
-          if (exit.getRangeTo(potentialSpot) < 2) {
-            shouldBuild = false;
-          }
+    if (this.hasTowers()) {
+      const exits = this.getExits();
+      exits.forEach(exitPos => {
+        const potentialSpots = exitPos.openPositionsAtRange(2);
+        const realSpots = potentialSpots.filter(potentialSpot => {
+          let shouldBuild = true;
+          exits.forEach(exit => {
+            if (exit.getRangeTo(potentialSpot) < 2) {
+              shouldBuild = false;
+            }
+          });
+          return shouldBuild;
         });
-        return shouldBuild;
+        realSpots.forEach(realSpot => {
+          this.createBuildFlag(realSpot, STRUCTURE_WALL);
+        });
       });
-      realSpots.forEach(realSpot => {
-        this.createBuildFlag(realSpot, STRUCTURE_WALL);
-      });
-    });
+    }
   },
 
   createBuildFlag(pos, structureType) {
-    this.placeFlag(pos, `BUILD_${structureType}`);
+    const existingStructures = [
+      ...pos.lookFor(LOOK_STRUCTURES),
+      ...pos.lookFor(LOOK_CONSTRUCTION_SITES)
+    ];
+    const alreadyHasStructure = existingStructures.find(structure => {
+      return structure.structureType === structureType || structureType === STRUCTURE_ROAD;
+    });
+
+    if (alreadyHasStructure) {
+      return undefined;
+    } else if (existingStructures.length === 0 || (existingStructures.length === 1 && existingStructures[0].structureType === STRUCTURE_ROAD)) {
+      return this.placeFlag(pos, `BUILD_${structureType}`);
+    }
+
+    return this.placeFlag(pos, `here?_${structureType}`);
   },
 
   placeFlag(pos, name) {
@@ -382,12 +378,6 @@ Object.assign(Room.prototype, {
     }
 
     return this._links;
-  },
-
-  getControllerLink() {
-    return this.getLinks().filter(link => {
-      return link.isControllerLink();
-    })[0];
   },
 
   upgraderWorkParts() {
@@ -462,9 +452,26 @@ Object.assign(Room.prototype, {
     this.placeFlag(this.getCenterPosition(), 'reserve');
   },
 
+  getClaimFlags() {
+    return this.getFlags().filter(flag => {
+      return flag.name.includes('claim');
+    });
+  },
+
+  shouldClaim() {
+    const claimFlags = this.getClaimFlags();
+    return claimFlags.length === 0 && this.controller && !this.controller.owner && !this.controller.reservation;
+  },
+
+  placeClaimFlag() {
+    this.placeFlag(this.getCenterPosition(), 'claim');
+  },
+
   attemptReserve() {
-    if (this.shouldReserve()) {
-      this.placeReserveFlag();
+    if (this.shouldClaim()) {
+      return this.placeClaimFlag();
+    } else if (this.shouldReserve()) {
+      return this.placeReserveFlag();
     }
   },
 
@@ -477,7 +484,18 @@ Object.assign(Room.prototype, {
         this.hasDirectExitTo(room.name);
     });
 
-    return hasController && !!ownNearbyRoom;
+    return hasController && !this.getSpawns().length && !!ownNearbyRoom;
+  },
+
+  getCreepsWithRole(role) {
+    if (!this._creepsWithRole) {
+      this._creepsWithRole = this.myCreeps().reduce((acc, creep) => {
+        if (!acc[creep.memory.role]) acc[creep.memory.role] = [];
+        acc[creep.memory.role].push(creep);
+        return acc;
+      }, {});
+    }
+    return this._creepsWithRole[role] || [];
   },
 
   getReservers() {
@@ -490,14 +508,6 @@ Object.assign(Room.prototype, {
 
   ableToReserve() {
     return this.getControllerOwned() && this.controller.level >= MIN_RESERVE_LEVEL;
-  },
-
-  needsRoadWorkers() {
-    if (Game.time % 30 !== 0) {
-      return false;
-    }
-
-    return this.roadWorkerCount() < 1 && this.hasDamagedRoads();
   },
 
   getReserveFlags() {
@@ -533,6 +543,7 @@ Object.assign(Room.prototype, {
   },
 
   needsCouriers() {
+    if (this.hasLinksConfigured()) return false;
     if (this.courierCount() === 1 && this.getCouriers()[0].ticksToLive < 70) {
       return true;
     }
@@ -545,47 +556,6 @@ Object.assign(Room.prototype, {
     }
 
     return this.courierCount() < 1;
-  },
-
-  getHarvesters() {
-    if (!this._harvesters) {
-      this._harvesters = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'harvester';
-      });
-    }
-    return this._harvesters;
-  },
-
-  getRoadWorkers() {
-    if (!this._roadWorkers) {
-      this._roadWorkers = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'roadworker';
-      });
-    }
-
-    return this._roadWorkers;
-  },
-
-  roadWorkerCount() {
-    return this.getRoadWorkers().length;
-  },
-
-  harvesterCount() {
-    return this.getHarvesters().length;
-  },
-
-  getMailmen() {
-    if (!this._mailmen) {
-      this._mailmen = this.myCreeps().filter((creep) => {
-        return creep.memory.role === 'mailman';
-      });
-    }
-
-    return this._mailmen;
-  },
-
-  mailmanCount() {
-    return this.getMailmen().length;
   },
 
   getExits() {
@@ -612,16 +582,6 @@ Object.assign(Room.prototype, {
     return this._uniqueExitPoints;
   },
 
-  hasOutdatedCreeps() {
-    return this.getOutdatedCreeps().length > 0;
-  },
-
-  getOutdatedCreeps() {
-    return this.myCreeps().filter((creep) => {
-      return creep.cost() <= this.getSpawn().maxEnergy() - 100;
-    });
-  },
-
   getFlags() {
     return this.find(FIND_FLAGS).filter(flag => {
       return flag.room === this;
@@ -632,10 +592,6 @@ Object.assign(Room.prototype, {
     return this.getFlags().filter(flag => {
       return flag.name.indexOf('CONTROLLER_ENERGY_DROP') !== -1;
     })[0];
-  },
-
-  workerCount() {
-    return this.harvesterCount() + this.builderCount() + this.mailmanCount();
   },
 
   courierCount() {
@@ -699,16 +655,6 @@ Object.assign(Room.prototype, {
     return this._sources;
   },
 
-  getSourcesNeedingHarvesters() {
-    return this.getSources().filter(source => {
-      return source.needsHarvesters();
-    });
-  },
-
-  needsHarvesters() {
-    return this.getSourcesNeedingHarvesters().length > 0;
-  },
-
   getEnergySourceStructures() {
     return this.getMyStructures().filter(structure => {
       return structure.energy;
@@ -718,7 +664,7 @@ Object.assign(Room.prototype, {
   droppedControllerEnergy() {
     if (!this._droppedControllerEnergy) {
       const dumpFlag = this.getControllerEnergyDropFlag();
-      this._droppedControllerEnergy = this.find(FIND_DROPPED_ENERGY).filter(energy => {
+      this._droppedControllerEnergy = this.find(FIND_DROPPED_RESOURCES).filter(energy => {
         return energy.pos.getRangeTo(dumpFlag) === 0;
       })[0];
     }
@@ -738,13 +684,8 @@ Object.assign(Room.prototype, {
     return this._energyStockSources;
   },
 
-  getSpawn() {
-    const spawns = this.find(FIND_MY_SPAWNS);
-    if (spawns.length) {
-      return spawns[0];
-    }
-
-    return spawns;
+  getSpawns() {
+    return this.find(FIND_MY_SPAWNS);
   },
 
   canBuildExtension() {
@@ -765,6 +706,10 @@ Object.assign(Room.prototype, {
     return this._extensions;
   },
 
+  getHostileStructures() {
+    return this.getStructures().filter(structure => structure.owner && !structure.my);
+  },
+
   courierTargets() {
     return this.getCouriers().filter(creep => {
       return creep.memory.role === 'courier' && !!creep.memory.target;
@@ -773,16 +718,8 @@ Object.assign(Room.prototype, {
     });
   },
 
-  getCreepsThatNeedOffloading() {
-    const targets = this.courierTargets();
-    return this.getHarvesters().filter(harvester => {
-      const targeted = targets.indexOf(harvester.id) !== -1;
-      return harvester.needsOffloaded() && !targeted;
-    });
-  },
-
   getDroppedEnergy() {
-    return this.find(FIND_DROPPED_ENERGY).sort((energyA, energyB) => {
+    return this.find(FIND_DROPPED_RESOURCES).sort((energyA, energyB) => {
       return energyB.energy - energyA.energy;
     });
   },
@@ -832,14 +769,6 @@ Object.assign(Room.prototype, {
     return this.hasScoutFlag() && getAllScouts().length < desiredValue;
   },
 
-  needsWanderers() {
-    return getAllWanderers().length < 1;
-  },
-
-  needsClaimers() {
-    return this.hasScoutFlag() && Game.claimFlags().length > 0 && getAllClaimers().length < 1;
-  },
-
   needsScoutHarvesters() {
     let desiredValue = 2;
     if (Game.dismantleFlags().length > 0) {
@@ -848,14 +777,17 @@ Object.assign(Room.prototype, {
     return this.hasScoutFlag() && getAllScoutHarvesters().length < desiredValue;
   },
 
-  getStructresNeedingEnergyDelivery() {
+  getSpawnStructures() {
+    return [
+      ...this.getExtensions(),
+      ...this.getSpawns(),
+    ]
+  },
+
+  getStructuresNeedingEnergy() {
     if (!this._structuresNeedingEnergyDelivery) {
       this._structuresNeedingEnergyDelivery = this.getMyStructures().filter(structure => {
-        const notALink = structure.structureType !== STRUCTURE_LINK;
-        const isTower = structure.structureType === STRUCTURE_TOWER;
-        const notASourceTower = isTower ? !structure.isSourceTower() : true;
-        const notFull = structure.energyCapacity && structure.energy < structure.energyCapacity;
-        return notFull && notALink && notASourceTower;
+        return structure.needsEnergy();
       });
     }
     return this._structuresNeedingEnergyDelivery;
@@ -864,17 +796,186 @@ Object.assign(Room.prototype, {
   getEnergySourcesThatNeedsStocked() {
     if (this.getEnergyThatNeedsPickedUp().length) {
       return this.getEnergyThatNeedsPickedUp();
-    } else if (this.getCreepsThatNeedOffloading().length) {
-      return this.getCreepsThatNeedOffloading();
+    } else if (this.getContainers().length) {
+      return this.getContainers().filter(container => !container.isEmpty());
     } else if (this.getStorage() && !this.getStorage().isEmpty()) {
       return [this.getStorage()];
-    } else if (this.getTowers().length) {
+    } else if (this.hasTowers()) {
       // All towers that aren't empty are a source of energy
       return this.getTowers().filter(tower => {
         return !tower.isEmpty();
       });
-    } else if (this.getContainers().length) {
-      return this.getContainers().filter(container => !container.isEmpty());
+    }
+
+    return [];
+  },
+
+  determineBuildSites() {
+    const containerSites = this.determineContainerSites();
+
+    return {
+      containerSites,
+      linkSites: this.determineLinkSites(),
+      towerSites: this.determineTowerSites(),
+      storageSite: this.determineStorageSite(),
+    };
+  },
+
+  determineContainerSites() {
+    if (!this._containerSites) {
+      const sources = this.getSources();
+      this._containerSites = sources.map((source) => {
+        let target = this.controller;
+        if (sources.length > 1) {
+          target =  sources.find(potentialTarget => potentialTarget !== source);
+        }
+        return this.mapPathToPosition(source.pos.findOptimalPathTo(target))[0];
+      }).filter(Boolean);
+    }
+
+    return this._containerSites;
+  },
+
+  mapPathToPosition(path) {
+    return path.map(pathPos => {
+      return new RoomPosition(pathPos.x, pathPos.y, this.name);
+    });
+  },
+
+  findPositionsInPathToNearestSpawn(target, onlyTerrain) {
+    return this.mapPathToPosition(this.findPathToNearestSpawn(target, onlyTerrain));
+  },
+
+  hasLinksConfigured() {
+    return this.getLinks().length >= 2;
+  },
+
+  determineLinkSites() {
+    return [
+      ...this.determineSourceLinkSites(),
+      ...this.determineControllerLinkLocations(),
+    ];
+  },
+
+  hasContainersConfigured() {
+    return this.getContainers().length === this.getSources().length;
+  },
+
+  findPathToNearestSpawn(target) {
+    let nearestPath;
+    this.getSpawns().forEach((spawn) => {
+      const path = target.pos.findOptimalPathTo(spawn);
+      if (!nearestPath || nearestPath.length > path.length) {
+        nearestPath = path;
+      }
+    });
+
+    return nearestPath;
+  },
+
+  determineTransferPostions() {
+
+  },
+
+  determineStorageSite() {
+    if (!this.controller) return undefined;
+    const controllerPathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
+    const transferPosition = controllerPathPositions[2];
+    return transferPosition.buildablePositionsAtRange(1).filter((position) => {
+      return !controllerPathPositions.find(pathPos => pathPos.isEqualTo(position));
+    })[0];
+  },
+
+  determineControllerLinkLocations() {
+    if (!this._locations) {
+      this._locations = [];
+      if (this.controller) {
+        const pathPositions = this.findPositionsInPathToNearestSpawn(this.controller, true);
+        if (pathPositions.length > 3) {
+          this._locations = [pathPositions[3]];
+        }
+      }
+    }
+    return this._locations;
+  },
+
+  getControllerLinks() {
+    return this.determineControllerLinkLocations().map((controllerLinkPos) => {
+      const structures = controllerLinkPos.lookFor(LOOK_STRUCTURES);
+      return structures.find(structure => structure.structureType === STRUCTURE_LINK);
+    }).filter(Boolean);
+  },
+
+  killAllCreeps() {
+    this.myCreeps().forEach(creep => creep.suicide());
+  },
+
+  determineSourceLinkSites() {
+    const sources = this.getSources();
+    if (!(this.controller && this.controller.my)) return [];
+
+    return sources.map((source) => {
+      let target = this.controller;
+      if (sources.length > 1) {
+        target =  sources.find(potentialTarget => potentialTarget !== source);
+      }
+      const pathPositions = this.mapPathToPosition(source.pos.findOptimalPathTo(target));
+      const transferLocation = pathPositions[1];
+      return transferLocation.buildablePositionsAtRange(1).filter(position => {
+        return !pathPositions.find(pathPos => pathPos.isEqualTo(position));
+      })[0];
+    });
+  },
+
+  determineSourceSpawnLocations() {
+    const sources = this.getSources();
+    if (!(this.controller && this.controller.my)) return [];
+
+    return sources.map((source) => {
+      let target = this.controller;
+      if (sources.length > 1) {
+        target =  sources.find(potentialTarget => potentialTarget !== source);
+      }
+      const pathPositions = this.mapPathToPosition(source.pos.findOptimalPathTo(target));
+      const transferLocation = pathPositions[1];
+      return transferLocation.buildablePositionsAtRange(1).filter(position => {
+        return !pathPositions.find(pathPos => pathPos.isEqualTo(position));
+      })[1];
+    });
+  },
+
+  determineTowerSites() {
+    const sources = this.getSources();
+    if (!(this.controller && this.controller.my)) return [];
+
+    return sources.map((source) => {
+      let target = this.controller;
+      if (sources.length > 1) {
+        target =  sources.find(potentialTarget => potentialTarget !== source);
+      }
+      const pathPositions = this.mapPathToPosition(source.pos.findOptimalPathTo(target));
+      const transferLocation = pathPositions[1];
+      return transferLocation.buildablePositionsAtRange(1).filter(position => {
+        return !pathPositions.find(pathPos => pathPos.isEqualTo(position));
+      })[2];
+    });
+  },
+
+  determineRoadSites() {
+    if (this.controller && this.controller.my) {
+      const closestSource = this.controller.pos.findClosestByRange(this.getSources());
+      const pathToClosestSource = this.controller.pos.findOptimalPathTo(closestSource);
+      const path = [
+        ...this.getSources().reduce((acc, source) => {
+          const optimalPath = source.pos.findOptimalPathTo(closestSource);
+          return [
+            ...acc,
+            ...optimalPath.slice(0, optimalPath.length - 1),
+          ];
+        }, []),
+        ...pathToClosestSource.slice(0, pathToClosestSource.length - 1),
+      ];
+      return this.mapPathToPosition(path);
     }
 
     return [];

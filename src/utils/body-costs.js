@@ -9,4 +9,19 @@ export default {
 
     return cost;
   },
+
+  costFor(creepName) {
+    return this.calculateCosts(Game.creeps[creepName].body);
+  },
+
+  perTickCostFor(creepName, distance) {
+    return this.costFor(creepName) / (1500 - distance);
+  },
+
+  perTickCostForCreeps() {
+    return Object.keys(Game.creeps).reduce((acc, name) => {
+      acc[name] = this.perTickCostFor(name);
+      return acc;
+    }, {});
+  },
 };

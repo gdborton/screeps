@@ -19,17 +19,29 @@ Object.assign(Structure.prototype, {
     return structureManager.enhanceStructure(this);
   },
 
-  isControllerLink() {
-    return this.structureType === STRUCTURE_LINK && this.pos.getRangeTo(this.room.controller) < 5;
-  },
-
   isFull() {
     if (this.energyCapacity) {
       return this.energy === this.energyCapacity;
     } else if (this.storeCapacity) {
-      return this.store === this.storeCapacity;
+      return this.totalUtilizedCapacity() === this.storeCapacity;
     }
     return true;
+  },
+
+  totalUtilizedCapacity() {
+    if (this.store) {
+      return Object.entries(this.store).reduce((acc, [key, val]) => {
+        return acc + val;
+      }, 0);
+    }
+    if (this.energy) return this.energy;
+  },
+
+  availableEnergy() {
+    if (this.store) {
+      return this.store[RESOURCE_ENERGY];
+    }
+    return this.energy || 0;
   },
 
   needsRepaired() {
@@ -72,5 +84,20 @@ Object.assign(Structure.prototype, {
         this.room.createConstructionSite(position.x, position.y, STRUCTURE_ROAD);
       }
     });
+  },
+
+  needsEnergy() {
+    if (!(this.store || this.energyCapacity)) return false;
+    if (this.structureType === STRUCTURE_TERMINAL) return false;
+    if (this.structureType === STRUCTURE_CONTAINER) return false;
+
+    if (this.structureType === STRUCTURE_STORAGE) {
+      return this.room.energyAvailable === this.room.energyCapacityAvailable;
+    };
+    if (this.store) {
+      return this.store[RESOURCE_ENERGY] < this.storeCapacity;
+    }
+
+    return this.energy < this.energyCapacity;
   },
 });

@@ -11,12 +11,18 @@ Object.assign(Flag.prototype, {
   work() {
     if (this.name.toLowerCase().indexOf('build') !== -1) {
       const parts = this.name.split('_');
+      if (parts.length < 2) return; // we're not going to find a target, just bail.
       const target = parts[1];
       let shouldBuild = false;
       const ownedRoom = this.room.getControllerOwned();
       const neutralStructure = neutralStructures.indexOf(target) !== -1;
       if (target && CONTROLLER_STRUCTURES[target] && (ownedRoom || neutralStructure)) {
-        const max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
+        let max = 0;
+        if (ownedRoom) {
+          max = CONTROLLER_STRUCTURES[target][this.room.controller.level];
+        } else if (target === STRUCTURE_CONTAINER) {
+          max = 5;
+        }
         const current = this.room.find(target).length;
         shouldBuild = current < max;
         shouldBuild = shouldBuild && this.pos.isOpen();
@@ -42,6 +48,8 @@ Object.assign(Flag.prototype, {
       }
     } else if (this.isReserveFlag()) {
       this.performReserveFlagRole();
+    } else if (this.isClaimFlag()) {
+      this.performClaimFlagRole();
     }
   },
 
@@ -49,8 +57,23 @@ Object.assign(Flag.prototype, {
     return this.name.indexOf('reserve') === 0;
   },
 
+  isNoBuildFlag() {
+    return this.name.indexOf('nobuild') !== -1;
+  },
+
+  isClaimFlag() {
+    return this.name.indexOf('claim') === 0;
+  },
+
+  performClaimFlagRole() {
+    if (!this.room.controller || this.room.controller.my || this.room.controller.owner || this.room.controller.reservation) {
+      return this.remove();
+    }
+  },
+
   performReserveFlagRole() {
     const rate = 5;
+    if (this.room && this.room.controller.my && this.room.getSpawns().length) return this.remove();
     if (Game.time % rate === 0) {
       const room = Game.roomArray().find(potentialRoom => potentialRoom.name === this.pos.roomName);
       if (room) {
@@ -87,7 +110,11 @@ Object.assign(Flag.prototype, {
       return creep.memory.flag === this.name;
     });
 
-    return couriers.length < this.memory.sources.length;
+    if (this.memory.sources) {
+      return couriers.length < this.memory.sources.length;
+    }
+
+    return false;
   },
 
   needsRemoteHarvesters() {
@@ -95,6 +122,10 @@ Object.assign(Flag.prototype, {
       return creep.memory.flag === this.name;
     });
 
-    return remoteHarvesters.length < this.memory.sources.length;
+    if (this.memory.sources) {
+      return remoteHarvesters.length < this.memory.sources.length;
+    }
+
+    return false;
   },
 });
